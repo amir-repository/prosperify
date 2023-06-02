@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('donor_name');
             $table->string('pickup_address');
-            $table->integer('phone');
+            $table->string('phone');
             $table->string('email');
             $table->string('title');
             $table->string('description');
-            $table->enum('status', ['diajukan', 'diproses', 'diambil', 'disimpan']);
+            $table->timestamp('rescue_date');
+            $table->enum('status', ['direncanakan', 'diajukan', 'diproses', 'diambil', 'disimpan']);
+            $table->foreignId('user_id');
             $table->timestamps();
         });
     }

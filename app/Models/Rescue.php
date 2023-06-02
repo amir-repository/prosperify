@@ -16,6 +16,12 @@ class Rescue extends Model
         'email',
         'title',
         'description',
+        'rescue_date',
         'status'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
