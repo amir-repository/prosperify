@@ -58,5 +58,19 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'type' => 'donor'
         ]);
+
+        // city seed
+        DB::table('cities')->insert(
+            ['name' => 'surabaya'],
+        );
+
+        DB::table('cities')->insert(
+            ['name' => 'bandung'],
+        );
+
+        // vaultas seed
+        DB::table('vaults')->insert(
+            ['name' => 'FoodBank HQ', 'city_id' => 1, 'address' => 'Jalan kemerdekaan No. 17']
+        );
     }
 }
