@@ -2,9 +2,17 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RescueController;
+use App\Models\Category;
+use App\Models\Food;
+use App\Models\FoodRescue;
+use App\Models\FoodVault;
 use Illuminate\Support\Facades\Route;
 use App\Models\Rescue;
+use App\Models\RescuePhoto;
+use App\Models\SubCategory;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,19 +53,96 @@ Route::get('donors/rescues/{id}', function (string $id) {
 
     $rescue_datetime_date = explode(':', $rescue_datetime[1]);
     $rescue->rescue_hours = $rescue_datetime_date[0];
+
     return  view('donors.rescues.show', ["rescue" => $rescue, 'user' => auth()->user()]);
 })->middleware('auth', 'donor')->name('donors.rescues.show');
 
 Route::get('/donors/rescues/{id}/foods/create', function (string $id) {
-    $rescue_id = $id;
-    return view('donors.rescues.foods.create', ['rescue_id' => $rescue_id]);
-});
+    $rescue = Rescue::where('id', $id)->first();
+    $foodCategories = Category::all();
+    $foodSubCategories = SubCategory::all();
+    return view('donors.rescues.foods.create', ['rescue' => $rescue, 'foodCategories' => $foodCategories, 'foodSubCategories' => $foodSubCategories]);
+})->middleware('auth', 'donor')->name('donors.rescues.foods.create');
+
+Route::post('/donors/rescues/{id}/foods/store', function (Request $request, string $id) {
+
+    $photo = $request->file('photo')->store('rescue-documentations');
+
+    // format date
+    $expired_date = explode('/', $request->expired_date);
+    $month = $expired_date[0];
+    $day = $expired_date[1];
+    $year = $expired_date[2];
+    $expired_date = Carbon::create($year, $month, $day, 0, 0, 0, 'UTC');
+
+    $food = new Food();
+    $food->name = $request->name;
+    $food->detail = $request->detail;
+    $food->expired_date = $expired_date;
+    $food->amount = $request->amount;
+    $food->unit = $request->unit;
+    $food->photo = $photo;
+    $food->user_id = $request->user_id;
+    $food->category_id = $request->category;
+    $food->sub_category_id = $request->sub_category;
+    $food->save();
+
+    $foodRescue = new FoodRescue();
+    $foodRescue->food_id = $food->id;
+    $foodRescue->rescue_id = $id;
+    $foodRescue->save();
+
+    // save rescue photo logs
+    $rescue = Rescue::where('id', $id)->first();
+    $rescueUserID = $rescue->user_logs->first()->pivot->id;
+    $userID = auth()->user()->id;
+
+    $rescuePhoto = new RescuePhoto();
+    $rescuePhoto->photo = $photo;
+    $rescuePhoto->rescue_user_id = $rescueUserID;
+    $rescuePhoto->user_id = $userID;
+    $rescuePhoto->save();
+
+    // save to vaults
+    $foodVault = new FoodVault();
+    $foodVault->food_id = $food->id;
+    $foodVault->vault_id = 1;
+    $foodVault->save();
+
+    return redirect()->route('donors.rescues.show', ["id" => $id]);
+})->middleware('auth', 'donor')->name('donors.rescues.foods.store');
 
 // volunteer
-Route::get('/volunteer', function () {
-    return view('volunteer.dashboard');
+Route::get('/volunteer/rescues', function (Request $request) {
+    $rescues = Rescue::all();
+    $param_status = $request->query("status");
+    $rescues = Rescue::where('status', $param_status)->get();
+    return view('volunteer.dashboard', ['rescues' => $rescues, 'active' => $param_status]);
 })->middleware('auth', 'volunteer')->name('volunteer.dashboard');
 
+Route::get('/volunteer/rescues/{id}', function (Request $request, string $id) {
+    $rescue = Rescue::where('id', $id)->get()->first();
+
+    // date
+    $rescue_datetime = explode(' ', $rescue->rescue_date);
+    $rescue_datetime_date = explode(' ', $rescue_datetime[0])[0];
+    $date = explode('-', $rescue_datetime_date);
+    $year = $date[0];
+    $month = $date[1];
+    $day = $date[2];
+    $rescue->rescue_date = "$month/$day/$year";
+
+    $rescue_datetime_date = explode(':', $rescue_datetime[1]);
+    $rescue->rescue_hours = $rescue_datetime_date[0];
+
+    return view('volunteer.rescues.show', ["rescue" => $rescue]);
+})->middleware('auth', 'volunteer')->name('volunteer.rescues.show');
+
+Route::get('/volunteer/rescues/{rescueID}/foods/{foodID}', function (string $rescueID, string $foodID) {
+
+    $food = Food::where('id', $foodID)->get()->first();
+    return view('volunteer.rescues.foods.show', ["food" => $food]);
+})->middleware('auth', 'volunteer')->name('volunteer.rescues.foods.show');
 
 // admin
 Route::get('/admin', function () {

@@ -24,4 +24,14 @@ class Rescue extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function user_logs()
+    {
+        return $this->belongsToMany(User::class)->withPivot('id', 'status');
+    }
+
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class);
+    }
 }

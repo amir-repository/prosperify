@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rescue;
+use App\Models\RescueUser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -51,6 +52,15 @@ class RescueController extends Controller
         $rescue->rescue_date = $timestamp;
         $rescue->user_id = auth()->user()->id;
         $rescue->save();
+
+        // save to log
+        $rescue_user_log = new RescueUser();
+        $rescue_user_log->user_id = auth()->user()->id;
+        $rescue_user_log->rescue_id = $rescue->id;
+        $rescue_user_log->status = $rescue->status;
+        $rescue_user_log->save();
+
+        return redirect()->route('donors.rescues.show', ['id' => $rescue->id]);
     }
 
     /**
@@ -74,7 +84,23 @@ class RescueController extends Controller
      */
     public function update(Request $request, Rescue $rescue)
     {
-        //
+        $rescue->status = $request->status;
+        $rescue->save();
+
+        // save to logs
+        $rescue_user_log = new RescueUser();
+        $rescue_user_log->user_id = auth()->user()->id;
+        $rescue_user_log->rescue_id = $rescue->id;
+        $rescue_user_log->status = $request->status;
+        $rescue_user_log->save();
+
+        // save photo
+
+        if (auth()->user()->type === "donor") {
+            return redirect()->route("donors.dashboard");
+        } else {
+            return redirect()->route("volunteer.dashboard");
+        }
     }
 
     /**

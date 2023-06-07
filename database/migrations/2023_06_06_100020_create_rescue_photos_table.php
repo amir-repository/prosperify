@@ -11,18 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food', function (Blueprint $table) {
+        Schema::create('rescue_photos', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('detail');
-            $table->timestamp('expired_date');
-            $table->integer('amount');
-            $table->enum('unit', ['kg', 'serving']);
-            $table->timestamp('stored_timestamp')->nullable();
             $table->string('photo');
+            $table->foreignId('rescue_user_id');
             $table->foreignId('user_id');
-            $table->foreignId('category_id');
-            $table->foreignId('sub_category_id');
             $table->timestamps();
         });
     }
@@ -32,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food');
+        Schema::dropIfExists('rescue_photos');
     }
 };
