@@ -101,6 +101,10 @@
                             <a href="rescues?status=disimpan"
                                 class="{{ $active === 'disimpan' ? 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500' : 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300' }}">Disimpan</a>
                         </li>
+                        <li class="mr-2">
+                            <a href="rescues?status=selesai"
+                                class="{{ $active === 'selesai' ? 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500' : 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300' }}">Selesai</a>
+                        </li>
                     </ul>
                 </div>
 
