@@ -9,6 +9,7 @@ use App\Models\FoodVault;
 use Illuminate\Support\Facades\Route;
 use App\Models\Rescue;
 use App\Models\RescuePhoto;
+use App\Models\RescueUser;
 use App\Models\SubCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -120,7 +121,7 @@ Route::get('/volunteer/rescues', function (Request $request) {
     return view('volunteer.dashboard', ['rescues' => $rescues, 'active' => $param_status]);
 })->middleware('auth', 'volunteer')->name('volunteer.dashboard');
 
-Route::get('/volunteer/rescues/{id}', function (Request $request, string $id) {
+Route::get('/volunteer/rescues/{id}/edit', function (Request $request, string $id) {
     $rescue = Rescue::where('id', $id)->get()->first();
 
     // date
@@ -136,13 +137,74 @@ Route::get('/volunteer/rescues/{id}', function (Request $request, string $id) {
     $rescue->rescue_hours = $rescue_datetime_date[0];
 
     return view('volunteer.rescues.show', ["rescue" => $rescue]);
-})->middleware('auth', 'volunteer')->name('volunteer.rescues.show');
+})->middleware('auth', 'volunteer')->name('volunteer.rescues.edit');
 
-Route::get('/volunteer/rescues/{rescueID}/foods/{foodID}', function (string $rescueID, string $foodID) {
-
+Route::get('/volunteer/rescues/{rescueID}/foods/{foodID}/edit', function (string $rescueID, string $foodID) {
     $food = Food::where('id', $foodID)->get()->first();
-    return view('volunteer.rescues.foods.show', ["food" => $food]);
-})->middleware('auth', 'volunteer')->name('volunteer.rescues.foods.show');
+
+    // date
+    $expired_date = explode(' ', $food->expired_date);
+    $expired_date = explode(' ', $expired_date[0])[0];
+    $date = explode('-', $expired_date);
+    $year = $date[0];
+    $month = $date[1];
+    $day = $date[2];
+    $food->expired_date = "$month/$day/$year";
+
+    // get photo timeline for foods
+    $rescue = Rescue::find($rescueID);
+    $rescueUserIDs = $rescue->user_logs->map(function ($user_log) {
+        return $user_log->pivot->id;
+    });
+
+    $rescuePhotos = collect([]);
+    foreach ($rescueUserIDs as $rescueUserID) {
+        $rescuePhoto = RescuePhoto::where('rescue_user_id', $rescueUserID)->get();
+        if (!$rescuePhoto->isEmpty()) {
+            $rescuePhotos->push($rescuePhoto);
+        }
+    }
+
+    return view('volunteer.rescues.foods.show', ["food" => $food, "rescuePhotos" => $rescuePhotos, "rescue" => $rescue]);
+})->middleware('auth', 'volunteer')->name('volunteer.rescues.foods.edit');
+
+Route::put('/volunteer/rescues/{rescueID}/foods/{foodID}', function (Request $request, string $rescueID, string $foodID) {
+
+    $photo = $request->file('photo')->store('rescue-documentations');
+
+    // format date
+    $expired_date = explode('/', $request->expired_date);
+    $month = $expired_date[0];
+    $day = $expired_date[1];
+    $year = $expired_date[2];
+    $expired_date = Carbon::create($year, $month, $day, 0, 0, 0, 'UTC');
+
+    // update food data
+    $food = Food::find($foodID);
+    $food->amount = $request->amount;
+    $food->expired_date = $expired_date;
+    $food->save();
+
+    // save rescue photo logs
+    $rescue = Rescue::where('id', $rescueID)->first();
+    $rescueUserIDs = $rescue->user_logs;
+    $rescueUserID = null;
+
+    foreach ($rescueUserIDs as $rescueUserID) {
+        if ($rescueUserID->pivot->status === $request->status) {
+            $rescueUserID = $rescueUserID->pivot->id;
+        }
+    }
+
+    $userID = auth()->user()->id;
+
+    $rescuePhoto = new RescuePhoto();
+    $rescuePhoto->photo = $photo;
+    $rescuePhoto->rescue_user_id = $rescueUserID;
+    $rescuePhoto->user_id = $userID;
+    $rescuePhoto->save();
+})->middleware('auth', 'volunteer')->name('volunteer.rescues.foods.update');
+
 
 // admin
 Route::get('/admin', function () {

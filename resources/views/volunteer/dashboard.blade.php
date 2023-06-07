@@ -111,7 +111,7 @@
         <main class="flex gap-4 p-4 flex-wrap">
             @foreach ($rescues as $rescue)
                 <section>
-                    <a href="{{ route('volunteer.rescues.show', ['id' => $rescue->id]) }}">
+                    <a href="{{ route('volunteer.rescues.edit', ['id' => $rescue->id]) }}">
                         <div
                             class="max-w-sm cursor-pointer p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                             <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">

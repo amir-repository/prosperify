@@ -172,21 +172,24 @@
                                 @csrf
                                 <div>
                                     <input type="text" name='status'
-                                        value="@if ($rescue->status === 'diajukan') diproses @elseif ($rescue->status === 'diproses')diambil @elseif ($rescue->status === 'diambil') disimpan @endif"
+                                        value="
+                                        @if ($rescue->status === 'diajukan') diproses @elseif ($rescue->status === 'diproses')diambil @elseif($rescue->status === 'diambil')disimpan @elseif($rescue->status === 'disimpan')selesai @endif"
                                         hidden>
                                 </div>
-                                <button type="submit"
-                                    class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                    @if ($rescue->status === 'diajukan')
-                                        Proses
-                                    @elseif ($rescue->status === 'diproses')
-                                        Ambil
-                                    @elseif ($rescue->status === 'diambil')
-                                        Simpan
-                                    @else
-                                        Selesai
-                                    @endif
-                                </button>
+                                @if ($rescue->status !== 'disimpan')
+                                    <button type="submit"
+                                        class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                        @if ($rescue->status === 'diajukan')
+                                            Proses
+                                        @elseif ($rescue->status === 'diproses')
+                                            Ambil
+                                        @elseif ($rescue->status === 'diambil')
+                                            Simpan
+                                        @else
+                                            Selesai
+                                        @endif
+                                    </button>
+                                @endif
                             </form>
                         </div>
                     </div>
@@ -196,15 +199,13 @@
                         <div
                             class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                             <a
-                                href="{{ route('volunteer.rescues.foods.show', ['rescueID' => $rescue->id, 'foodID' => $food->id]) }}">
+                                href="{{ route('volunteer.rescues.foods.edit', ['rescueID' => $rescue->id, 'foodID' => $food->id]) }}">
                                 <img class="rounded-t-lg" src="{{ asset("storage/$food->photo") }}"
                                     alt="" />
                             </a>
                             <div class="p-5">
-                                <a href="#">
-                                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                        {{ $food->name }}</h5>
-                                </a>
+                                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                    {{ $food->name }}</h5>
                                 <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{ $food->detail }}
                                 </p>
                             </div>

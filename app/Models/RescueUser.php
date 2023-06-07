@@ -11,4 +11,9 @@ class RescueUser extends Model
     protected $table = 'rescue_user';
 
     use HasFactory;
+
+    public function rescuePhotos()
+    {
+        return $this->hasMany(RescuePhoto::class);
+    }
 }

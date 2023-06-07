@@ -10,4 +10,9 @@ class RescuePhoto extends Model
     use HasFactory;
 
     protected $fillable = ['photo', 'rescue_user_id', 'user_id'];
+
+    public function rescueUser()
+    {
+        return $this->belongsTo(RescueUser::class);
+    }
 }

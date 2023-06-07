@@ -88,7 +88,10 @@
             <section class="flex justify-center items-center my-6">
                 <div
                     class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-                    <form class="space-y-6" method="POST" action="" enctype="multipart/form-data">
+                    <form class="space-y-6" method="POST"
+                        action="{{ route('volunteer.rescues.foods.update', ['rescueID' => $rescue->id, 'foodID' => $food->id]) }}"
+                        enctype="multipart/form-data">
+                        @method('put')
                         @csrf
                         <div>
                             <label for="name"
@@ -120,10 +123,8 @@
                                 </div>
                                 <input datepicker name="expired_date" type="datetime"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Select date" value="{{ $food->expired_date }}" disabled>
+                                    placeholder="Select date" value="{{ $food->expired_date }}">
                             </div>
-
-
                         </div>
                         <div class="flex gap-3">
                             <div class="flex-1">
@@ -131,8 +132,7 @@
                                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kuantitas</label>
                                 <input type="number" name="amount" id="amount"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                    placeholder="1" min="1" max="23" value="8"
-                                    value="{{ $food->amount }}" disabled>
+                                    placeholder="1" min="1" max="23" value="{{ $food->amount }}">
                             </div>
                             <div>
                                 <label for="unit"
@@ -140,9 +140,8 @@
                                 <select name="unit" id="unit"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     disabled>
-                                    @foreach (['kg', 'serving'] as $unit)
-                                        <option selected={{ $unit === $food->unit }} value="$unit">$unit</option>
-                                    @endforeach
+                                    <option selected value="{{ $food->unit }}">
+                                        {{ $food->unit }}</option>
                                 </select>
                             </div>
                         </div>
@@ -167,31 +166,30 @@
                                 <option value="{{ $food->subCategory->name }}">{{ $food->subCategory->name }}
                                 </option>
                             </select>
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                for="file_input">Dokumentasi gambar pengajuaan</label>
-                            <input
-                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                id="file_input" type="file" name="photo">
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                for="file_input">Dokumentasi gambar pengambilan</label>
-                            <input
-                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                id="file_input" type="file" name="photo">
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                for="file_input">Dokumentasi gambar penyimpanan</label>
-                            <input
-                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                id="file_input" type="file" name="photo">
-                        </div>
 
-                        <button type="submit"
-                            class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Simpan</button>
+                        </div>
+                        @foreach ($rescuePhotos as $rescuePhoto)
+                            <div>
+                                <label for="sub_category"
+                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kondisi saat
+                                    {{ $rescuePhoto->first()->rescueUser->status }}</label>
+                                <img class="rounded-t-lg"
+                                    src="{{ asset('storage/' . $rescuePhoto->first()->photo) }}" alt="" />
+                            </div>
+                        @endforeach
+                        @if ($rescue->status !== 'diajukan' && $rescue->status !== 'diproses')
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                    for="file_input">Kondisi saat {{ $rescue->status }}</label>
+                                <input
+                                    class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                                    id="file_input" type="file" name="photo">
+                            </div>
+                            <input type="text" name="status" value="{{ $rescue->status }}" hidden>
+
+                            <button type="submit"
+                                class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Simpan</button>
+                        @endif
                     </form>
                 </div>
             </section>
