@@ -177,7 +177,8 @@
                                         @elseif ($rescue->status === 'diproses')diambil 
                                         @elseif($rescue->status === 'diambil')disimpan 
                                         @elseif($rescue->status === 'disimpan')selesai
-                                        @elseif($rescue->status === 'selesai') @endif">
+                                        @elseif($rescue->status === 'selesai') @endif"
+                                        hidden>
                                 </div>
                                 @if ($rescue->status !== 'selesai')
                                     <button type="submit"
