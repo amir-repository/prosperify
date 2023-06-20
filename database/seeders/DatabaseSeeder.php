@@ -122,5 +122,17 @@ class DatabaseSeeder extends Seeder
         DB::table('sub_categories')->insert(
             ['name' => 'minuman lainnya', 'category_id' => 2]
         );
+
+        // recipient seed
+        DB::table('recipients')->insert([
+            [
+                'name' => 'Agus',
+                'address' => 'Jalan bersama',
+                'phone' => '08123456789',
+                'family_members' => 4,
+                'document' => '',
+                'status' => 'diterima'
+            ]
+        ]);
     }
 }

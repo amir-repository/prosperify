@@ -55,4 +55,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Rescue::class)->withPivot('status');
     }
+
+    public function donation()
+    {
+        return $this->belongsToMany(Donation::class)->withPivot('id');
+    }
 }

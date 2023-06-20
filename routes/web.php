@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RescueController;
 use App\Models\Category;
+use App\Models\Donation;
+use App\Models\DonationFood;
+use App\Models\DonationPhoto;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodVault;
@@ -211,8 +215,88 @@ Route::get('/admin', function () {
     return view('admin.dashboard');
 })->middleware('auth', 'admin')->name('admin.dashboard');
 
+Route::get('/admin/donations', function () {
+
+    $donations = Donation::all();
+
+    return view('admin.donations.index', ['donations' => $donations]);
+})->middleware('auth', 'admin')->name('admin.donations');
+
+Route::get('/admin/donations/{id}', function (string $id) {
+    $donation = Donation::find($id);
+
+    // date
+    $donation_datetime = explode(' ', $donation->donation_date);
+    $rescue_datetime_date = explode(' ', $donation_datetime[0])[0];
+    $date = explode('-', $rescue_datetime_date);
+    $year = $date[0];
+    $month = $date[1];
+    $day = $date[2];
+    $donation->donation_date = "$month/$day/$year";
+
+    $donationFoods = DonationFood::where('donation_id', $id)->get();
+
+    return view('admin.donations.show', ['donation' => $donation, 'donationFoods' => $donationFoods]);
+})->middleware('auth', 'admin')->name('admin.donations.show');
+
+Route::get('/admin/donations/{id}/foods/create', function (string $id) {
+    $foods = Food::all();
+    return view('admin.donations.foods.create', ['foods' => $foods, "donationID" => $id]);
+})->middleware('auth', 'admin')->name('admin.donations.foods.create');
+
+Route::post('/admin/donations/{id}/foods', function (string $id, Request $request) {
+    $donationFood = new DonationFood();
+    $donationFood->food_id = $request->food_id;
+    $donationFood->donation_id = $request->donation_id;
+    $donationFood->outbound_plan = $request->outbound_plan;
+    $donationFood->save();
+})->middleware('auth', 'admin')->name('admin.donations.foods.store');
+
+Route::get('/admin/donations/{donationID}/foods/{foodID}', function (string $donationID, string $foodID) {
+
+    $food = Food::find($foodID);
+    $donation = Donation::find($donationID);
+
+    // get photo timeline for foods
+    $donationUserIDs = $donation->users->map(function ($user) {
+        return $user->pivot->id;
+    });
+
+    $donationPhotos = collect([]);
+    foreach ($donationUserIDs as $donationUserID) {
+        $donationPhoto = DonationPhoto::where('donation_user_id', $donationUserID)->get();
+        if (!$donationPhoto->isEmpty()) {
+            $donationPhotos->push($donationPhoto);
+        }
+    }
+
+    return view('admin.donations.foods.edit', ['food' => $food, 'donation' => $donation, 'donationPhotos' => $donationPhotos]);
+})->middleware('auth', 'admin')->name('admin.donations.foods.edit');
+
+Route::put('/admin/donations/{donationID}/foods/{foodID}', function (string $donationID, string $foodID, Request $request) {
+
+    // update outbound
+    $donationFood = DonationFood::find($request->donationFoodID);
+    $donationFood->outbound_plan = $request->outbound_plan;
+    $donationFood->save();
+
+    // save photo docs
+    $donation = Donation::find($donationID);
+    $donationUserID = $donation->users->last()->pivot->id;
+    $photo = $request->file('photo')->store('donation-documentations');
+
+    $donationPhoto = new DonationPhoto();
+    $donationPhoto->photo = $photo;
+    $donationPhoto->user_id = auth()->user()->id;
+    $donationPhoto->donation_user_id = $donationUserID;
+    $donationPhoto->save();
+})->middleware('auth', 'admin')->name('admin.donations.foods.update');
+
 // Rescue
 Route::resource('rescues', RescueController::class);
+
+// Donation
+Route::resource('donations', DonationController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
