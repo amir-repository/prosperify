@@ -4,17 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Rescue;
 use App\Models\RescueUser;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class RescueController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if (Gate::allows('is-donor')) {
+            $userID = auth()->user()->id;
+            $rescues = User::find($userID)->rescues;
+
+            $filtered = $rescues->filter(function ($rescues) {
+                $status = request()->query('status');
+                if ($status === null) {
+                    return $rescues;
+                }
+                return $rescues->status === request()->query('status');
+            });
+
+            return view('rescues.index', ['rescues' => $filtered]);
+        } else {
+        }
     }
 
     /**
@@ -22,7 +38,10 @@ class RescueController extends Controller
      */
     public function create()
     {
-        $this->authorize('donor');
+        if (!Gate::allows('is-donor')) {
+            abort(403);
+        }
+
         $user = auth()->user();
         return view('rescues.create', ['user' => $user]);
     }
@@ -33,13 +52,9 @@ class RescueController extends Controller
     public function store(Request $request)
     {
 
-        // Find correct time stamp to store in DB
-        $rescue_date = explode('/', $request->rescue_date);
-        $month = $rescue_date[0];
-        $day = $rescue_date[1];
-        $year = $rescue_date[2];
-        $hour = $request->rescue_hours;
-        $timestamp = Carbon::create($year, $month, $day, $hour, 0, 0, 'UTC');
+        if (!Gate::allows('is-donor')) {
+            abort(403);
+        }
 
         $rescue = new Rescue();
         $rescue->donor_name = $request->donor_name;
@@ -49,7 +64,7 @@ class RescueController extends Controller
         $rescue->title = $request->title;
         $rescue->description = $request->description;
         $rescue->status = "direncanakan";
-        $rescue->rescue_date = $timestamp;
+        $rescue->rescue_date = $this->formatDateAndHour($request->rescue_date, $request->rescue_hours);
         $rescue->user_id = auth()->user()->id;
         $rescue->save();
 
@@ -60,7 +75,9 @@ class RescueController extends Controller
         $rescue_user_log->status = $rescue->status;
         $rescue_user_log->save();
 
-        return redirect()->route('donors.rescues.show', ['id' => $rescue->id]);
+        return redirect()->route('rescues.show', ['rescue' => $rescue]);
+
+        // return redirect()->route('donors.rescues.show', ['id' => $rescue->id]);
     }
 
     /**
@@ -68,7 +85,11 @@ class RescueController extends Controller
      */
     public function show(Rescue $rescue)
     {
-        //
+        if (Gate::allows('is-donor')) {
+            return view('rescues.show', ['rescue' => $rescue]);
+        } else {
+            // selain donor
+        }
     }
 
     /**
@@ -94,8 +115,6 @@ class RescueController extends Controller
         $rescue_user_log->status = $request->status;
         $rescue_user_log->save();
 
-        // save photo
-
         if (auth()->user()->type === "donor") {
             return redirect()->route("donors.dashboard");
         } else {
@@ -109,5 +128,15 @@ class RescueController extends Controller
     public function destroy(Rescue $rescue)
     {
         //
+    }
+
+    public function formatDateAndHour($datestring, $hour)
+    {
+        $rescue_date = explode('-', $datestring);
+        $year = $rescue_date[0];
+        $month = $rescue_date[1];
+        $day = $rescue_date[2];
+        $timestamp = Carbon::create($year, $month, $day, $hour, 0, 0, 'UTC');
+        return $timestamp;
     }
 }
