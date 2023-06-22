@@ -16,7 +16,10 @@ class RescueController extends Controller
      */
     public function index(Request $request)
     {
-        if (Gate::allows('is-donor')) {
+        $donor = Gate::allows('is-donor');
+        $manager = Gate::allows('is-volunteer') || Gate::allows('is-volunteer');
+
+        if ($donor) {
             $userID = auth()->user()->id;
             $rescues = User::find($userID)->rescues;
 
@@ -29,7 +32,18 @@ class RescueController extends Controller
             });
 
             return view('rescues.index', ['rescues' => $filtered]);
-        } else {
+        } else if ($manager) {
+            $rescues = Rescue::all();
+
+            $filtered = $rescues->filter(function ($rescues) {
+                $status = request()->query('status');
+                if ($status === null) {
+                    return $rescues;
+                }
+                return $rescues->status === request()->query('status');
+            });
+
+            return view('manager.rescues.index', ['rescues' => $filtered]);
         }
     }
 
@@ -85,10 +99,13 @@ class RescueController extends Controller
      */
     public function show(Rescue $rescue)
     {
-        if (Gate::allows('is-donor')) {
+        $donor = Gate::allows('is-donor');
+        $manager = Gate::allows('is-volunteer') || Gate::allows('is-volunteer');
+
+        if ($donor) {
             return view('rescues.show', ['rescue' => $rescue]);
-        } else {
-            // selain donor
+        } else if ($manager) {
+            return view('manager.rescues.show', ['rescue' => $rescue]);
         }
     }
 
@@ -118,7 +135,7 @@ class RescueController extends Controller
         if (auth()->user()->type === "donor") {
             return redirect()->route("donors.dashboard");
         } else {
-            return redirect()->route("volunteer.dashboard");
+            return redirect()->route("rescues.index");
         }
     }
 

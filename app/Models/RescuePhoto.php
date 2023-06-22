@@ -9,7 +9,7 @@ class RescuePhoto extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['photo', 'rescue_user_id', 'user_id'];
+    protected $fillable = ['photo', 'rescue_user_id', 'user_id', 'food_id'];
 
     public function rescueUser()
     {

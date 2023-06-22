@@ -62,6 +62,7 @@ class FoodController extends Controller
         $rescuePhoto->photo = $photo;
         $rescuePhoto->rescue_user_id = $rescueUserID;
         $rescuePhoto->user_id = $userID;
+        $rescuePhoto->food_id = $food->id;
         $rescuePhoto->save();
 
         // save to vaults
@@ -76,9 +77,22 @@ class FoodController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Food $food)
+    public function show(Rescue $rescue, Food $food)
     {
-        //
+        // get photo timeline for foods
+        $rescueUserIDs = $rescue->user_logs->map(function ($user_log) {
+            return $user_log->pivot->id;
+        });
+
+        $rescuePhotos = collect([]);
+        foreach ($rescueUserIDs as $rescueUserID) {
+            $rescuePhoto = RescuePhoto::where(['rescue_user_id' => $rescueUserID, 'food_id' => $food->id])->get();
+            if (!$rescuePhoto->isEmpty()) {
+                $rescuePhotos->push($rescuePhoto);
+            }
+        }
+
+        return view('manager.foods.show', ["food" => $food, "rescuePhotos" => $rescuePhotos, "rescue" => $rescue]);
     }
 
     /**
@@ -92,9 +106,28 @@ class FoodController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Food $food)
+    public function update(Request $request, Rescue $rescue, Food $food)
     {
-        //
+        // save rescue photo logs
+        $rescueUserIDs = $rescue->user_logs;
+        $rescueUserID = null;
+
+        foreach ($rescueUserIDs as $rescueUserID) {
+            if ($rescueUserID->pivot->status === $request->status) {
+                $rescueUserID = $rescueUserID->pivot->id;
+            }
+        }
+
+        $photo = $request->file('photo')->store('rescue-documentations');
+
+        $rescuePhoto = new RescuePhoto();
+        $rescuePhoto->photo = $photo;
+        $rescuePhoto->rescue_user_id = $rescueUserID;
+        $rescuePhoto->user_id = auth()->user()->id;
+        $rescuePhoto->food_id = $food->id;
+        $rescuePhoto->save();
+
+        return redirect()->route('rescues.show', ['rescue' => $rescue]);
     }
 
     /**
