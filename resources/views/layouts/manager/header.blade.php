@@ -186,9 +186,6 @@
                     <button id="hs-mega-menu-basic-dr" type="button"
                         class="flex items-center w-full text-gray-600 hover:text-gray-400 font-medium dark:text-gray-400 dark:hover:text-gray-500 ">
                         <span class="capitalize">{{ auth()->user()->name }}</span>
-                        <span
-                            class="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-gray-100 text-gray-800 ml-2">🪙
-                            500</span>
                         <svg class="ml-2 w-2.5 h-2.5 text-gray-600" width="16" height="16"
                             viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2 5L8.16086 10.6869C8.35239 10.8637 8.64761 10.8637 8.83914 10.6869L15 5"

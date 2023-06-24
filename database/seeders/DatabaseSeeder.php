@@ -59,6 +59,18 @@ class DatabaseSeeder extends Seeder
             'type' => 'donor'
         ]);
 
+        // point seed
+        DB::table('points')->insert([
+            'point' => 0,
+            'user_id' => 4,
+        ]);
+
+        // point seed
+        DB::table('points')->insert([
+            'point' => 0,
+            'user_id' => 5,
+        ]);
+
         // city seed
         DB::table('cities')->insert(
             ['name' => 'surabaya'],

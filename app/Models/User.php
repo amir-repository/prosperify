@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Donation::class)->withPivot('id');
     }
+
+    public function point()
+    {
+        return $this->hasOne(Point::class);
+    }
 }

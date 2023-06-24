@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Point;
 use App\Models\Rescue;
 use App\Models\RescueUser;
 use App\Models\User;
@@ -124,6 +125,13 @@ class RescueController extends Controller
     {
         $rescue->status = $request->status;
         $rescue->save();
+
+        // add point to donor
+        if ($rescue->status === 'selesai') {
+            $donorPoint = Point::where('user_id', $rescue->user_id)->first();
+            $donorPoint->point = $donorPoint->point + 100;
+            $donorPoint->save();
+        }
 
         // save to logs
         $rescue_user_log = new RescueUser();

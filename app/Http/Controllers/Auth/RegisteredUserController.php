@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Point;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
@@ -46,6 +47,12 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        // create user point
+        $point = new Point();
+        $point->user_id = $user->id;
+        $point->point = 0;
+        $point->save();
 
         Auth::login($user);
 

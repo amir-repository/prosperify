@@ -48,6 +48,8 @@ class DonationController extends Controller
             $recipients = Recipient::where('status', 'diterima')->get();
             return view('donations.create', ['user' => $user, 'recipients' => $recipients]);
         }
+
+        return redirect()->route('donations.index');
     }
 
     /**

@@ -1,4 +1,4 @@
-@extends('layouts.index')
+@extends('layouts.manager.index')
 
 @section('main')
     <main class="flex flex-col p-4 gap-4">

@@ -1,4 +1,4 @@
-@extends('layouts.index')
+@extends('layouts.manager.index')
 
 @section('main')
     <main class="p-4">
