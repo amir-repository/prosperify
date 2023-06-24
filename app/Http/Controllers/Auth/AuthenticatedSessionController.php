@@ -8,6 +8,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -29,7 +30,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        if (Gate::allows('is-donor')) {
+            return redirect()->route('rescues.index');
+        } else if (Gate::allows('is-volunteer')) {
+            return redirect()->route('rescues.index');
+        } else if (Gate::allows('is-admin')) {
+            return redirect()->route('donations.index');
+        }
     }
 
     /**
