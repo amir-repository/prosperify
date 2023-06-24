@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('photo');
             $table->foreignId('donation_user_id');
             $table->foreignId('user_id');
+            $table->foreignId('food_id');
             $table->timestamps();
         });
     }

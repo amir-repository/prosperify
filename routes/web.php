@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\FoodDonationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RescueController;
 use App\Models\Category;
@@ -301,6 +302,9 @@ Route::resource('rescues.foods', FoodController::class);
 
 // Donation
 Route::resource('donations', DonationController::class);
+
+// Donation Food
+Route::resource('donations.foods', FoodDonationController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

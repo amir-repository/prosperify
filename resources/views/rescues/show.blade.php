@@ -19,7 +19,9 @@
                     @method('put')
                     @csrf
                     <input type="text" value="diajukan" name="status" hidden>
-                    <Button class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Ajukan Penyelamatan Pangan</Button>
+                    @if (!$rescue->foods->isEmpty())
+                        <Button class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Ajukan Penyelamatan Pangan</Button>
+                    @endif
                 </form>
             @endif
         </section>
@@ -34,7 +36,7 @@
                 @endif
             </div>
             <div>
-                @if (!$rescue->foods)
+                @if ($rescue->foods->isEmpty())
                     <p class="text-center mt-10">Ayo tambahkan makanannya 🍎</p>
                 @else
                     <main class="flex gap-4 flex-wrap justify-center">

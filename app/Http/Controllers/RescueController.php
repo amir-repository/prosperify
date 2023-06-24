@@ -132,11 +132,7 @@ class RescueController extends Controller
         $rescue_user_log->status = $request->status;
         $rescue_user_log->save();
 
-        if (auth()->user()->type === "donor") {
-            return redirect()->route("donors.dashboard");
-        } else {
-            return redirect()->route("rescues.index");
-        }
+        return redirect()->route("rescues.index");
     }
 
     /**

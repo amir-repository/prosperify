@@ -3,20 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\Donation;
+use App\Models\DonationFood;
 use App\Models\DonationUser;
 use App\Models\Food;
 use App\Models\Recipient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class DonationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $manager = Gate::allows('is-admin') || Gate::allows('is-volunteer');
+        if (!$manager) {
+            abort(403);
+        }
+
+        $donationStatus = ['direncanakan', 'berlangsung', 'diserahkan', 'selesai'];
+        $status = $request->query('status');
+        $donations = null;
+
+        if (in_array($status, $donationStatus)) {
+            $donations = Donation::where('status', $status)->get();
+        } else {
+            $donations = Donation::all();
+        }
+
+        return view('donations.index', ['donations' => $donations]);
     }
 
     /**
@@ -24,10 +41,13 @@ class DonationController extends Controller
      */
     public function create()
     {
-        $this->authorize('admin');
-        $user = auth()->user();
-        $recipients = Recipient::where('status', 'diterima')->get();
-        return view('admin.donations.create', ['user' => $user, 'recipients' => $recipients]);
+        $admin = Gate::allows('is-admin');
+
+        if ($admin) {
+            $user = auth()->user();
+            $recipients = Recipient::where('status', 'diterima')->get();
+            return view('donations.create', ['user' => $user, 'recipients' => $recipients]);
+        }
     }
 
     /**
@@ -36,18 +56,11 @@ class DonationController extends Controller
     public function store(Request $request)
     {
 
-        // format date
-        $donation_date = explode('/', $request->donation_date);
-        $month = $donation_date[0];
-        $day = $donation_date[1];
-        $year = $donation_date[2];
-        $donation_date = Carbon::create($year, $month, $day, 0, 0, 0, 'UTC');
-
         // save donation
         $donation = new Donation();
         $donation->title = $request->title;
         $donation->description = $request->description;
-        $donation->donation_date = $donation_date;
+        $donation->donation_date = $this->formatDateAndHour($request->donation_date, 0);
         $donation->recipient_id = $request->recipientID;
         $donation->status = 'direncanakan';
         $donation->save();
@@ -65,7 +78,8 @@ class DonationController extends Controller
      */
     public function show(Donation $donation)
     {
-        //
+        $donationFoods = DonationFood::where('donation_id', $donation->id)->get();
+        return view('donations.show', ['donation' => $donation, 'donationFoods' => $donationFoods]);
     }
 
     /**
@@ -106,7 +120,7 @@ class DonationController extends Controller
         $donationUser->status = $request->status;
         $donationUser->save();
 
-        // 
+        return redirect()->route('donations.show', ['donation' => $donation]);
     }
 
     /**
@@ -115,5 +129,15 @@ class DonationController extends Controller
     public function destroy(Donation $donation)
     {
         //
+    }
+
+    public function formatDateAndHour($datestring, $hour)
+    {
+        $rescue_date = explode('-', $datestring);
+        $year = $rescue_date[0];
+        $month = $rescue_date[1];
+        $day = $rescue_date[2];
+        $timestamp = Carbon::create($year, $month, $day, $hour, 0, 0, 'UTC');
+        return $timestamp;
     }
 }
