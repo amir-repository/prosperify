@@ -107,7 +107,7 @@ class DonationController extends Controller
                 $foodID = $food->pivot->food_id;
 
                 $selectedFood = Food::find($foodID);
-                $foodOutbound = $food->pivot->outbound_plan;
+                $foodOutbound = $food->pivot->outbound_result;
                 $foodAmount = $selectedFood->amount;
                 $amount = $foodAmount - $foodOutbound;
                 $selectedFood->amount = $amount;

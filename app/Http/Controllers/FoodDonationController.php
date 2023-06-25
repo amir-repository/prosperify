@@ -46,7 +46,6 @@ class FoodDonationController extends Controller
      */
     public function show(Donation $donation, Food $food)
     {
-
         // get photo timeline for foods
         $donationUserIDs = $donation->users->map(function ($user) {
             return $user->pivot->id;
@@ -76,6 +75,14 @@ class FoodDonationController extends Controller
      */
     public function update(Request $request, Donation $donation, Food $food)
     {
+
+        if ($request->status === 'berlangsung' || $request->status === 'diserahkan') {
+            $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
+            $donationFood->outbound_result = $request->outbound_amount;
+            $donationFood->save();
+        }
+
+
         $donationUserID = $donation->users->last()->pivot->id;
         $photo = $request->file('photo')->store('donation-documentations');
 

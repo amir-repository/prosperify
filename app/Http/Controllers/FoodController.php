@@ -108,6 +108,12 @@ class FoodController extends Controller
      */
     public function update(Request $request, Rescue $rescue, Food $food)
     {
+        // update amount
+        if ($food->amount !== $request->amount) {
+            $food->amount = $request->amount;
+            $food->save();
+        }
+
         // save rescue photo logs
         $rescueUserIDs = $rescue->user_logs;
         $rescueUserID = null;

@@ -5,7 +5,8 @@
         <img class="w-full h-[375px] object-cover" src="{{ asset('storage/' . $food->photo) }}" alt="">
         <div class="p-4">
             <div class="flex justify-between">
-                <h2 class="capitalize text-2xl font-bold">{{ $food->donations->first()->pivot->outbound_plan }}
+                <h2 class="capitalize text-2xl font-bold">
+                    {{ $food->donations->first()->pivot->outbound_plan }}
                     {{ $food->unit }}</h2>
                 <p>⚠️ {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
             </div>
@@ -45,6 +46,14 @@
                             id="file_input" type="file" name="photo">
                     </div>
                     <input type="text" name="status" value="{{ $donation->status }}" hidden>
+                    <div class="mt-4">
+                        <label for="outbound_amount">Jumlah makanan saat {{ $donation->status }}</label>
+                        <div>
+                            <input type="number" name="outbound_amount" id="outbound_amount"
+                                value="{{ $food->donations->first()->pivot->outbound_plan }}">
+                            <span class="capitalize font-bold">{{ $food->unit }}</span>
+                        </div>
+                    </div>
                     <button type="submit" class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Simpan</button>
                 @endif
             </form>

@@ -42,6 +42,13 @@
                             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                             id="file_input" type="file" name="photo">
                     </div>
+                    <div class="mt-4">
+                        <label for="">Jumlah pangan saat {{ $rescue->status }}</label>
+                        <div>
+                            <input type="number" name="amount" value="{{ $food->amount }}">
+                            <span class="capitalize font-bold">{{ $food->unit }}</span>
+                        </div>
+                    </div>
                     <input type="text" name="status" value="{{ $rescue->status }}" hidden>
                     <button type="submit"
                         class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-4 mb-12">Simpan</button>

@@ -64,7 +64,12 @@
                                     src="{{ asset('storage/' . $donationFood->food->photo) }}" alt="">
                                 <div class="p-2">
                                     <h2 class="text-xl">{{ $donationFood->food->name }}</h2>
-                                    <h3 class="font-bold">{{ $donationFood->outbound_plan }}
+                                    <h3 class="font-bold">
+                                        @if ($donationFood->outbound_result === null)
+                                            {{ $donationFood->outbound_plan }}
+                                        @else
+                                            {{ $donationFood->outbound_result }}
+                                        @endif
                                         {{ $donationFood->food->unit }}
                                     </h3>
                                     <h3 class="text-sm text-gray-600 capitalize mt-2">🎁
