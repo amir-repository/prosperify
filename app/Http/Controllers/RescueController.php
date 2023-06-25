@@ -27,7 +27,7 @@ class RescueController extends Controller
             $filtered = $rescues->filter(function ($rescues) {
                 $status = request()->query('status');
                 if ($status === null) {
-                    return $rescues;
+                    return $rescues->status === 'direncanakan';
                 }
                 return $rescues->status === request()->query('status');
             });
@@ -39,7 +39,7 @@ class RescueController extends Controller
             $filtered = $rescues->filter(function ($rescues) {
                 $status = request()->query('status');
                 if ($status === null) {
-                    return $rescues;
+                    return $rescues->status === 'diajukan';
                 }
                 return $rescues->status === request()->query('status');
             });
