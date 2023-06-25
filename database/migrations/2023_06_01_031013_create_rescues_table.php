@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('description');
             $table->timestamp('rescue_date');
+            $table->integer('score')->nullable();
             $table->enum('status', ['direncanakan', 'diajukan', 'diproses', 'diambil', 'disimpan', 'selesai']);
             $table->foreignId('user_id');
             $table->timestamps();

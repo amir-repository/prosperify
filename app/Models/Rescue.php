@@ -17,6 +17,7 @@ class Rescue extends Model
         'title',
         'description',
         'rescue_date',
+        'score',
         'status'
     ];
 

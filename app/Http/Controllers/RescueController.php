@@ -20,10 +20,6 @@ class RescueController extends Controller
         $donor = Gate::allows('is-donor');
         $manager = Gate::allows('is-volunteer') || Gate::allows('is-admin');
 
-        // dd(Rescue::all()->first()->foods()->get()->map(function ($rescue) {
-        //     return $rescue->amount;
-        // })->sum());
-
         if ($donor) {
             $userID = auth()->user()->id;
             $rescues = User::find($userID)->rescues;
@@ -49,10 +45,18 @@ class RescueController extends Controller
                 return $rescues->status === request()->query('status');
             });
 
-
+            // sort rescues
             $urgent = request()->query('urgent');
-            if ($urgent === 'on') {
+            $highAmount = request()->query('high-amount');
+            if ($urgent === 'on' && $highAmount === 'on') {
+                $filtered = $filtered->sortBy([
+                    ['rescue_date', 'asc'],
+                    ['score', 'desc']
+                ]);
+            } else if ($urgent === 'on') {
                 $filtered = $filtered->sortBy('rescue_date');
+            } else if ($highAmount === 'on') {
+                $filtered = $filtered->sortByDesc('score');
             }
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
@@ -135,6 +139,15 @@ class RescueController extends Controller
         $rescue->status = $request->status;
         $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
         $rescue->save();
+
+        if ($rescue->status = 'diajukan') {
+            // give score to rescue based on food amount
+            $score = $rescue->foods()->get()->map(function ($rescue) {
+                return $rescue->amount;
+            })->sum();
+            $rescue->score = $score;
+            $rescue->save();
+        }
 
         // add point to donor
         if ($rescue->status === 'selesai') {
