@@ -18,7 +18,11 @@ class RescueController extends Controller
     public function index(Request $request)
     {
         $donor = Gate::allows('is-donor');
-        $manager = Gate::allows('is-volunteer') || Gate::allows('is-volunteer');
+        $manager = Gate::allows('is-volunteer') || Gate::allows('is-admin');
+
+        // dd(Rescue::all()->first()->foods()->get()->map(function ($rescue) {
+        //     return $rescue->amount;
+        // })->sum());
 
         if ($donor) {
             $userID = auth()->user()->id;
@@ -41,8 +45,15 @@ class RescueController extends Controller
                 if ($status === null) {
                     return $rescues->status === 'diajukan';
                 }
+
                 return $rescues->status === request()->query('status');
             });
+
+
+            $urgent = request()->query('urgent');
+            if ($urgent === 'on') {
+                $filtered = $filtered->sortBy('rescue_date');
+            }
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
         }
@@ -79,7 +90,7 @@ class RescueController extends Controller
         $rescue->title = $request->title;
         $rescue->description = $request->description;
         $rescue->status = "direncanakan";
-        $rescue->rescue_date = $request->rescue_date;
+        $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
         $rescue->user_id = auth()->user()->id;
         $rescue->save();
 
@@ -91,8 +102,6 @@ class RescueController extends Controller
         $rescue_user_log->save();
 
         return redirect()->route('rescues.show', ['rescue' => $rescue]);
-
-        // return redirect()->route('donors.rescues.show', ['id' => $rescue->id]);
     }
 
     /**
@@ -124,6 +133,7 @@ class RescueController extends Controller
     public function update(Request $request, Rescue $rescue)
     {
         $rescue->status = $request->status;
+        $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
         $rescue->save();
 
         // add point to donor
@@ -149,5 +159,19 @@ class RescueController extends Controller
     public function destroy(Rescue $rescue)
     {
         //
+    }
+
+    function formatDateTime($dateTimeString)
+    {
+        $dateTime = explode('T', $dateTimeString);
+        $date = explode('-', $dateTime[0]);
+        $time = explode(':', $dateTime[1]);
+        $year = $date[0];
+        $month = $date[1];
+        $day = $date[2];
+        $hour = $time[0];
+        $minute = $time[1];
+
+        return Carbon::create($year, $month, $day, $hour, $minute, 0);
     }
 }

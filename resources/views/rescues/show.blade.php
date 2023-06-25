@@ -19,6 +19,7 @@
                     @method('put')
                     @csrf
                     <input type="text" value="diajukan" name="status" hidden>
+                    <input type="datetime-local" value="{{ $rescue->rescue_date }}" name="rescue_date" hidden>
                     @if (!$rescue->foods->isEmpty())
                         <Button class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Ajukan Penyelamatan Pangan</Button>
                     @endif
