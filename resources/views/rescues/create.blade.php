@@ -52,21 +52,11 @@
                             placeholder="Donasi rutin setiap minggu ..." required>
                     </div>
 
-                    <div class="flex">
-                        <div class="flex-1">
-                            <label for="rescue_date"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal
-                                pengambilan</label>
-                            <input class="border-none" type="date" id="rescue_date" name="rescue_date" required>
-                        </div>
-                        <div>
-                            <label for="rescue_hours"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jam
-                                pengambilan</label>
-                            <input type="number" name="rescue_hours" id="rescue_hours"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                placeholder="1" min="1" max="23" value="8" required>
-                        </div>
+                    <div>
+                        <label for="rescue_date"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal
+                            pengambilan</label>
+                        <input type="datetime-local" id="rescue_date" name="rescue_date" required>
                     </div>
 
                     <button type="submit"

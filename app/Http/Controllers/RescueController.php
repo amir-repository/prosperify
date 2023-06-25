@@ -79,7 +79,7 @@ class RescueController extends Controller
         $rescue->title = $request->title;
         $rescue->description = $request->description;
         $rescue->status = "direncanakan";
-        $rescue->rescue_date = $this->formatDateAndHour($request->rescue_date, $request->rescue_hours);
+        $rescue->rescue_date = $request->rescue_date;
         $rescue->user_id = auth()->user()->id;
         $rescue->save();
 
@@ -149,15 +149,5 @@ class RescueController extends Controller
     public function destroy(Rescue $rescue)
     {
         //
-    }
-
-    public function formatDateAndHour($datestring, $hour)
-    {
-        $rescue_date = explode('-', $datestring);
-        $year = $rescue_date[0];
-        $month = $rescue_date[1];
-        $day = $rescue_date[2];
-        $timestamp = Carbon::create($year, $month, $day, $hour, 0, 0, 'UTC');
-        return $timestamp;
     }
 }
