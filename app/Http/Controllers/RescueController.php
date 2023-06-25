@@ -137,7 +137,7 @@ class RescueController extends Controller
     public function update(Request $request, Rescue $rescue)
     {
         $rescue->status = $request->status;
-        $rescue->rescue_date = $this->formatDateTime($request->rescue_date); // harus di save ulang gk tau kenapa, kalau gk di save akan ke reset ke hari ini
+        $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
         $rescue->save();
 
         if ($rescue->status = 'diajukan') {
@@ -147,6 +147,7 @@ class RescueController extends Controller
             })->sum();
             $rescue->score = $score;
             $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
+            $rescue->status = $request->status;
             $rescue->save();
         }
 

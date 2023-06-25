@@ -5,8 +5,8 @@
         <section>
             <div class="flex justify-between">
                 <div class="flex gap-2">
-                    <p>📅 {{ Carbon\Carbon::parse($rescue->recue_date)->format('d M Y') }}</p>
-                    <p>⏰ {{ Carbon\Carbon::parse($rescue->recue_date)->format('H:i') }}</p>
+                    <p>📅 {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}</p>
+                    <p>⏰ {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
                 </div>
                 <h2 class="font-bold">{{ $rescue->donor_name }} 😇</h2>
             </div>
@@ -17,6 +17,7 @@
             <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">
                 @method('put')
                 @csrf
+                <input type="datetime-local" value="{{ $rescue->rescue_date }}" name="rescue_date" hidden>
                 <div>
                     <input type="text" name='status'
                         value="
