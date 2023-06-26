@@ -151,11 +151,16 @@ class RescueController extends Controller
             $rescue->save();
         }
 
-        // add point to donor
+        // add point to donor and add stored timestamp for food
         if ($rescue->status === 'selesai') {
             $donorPoint = Point::where('user_id', $rescue->user_id)->first();
             $donorPoint->point = $donorPoint->point + 100;
             $donorPoint->save();
+
+            $rescue->foods()->get()->each(function ($food) {
+                $food->stored_timestamp = Carbon::now();
+                $food->save();
+            });
         }
 
         // save to logs
