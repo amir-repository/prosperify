@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,130 +22,87 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        // admin seed
-        DB::table('users')->insert([
-            'name' => 'Admin',
-            'email' => 'admin@mail.com',
-            'password' => Hash::make('admin'),
-            'type' => 'admin'
-        ]);
-
-        // volunteer seed
-        DB::table('users')->insert([
-            'name' => 'Volunteer Amir',
-            'email' => 'amir@mail.com',
-            'password' => Hash::make('password'),
-            'type' => 'volunteer'
-        ]);
-
-        DB::table('users')->insert([
-            'name' => 'Volunteer Adip',
-            'email' => 'adip@mail.com',
-            'password' => Hash::make('password'),
-            'type' => 'volunteer'
-        ]);
-
-        // donor seed
-        DB::table('users')->insert([
-            'name' => 'Donor Budi',
-            'email' => 'budi@mail.com',
-            'password' => Hash::make('password'),
-            'type' => 'donor'
-        ]);
-
-        DB::table('users')->insert([
-            'name' => 'Donor Neo',
-            'email' => 'neo@mail.com',
-            'password' => Hash::make('password'),
-            'type' => 'donor'
-        ]);
-
-        // point seed
-        DB::table('points')->insert([
-            'point' => 0,
-            'user_id' => 4,
-        ]);
-
-        // point seed
-        DB::table('points')->insert([
-            'point' => 0,
-            'user_id' => 5,
-        ]);
-
-        // city seed
-        DB::table('cities')->insert(
-            ['name' => 'surabaya'],
-        );
-
-        DB::table('cities')->insert(
-            ['name' => 'bandung'],
-        );
-
-        // vaults seed
-        DB::table('vaults')->insert(
-            ['name' => 'FoodBank HQ', 'city_id' => 1, 'address' => 'Jalan kemerdekaan No. 17']
-        );
-
-        // category seed
-        DB::table('categories')->insert(
-            ['name' => 'perishable']
-        );
-
-        DB::table('categories')->insert(
-            ['name' => 'non perishable']
-        );
-
-        // sub-categories seed
-        DB::table('sub_categories')->insert(
-            ['name' => 'pastry', 'category_id' => 1]
-        );
-
-        DB::table('sub_categories')->insert(
-            ['name' => 'protein hewani', 'category_id' => 1]
-        );
-
-        DB::table('sub_categories')->insert(
-            ['name' => 'karbo/nasi', 'category_id' => 1]
-        );
-
-        DB::table('sub_categories')->insert(
-            ['name' => 'sayur', 'category_id' => 1]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'beras', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'mie', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'protein hewani kalengan', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'susu', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'bumbu dapur', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'kopi', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'teh', 'category_id' => 2]
-        );
-        DB::table('sub_categories')->insert(
-            ['name' => 'minuman lainnya', 'category_id' => 2]
-        );
-
-        // recipient seed
-        DB::table('recipients')->insert([
+        $this->call(
             [
-                'name' => 'Agus',
-                'address' => 'Jalan bersama',
-                'phone' => '08123456789',
-                'family_members' => 4,
-                'document' => '',
-                'status' => 'diterima'
+                RoleAndPermissionSeeder::class, UserSeeder::class,
+                PointSeeder::class
             ]
-        ]);
+        );
+
+        // // city seed
+        // DB::table('cities')->insert(
+        //     ['name' => 'surabaya'],
+        // );
+
+        // DB::table('cities')->insert(
+        //     ['name' => 'bandung'],
+        // );
+
+        // // vaults seed
+        // DB::table('vaults')->insert(
+        //     ['name' => 'FoodBank HQ', 'city_id' => 1, 'address' => 'Jalan kemerdekaan No. 17']
+        // );
+
+        // // category seed
+        // DB::table('categories')->insert(
+        //     ['name' => 'perishable']
+        // );
+
+        // DB::table('categories')->insert(
+        //     ['name' => 'non perishable']
+        // );
+
+        // // sub-categories seed
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'pastry', 'category_id' => 1]
+        // );
+
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'protein hewani', 'category_id' => 1]
+        // );
+
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'karbo/nasi', 'category_id' => 1]
+        // );
+
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'sayur', 'category_id' => 1]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'beras', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'mie', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'protein hewani kalengan', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'susu', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'bumbu dapur', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'kopi', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'teh', 'category_id' => 2]
+        // );
+        // DB::table('sub_categories')->insert(
+        //     ['name' => 'minuman lainnya', 'category_id' => 2]
+        // );
+
+        // // recipient seed
+        // DB::table('recipients')->insert([
+        //     [
+        //         'name' => 'Agus',
+        //         'address' => 'Jalan bersama',
+        //         'phone' => '08123456789',
+        //         'family_members' => 4,
+        //         'document' => '',
+        //         'status' => 'diterima'
+        //     ]
+        // ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,12 +31,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (Gate::allows('is-donor')) {
-            return redirect()->route('rescues.index');
-        } else if (Gate::allows('is-volunteer')) {
-            return redirect()->route('rescues.index');
-        } else if (Gate::allows('is-admin')) {
+        $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
             return redirect()->route('donations.index');
+        }
+
+        if ($user->hasRole('volunteer')) {
+            return redirect()->route('rescues.index');
+        }
+
+        if ($user->hasRole('donor')) {
+            return redirect()->route('rescues.index');
         }
     }
 

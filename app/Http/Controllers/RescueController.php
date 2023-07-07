@@ -17,7 +17,8 @@ class RescueController extends Controller
      */
     public function index(Request $request)
     {
-        $donor = Gate::allows('is-donor');
+        $user = auth()->user();
+        $donor = $user->hasRole('donor');
         $manager = Gate::allows('is-volunteer') || Gate::allows('is-admin');
 
         if ($donor) {
