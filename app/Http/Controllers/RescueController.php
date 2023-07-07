@@ -70,6 +70,11 @@ class RescueController extends Controller
     public function create()
     {
         $user = auth()->user();
+        if (!$user->hasRole('donor')) {
+            abort(403);
+        }
+
+        $user = auth()->user();
         return view('rescues.create', ['user' => $user]);
     }
 
