@@ -18,8 +18,8 @@ class RescueController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $donor = $user->hasRole('donor');
-        $manager = Gate::allows('is-volunteer') || Gate::allows('is-admin');
+        $donor = $user->hasRole(User::DONOR);
+        $manager = $user->hasRole(User::VOLUNTEER, User::ADMIN);
 
         if ($donor) {
             $userID = auth()->user()->id;
@@ -69,7 +69,7 @@ class RescueController extends Controller
      */
     public function create()
     {
-        if (!Gate::allows('is-donor')) {
+        if (!auth()->user()->hasRole('donor')) {
             abort(403);
         }
 

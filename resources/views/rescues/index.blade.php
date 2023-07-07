@@ -3,10 +3,11 @@
 @section('main')
     <main class="flex flex-col p-4 gap-4">
         @if ($rescues->isEmpty())
-            <p class="font-bold text-center mt-16">⚠️ Belum ada food rescue yang sedang
-                {{ request()->query('status') }}
-
+            <p class="font-medium text-center mt-16"> Belum ada penyelamatan pangan
             </p>
+            <div class="flex justify-center">
+                <a href="{{ route('rescues.create') }}" class="py-2 px-4 bg-slate-900 text-white rounded-md">Buatbaru</a>
+            </div>
         @endif
         @foreach ($rescues as $rescue)
             <a href="{{ route('rescues.show', ['rescue' => $rescue]) }}">

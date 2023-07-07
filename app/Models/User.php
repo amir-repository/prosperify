@@ -46,6 +46,10 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public const DONOR = 'donor';
+    public const VOLUNTEER = 'volunteer';
+    public const ADMIN = 'admin';
+
     public function rescues()
     {
         return $this->hasMany(Rescue::class);
