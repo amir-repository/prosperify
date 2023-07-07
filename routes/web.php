@@ -4,6 +4,7 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodDonationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RescueController;
 use App\Models\Category;
 use App\Models\Donation;
@@ -44,6 +45,7 @@ Route::resource('rescues', RescueController::class);
 Route::resource('rescues.foods', FoodController::class);
 Route::resource('donations', DonationController::class);
 Route::resource('donations.foods', FoodDonationController::class);
+Route::resource('reports', ReportController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
