@@ -19,7 +19,7 @@ class RescueController extends Controller
     {
         $user = auth()->user();
         $donor = $user->hasRole(User::DONOR);
-        $manager = $user->hasRole(User::VOLUNTEER, User::ADMIN);
+        $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
 
         if ($donor) {
             $userID = auth()->user()->id;
@@ -69,10 +69,6 @@ class RescueController extends Controller
      */
     public function create()
     {
-        if (!auth()->user()->hasRole('donor')) {
-            abort(403);
-        }
-
         $user = auth()->user();
         return view('rescues.create', ['user' => $user]);
     }

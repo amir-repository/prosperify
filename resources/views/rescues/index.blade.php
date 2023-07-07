@@ -6,7 +6,7 @@
             <p class="font-medium text-center mt-16"> Belum ada penyelamatan pangan
             </p>
             <div class="flex justify-center">
-                <a href="{{ route('rescues.create') }}" class="py-2 px-4 bg-slate-900 text-white rounded-md">Buatbaru</a>
+                <a href="{{ route('rescues.create') }}" class="py-2 px-4 bg-slate-900 text-white rounded-md">Buat baru</a>
             </div>
         @endif
         @foreach ($rescues as $rescue)
