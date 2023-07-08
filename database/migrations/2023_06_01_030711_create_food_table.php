@@ -15,14 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('detail');
-            $table->timestamp('expired_date');
+            $table->dateTime('expired_date');
+            $table->integer('in_stock')->nullable();
             $table->integer('amount');
-            $table->enum('unit', ['kg', 'serving']);
-            $table->timestamp('stored_timestamp')->nullable();
             $table->string('photo');
+            $table->timestamp('stored_at')->nullable();
             $table->foreignId('user_id');
             $table->foreignId('category_id');
             $table->foreignId('sub_category_id');
+            $table->foreignId('unit_id');
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@ class Food extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'unit', 'stored_timestamp', 'user_id', 'category_id', 'sub_category_id'];
+    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'in_stock', 'photo', 'unit_id', 'stored_at', 'user_id', 'category_id', 'sub_category_id'];
 
     public function vaults()
     {
@@ -34,5 +34,10 @@ class Food extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }
