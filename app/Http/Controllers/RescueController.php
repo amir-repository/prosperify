@@ -8,6 +8,7 @@ use App\Models\RescueUser;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -25,27 +26,12 @@ class RescueController extends Controller
         if ($donor) {
             $userID = auth()->user()->id;
             $rescues = User::find($userID)->rescues;
-
-            $filtered = $rescues->filter(function ($rescues) {
-                $status = request()->query('status');
-                if ($status === null) {
-                    return $rescues->rescue_status_id === Rescue::DIRENCANAKAN;
-                }
-                return $rescues->status === request()->query('status');
-            });
+            $filtered = $this->filterRescueByStatus($rescues, Rescue::DIRENCANAKAN);
 
             return view('rescues.index', ['rescues' => $filtered]);
         } else if ($manager) {
             $rescues = Rescue::all();
-
-            $filtered = $rescues->filter(function ($rescues) {
-                $status = request()->query('status');
-                if ($status === null) {
-                    return $rescues->status === 'diajukan';
-                }
-
-                return $rescues->status === request()->query('status');
-            });
+            $filtered = $this->filterRescueByStatus($rescues, Rescue::DIAJUKAN);
 
             // sort rescues
             $urgent = request()->query('urgent');
@@ -85,6 +71,9 @@ class RescueController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $donor = $user->hasRole(User::DONOR);
+        $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
+
         if (!$user->hasRole('donor')) {
             abort(403);
         }
@@ -99,7 +88,8 @@ class RescueController extends Controller
             'email' => 'required',
         ]);
 
-        DB::transaction(function () use ($request) {
+        try {
+            DB::beginTransaction();
             $rescue = new Rescue();
             $rescue->donor_name = $request->donor_name;
             $rescue->pickup_address = $request->pickup_address;
@@ -118,8 +108,12 @@ class RescueController extends Controller
             $rescue_user_log->rescue_status_id = Rescue::DIRENCANAKAN;
             $rescue_user_log->save();
 
+            DB::commit();
+
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
-        });
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
     }
 
     /**
@@ -127,8 +121,9 @@ class RescueController extends Controller
      */
     public function show(Rescue $rescue)
     {
-        $donor = Gate::allows('is-donor');
-        $manager = Gate::allows('is-volunteer') || Gate::allows('is-volunteer');
+        $user = Auth::user();
+        $donor = $user->hasRole(User::DONOR);
+        $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
 
         if ($donor) {
             return view('rescues.show', ['rescue' => $rescue]);
@@ -150,17 +145,21 @@ class RescueController extends Controller
      */
     public function update(Request $request, Rescue $rescue)
     {
-        $rescue->status = $request->status;
-        $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
+        $rescue->rescue_status_id = $request->status;
         $rescue->save();
 
-        if ($rescue->status = 'diajukan') {
+        $rescueUser = new RescueUser();
+        $rescueUser->user_id = auth()->user()->id;
+        $rescueUser->rescue_id = $rescue->id;
+        $rescueUser->rescue_status_id = $request->status;
+        $rescueUser->save();
+
+        if ($rescue->status == Rescue::DIAJUKAN) {
             // give score to rescue based on food amount
             $score = $rescue->foods()->get()->map(function ($rescue) {
                 return $rescue->amount;
             })->sum();
             $rescue->score = $score;
-            $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
             $rescue->status = $request->status;
             $rescue->save();
         }
@@ -177,13 +176,6 @@ class RescueController extends Controller
             });
         }
 
-        // save to logs
-        $rescue_user_log = new RescueUser();
-        $rescue_user_log->user_id = auth()->user()->id;
-        $rescue_user_log->rescue_id = $rescue->id;
-        $rescue_user_log->status = $request->status;
-        $rescue_user_log->save();
-
         return redirect()->route("rescues.index");
     }
 
@@ -193,6 +185,19 @@ class RescueController extends Controller
     public function destroy(Rescue $rescue)
     {
         //
+    }
+
+    private function filterRescueByStatus($rescues, $rescueStatusID)
+    {
+        $filtered = $rescues->filter(function ($rescues) use ($rescueStatusID) {
+            $status = request()->query('status');
+            if ($status === null) {
+                return $rescues->rescue_status_id === $rescueStatusID;
+            }
+            return $rescues->rescue_status_id === (int) request()->query('status');
+        });
+
+        return $filtered;
     }
 
     function formatDateTime($dateTimeString)

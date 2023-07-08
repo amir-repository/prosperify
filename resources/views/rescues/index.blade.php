@@ -16,7 +16,12 @@
                     <p class="mt-1">Pada {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }} jam
                         {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
                     <div class="flex items-center gap-3 mt-3">
-                        <div class="w-11 h-11 bg-slate-100 rounded-md">
+                        <div class="w-11 h-11 bg-slate-100 rounded-md flex items-center justify-center">
+                            @if ($rescue->rescue_status_id === 1)
+                                <x-heroicon-o-bookmark class="w-6 h-6" />
+                            @elseif($rescue->rescue_status_id === 2)
+                                <x-heroicon-o-paper-airplane class="w-6 h-6" />
+                            @endif
                         </div>
                         <div>
                             <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh

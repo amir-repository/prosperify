@@ -1,63 +1,102 @@
 @extends('layouts.index')
 
 @section('main')
-    <main class="p-4">
-        <section>
-            <div class="flex justify-between">
-                <div class="flex gap-2">
-                    <p>📅 {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}</p>
-                    <p>⏰ {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
-                </div>
-                <h2 class="font-bold">{{ $rescue->donor_name }} 😇</h2>
+    <main class="p-6 text-slate-900">
+        <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
+        <div class="mt-4 text-sm">
+            <div class="flex gap-4">
+                <p class="flex items-center gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}
+                </p>
+                <p class="flex gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}
+                </p>
             </div>
-            <p class="mt-1">📍 {{ $rescue->pickup_address }}</p>
-            <h1 class="capitalize text-2xl font-bold mt-4">{{ $rescue->title }}</h1>
-            <p>{{ $rescue->description }}</p>
-
-            @if ($rescue->status === 'direncanakan')
-                <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">
-                    @method('put')
-                    @csrf
-                    <input type="text" value="diajukan" name="status" hidden>
-                    <input type="datetime-local" value="{{ $rescue->rescue_date }}" name="rescue_date" hidden>
-                    @if (!$rescue->foods->isEmpty())
-                        <Button class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Ajukan Penyelamatan Pangan</Button>
+            <p class="mt-2 flex gap-1">
+                <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />{{ $rescue->pickup_address }}
+            </p>
+        </div>
+        <div class="mt-6">
+            <section class="flex items-center gap-2">
+                <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                    <x-heroicon-o-user class="w-6 h-6" />
+                </div>
+                <div>
+                    <p>{{ $rescue->donor_name }}</p>
+                    <p class="text-xs text-slate-500 capitalize">Donor</p>
+                </div>
+            </section>
+            <section class="flex items-center gap-2 mt-4">
+                <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                    @if ($rescue->rescue_status_id === 1)
+                        <x-heroicon-o-bookmark class="w-6 h-6" />
+                    @elseif($rescue->rescue_status_id === 2)
+                        <x-heroicon-o-paper-airplane class="w-6 h-6" />
                     @endif
-                </form>
-            @endif
-        </section>
-
-        <section class="mt-11">
-            <div class="flex justify-between mb-8">
-                <h1 class="text-xl font-bold">Makanan</h1>
-                @if ($rescue->status === 'direncanakan')
-                    <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
-                        class="p-1 px-2 text-blue-800 bg-blue-100 border-blue-400 border text-sm font-bold">Tambah
-                        Makanan</a>
+                </div>
+                <div>
+                    <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh
+                        {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->name }}
+                    </p>
+                    <p class="text-xs text-slate-500 capitalize">
+                        {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->roles->first()->name }}
+                    </p>
+                </div>
+            </section>
+            <section>
+                @if (!$rescue->rescue_status_id == 2)
+                    <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">
+                        @method('put')
+                        @csrf
+                        <input type="text" value="2" name="status" hidden>
+                        @if (!$rescue->foods->isEmpty())
+                            <Button
+                                class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">Ajukan</Button>
+                        @endif
+                    </form>
+                @endif
+            </section>
+        </div>
+        <div class="mt-11">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold">Makanan</h2>
+                @if (!$rescue->rescue_status_id == 2)
+                    <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}" class="flex items-center gap-1">
+                        <x-heroicon-o-plus class="w-5 h-5" />Tambah
+                    </a>
                 @endif
             </div>
             <div>
                 @if ($rescue->foods->isEmpty())
-                    <p class="text-center mt-10">Ayo tambahkan makanannya 🍎</p>
+                    <p class="mt-6 font-medium text-center">Belum ada makanan yang ditambahkan</p>
+                    <div class="flex justify-center mt-3">
+                        <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
+                            class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Tambah
+                            makanan</a>
+                    </div>
                 @else
-                    <main class="flex gap-4 flex-wrap justify-center">
+                    <div class="mt-4">
                         @foreach ($rescue->foods as $food)
-                            <div class="cursor-pointer w-[132px] border-gray-500 border">
-                                <img class="w-[132px] h-[132px] object-cover" src="{{ asset("storage/$food->photo") }}"
-                                    alt="">
-                                <div class="p-2">
-                                    <h2 class="text-xl">{{ $food->name }}</h2>
-                                    <h3 class="font-bold">{{ $food->amount }} {{ $food->unit }}</h3>
-                                    <h3 class="text-sm text-gray-600 capitalize mt-2">🎁 {{ $food->subCategory->name }}
-                                    </h3>
-                                    <h3 class="text-sm text-gray-600">⚠️
-                                        {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</h3>
+                            <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
+                                <div>
+                                    <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                        src="{{ asset("storage/$food->photo") }}" alt="">
                                 </div>
-                            </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold">
+                                        {{ $food->amount }}.<span class="text-base">{{ $food->unit->name }}</span>
+                                    </h3>
+                                    <p class="text-slate-500">{{ $food->name }}</p>
+                                    <p class="text-xs text-slate-500">
+                                        {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
+                                </div>
+                            </section>
                         @endforeach
-                    </main>
+                    </div>
                 @endif
             </div>
-        </section>
+        </div>
     </main>
 @endsection
