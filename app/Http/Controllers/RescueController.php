@@ -8,6 +8,7 @@ use App\Models\RescueUser;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class RescueController extends Controller
@@ -83,31 +84,42 @@ class RescueController extends Controller
      */
     public function store(Request $request)
     {
-
-        if (!Gate::allows('is-donor')) {
+        $user = auth()->user();
+        if (!$user->hasRole('donor')) {
             abort(403);
         }
 
-        $rescue = new Rescue();
-        $rescue->donor_name = $request->donor_name;
-        $rescue->pickup_address = $request->pickup_address;
-        $rescue->phone = $request->phone;
-        $rescue->email = $request->email;
-        $rescue->title = $request->title;
-        $rescue->description = $request->description;
-        $rescue->status = "direncanakan";
-        $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
-        $rescue->user_id = auth()->user()->id;
-        $rescue->save();
+        $validated = $request->validate([
+            'title' => 'required|max:100',
+            'description' => 'required|max:255',
+            'pickup_address' => 'required|max:255',
+            'rescue_date' => 'required|max:255',
+            'donor_name' => 'required|max:100',
+            'phone' => 'required|max:15',
+            'email' => 'required',
+        ]);
 
-        // save to log
-        $rescue_user_log = new RescueUser();
-        $rescue_user_log->user_id = auth()->user()->id;
-        $rescue_user_log->rescue_id = $rescue->id;
-        $rescue_user_log->status = $rescue->status;
-        $rescue_user_log->save();
+        DB::transaction(function () use ($request) {
+            $rescue = new Rescue();
+            $rescue->donor_name = $request->donor_name;
+            $rescue->pickup_address = $request->pickup_address;
+            $rescue->phone = $request->phone;
+            $rescue->email = $request->email;
+            $rescue->title = $request->title;
+            $rescue->description = $request->description;
+            $rescue->rescue_status_id = Rescue::DIRENCANAKAN;
+            $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
+            $rescue->user_id = auth()->user()->id;
+            $rescue->save();
 
-        return redirect()->route('rescues.show', ['rescue' => $rescue]);
+            $rescue_user_log = new RescueUser();
+            $rescue_user_log->user_id = auth()->user()->id;
+            $rescue_user_log->rescue_id = $rescue->id;
+            $rescue_user_log->rescue_status_id = Rescue::DIRENCANAKAN;
+            $rescue_user_log->save();
+
+            return redirect()->route('rescues.show', ['rescue' => $rescue]);
+        });
     }
 
     /**
