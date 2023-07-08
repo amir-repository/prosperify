@@ -1,68 +1,75 @@
 @extends('layouts.index')
 
 @section('main')
-    <main>
-        <section class="flex justify-center items-center my-6">
-            <div
-                class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-                <form class="space-y-6" method="POST" action="{{ route('rescues.store') }}">
-                    @csrf
-                    <h5 class="text-xl font-medium text-gray-900 dark:text-white">Food Rescue</h5>
-                    <div>
-                        <label for="donor_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
-                            donatur</label>
-                        <input type="text" name="donor_name" id="donor_name"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Nama" value="{{ $user->name }}" required>
+    <main class="px-6">
+        <form action="{{ route('rescues.store') }}" method="post">
+            @csrf
+            <h1 class="text-lg font-bold">Penyelamatan pangan</h1>
+            <section class="mt-4">
+                <div class="mb-4">
+                    <label for="title" class="text-sm font-medium block mb-[6px]">Judul donasi</label>
+                    <input id="title" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="{{ old('title') }}" placeholder="Donasi berkah" name="title" required>
+                    @error('title')
+                        <p class="mt-1 text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="text-sm font-medium block mb-[6px]">Deskripsi</label>
+                    <input id="description" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="{{ old('description') }}" placeholder="Donasi berkah adalah ..." name="description" required>
+                    @error('description')
+                        <p class="mt-1 text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="pickup_address" class="text-sm font-medium block mb-[6px]">Alamat pengambilan</label>
+                    <input id="pickup_address" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="{{ old('pickup_address') }}" placeholder="Jalan ..." name="pickup_address" required>
+                    @error('pickup_address')
+                        <p class="mt-1 text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="rescue_date" class="text-sm font-medium block mb-[6px]">Tanggal pengambilan</label>
+                    <input id="rescue_date" type="datetime-local" class="border border-slate-200 rounded-md w-full"
+                        value="{{ old('rescue_date') }}" placeholder="Donasi berkah adalah ..." name="rescue_date"
+                        value="" required>
+                    @error('rescue_date')
+                        <p class="mt-1 text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </section>
+            <h2 class="text-lg font-bold mt-8">Donatur</h2>
+            <section class="mt-4">
+                <div class="mb-4">
+                    <label for="donor_name" class="text-sm font-medium block mb-[6px]">Nama donatur</label>
+                    <input id="donor_name" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="{{ $user->name }}" placeholder="Nama saya" name="donor_name" required>
+                    @error('donor_name')
+                        <p class="mt-1 text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="flex gap-4">
+                    <div class="mb-4 flex-1">
+                        <label for="phone" class="text-sm font-medium block mb-[6px]">Nomor telepon</label>
+                        <input id="phone" type="text" class="border border-slate-200 rounded-md w-full"
+                            value="{{ $user->phone }}" placeholder="081234567890" name="phone" required>
+                        @error('phone')
+                            <p class="mt-1 text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
-                    <div>
-                        <label for="pickup_address"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Alamat pengambilan
-                            makanan</label>
-                        <input type="text" name="pickup_address" id="pickup_address"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Jalan bersama" required>
+                    <div class="mb-4 flex-1">
+                        <label for="email" class="text-sm font-medium block mb-[6px]">Email</label>
+                        <input id="email" type="email" class="border border-slate-200 rounded-md w-full"
+                            value="{{ $user->email }}" placeholder="name@mail.com" name="email" required>
+                        @error('email')
+                            <p class="mt-1 text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
-                    <div>
-                        <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nomor
-                            Telepon</label>
-                        <input type="text" name="phone" id="phone"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="081234567890" required>
-                    </div>
-                    <div>
-                        <label for="email"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-                        <input type="email" name="email" id="email"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="081234567890" value="{{ $user->email }}" required>
-                    </div>
-                    <div>
-                        <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Judul
-                            donasi</label>
-                        <input type="text" name="title" id="title"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Donasi Berkah" required>
-                    </div>
-                    <div>
-                        <label for="description"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deskripsi</label>
-                        <input type="text" name="description" id="description"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Donasi rutin setiap minggu ..." required>
-                    </div>
-
-                    <div>
-                        <label for="rescue_date"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal
-                            pengambilan</label>
-                        <input type="datetime-local" id="rescue_date" name="rescue_date" required>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Lanjut</button>
-                </form>
-            </div>
-        </section>
+                </div>
+            </section>
+            <button class="py-2 bg-slate-900 text-white w-full rounded-md mt-8">Buat</button>
+        </form>
     </main>
 @endsection
