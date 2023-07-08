@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('rescue_id');
-            $table->enum('status', ['direncanakan', 'diajukan', 'diproses', 'diambil', 'disimpan', 'selesai']);
+            $table->foreignId('rescue_status_id');
             $table->timestamps();
         });
     }

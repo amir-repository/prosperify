@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\RescueStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -25,7 +27,8 @@ class DatabaseSeeder extends Seeder
         $this->call(
             [
                 RoleAndPermissionSeeder::class, UserSeeder::class,
-                PointSeeder::class
+                PointSeeder::class,
+                RescueStatusSeeder::class
             ]
         );
 

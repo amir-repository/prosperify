@@ -18,8 +18,16 @@ class Rescue extends Model
         'description',
         'rescue_date',
         'score',
-        'status'
+        'rescue_status_id',
+        'user_id'
     ];
+
+    public const DIRENCANAKAN = 1;
+    public const DIAJUKAN = 2;
+    public const DIPROSES = 3;
+    public const DIAMBIL = 4;
+    public const DISIMPAN = 5;
+    public const DIBATALKAN = 6;
 
     public function user()
     {
@@ -34,5 +42,15 @@ class Rescue extends Model
     public function foods()
     {
         return $this->belongsToMany(Food::class);
+    }
+
+    public function rescueStatus()
+    {
+        return $this->belongsTo(RescueStatus::class);
+    }
+
+    public function rescueUser()
+    {
+        return $this->hasMany(RescueUser::class);
     }
 }
