@@ -29,7 +29,7 @@ class RescueController extends Controller
             $filtered = $rescues->filter(function ($rescues) {
                 $status = request()->query('status');
                 if ($status === null) {
-                    return $rescues->status === 'direncanakan';
+                    return $rescues->rescue_status_id === Rescue::DIRENCANAKAN;
                 }
                 return $rescues->status === request()->query('status');
             });
