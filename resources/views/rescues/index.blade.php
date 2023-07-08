@@ -1,7 +1,7 @@
 @extends('layouts.index')
 
 @section('main')
-    <main class="flex flex-col p-4 gap-4">
+    <main class="flex flex-col p-6 gap-4">
         @if ($rescues->isEmpty())
             <p class="font-medium text-center mt-16"> Belum ada penyelamatan pangan
             </p>
@@ -11,14 +11,20 @@
         @endif
         @foreach ($rescues as $rescue)
             <a href="{{ route('rescues.show', ['rescue' => $rescue]) }}">
-                <section class="border border-gray-400 p-2">
-                    <div class="flex justify-between">
-                        <p>📅 {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}</p>
-                        <p>⏰ {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
+                <section class="border border-slate-200 p-6 rounded-md text-slate-900">
+                    <h2 class="font-bold text-2xl">{{ $rescue->title }}</h2>
+                    <p class="mt-1">Pada {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }} jam
+                        {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
+                    <div class="flex items-center gap-3 mt-3">
+                        <div class="w-11 h-11 bg-slate-100 rounded-md">
+                        </div>
+                        <div>
+                            <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh
+                                {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->name }}
+                            </p>
+                            <p class="text-xs text-slate-500">21 Juli 2023</p>
+                        </div>
                     </div>
-                    <h1 class="capitalize text-2xl font-bold mt-2">{{ $rescue->title }}</h1>
-                    <p class="capitalize font-bold text-red-600">🔔 {{ $rescue->status }}</p>
-                    <p class="mt-2">📍 {{ $rescue->pickup_address }}</p>
                 </section>
             </a>
         @endforeach
