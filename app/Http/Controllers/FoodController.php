@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Food;
 use App\Models\FoodRescue;
+use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Rescue;
 use App\Models\RescuePhoto;
 use App\Models\SubCategory;
+use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FoodController extends Controller
 {
@@ -27,7 +30,8 @@ class FoodController extends Controller
     public function create(Request $request, Rescue $rescue)
     {
         $foodSubCategories = SubCategory::all();
-        return view('foods.create', ['rescue' => $rescue, 'foodSubCategories' => $foodSubCategories]);
+        $units = Unit::all();
+        return view('foods.create', ['rescue' => $rescue, 'foodSubCategories' => $foodSubCategories, 'units' => $units]);
     }
 
     /**
@@ -35,41 +39,51 @@ class FoodController extends Controller
      */
     public function store(Request $request, Rescue $rescue)
     {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => 'required|max:100',
+            'detail' => 'required|max:255',
+            'amount' => 'required|max:10',
+            'unit' => 'required|max:5',
+            'expired_date' => 'required|max:100',
+            'sub_category' => 'required|max:5',
+        ]);
+
         $photo = $request->file('photo')->store('rescue-documentations');
 
-        $food = new Food();
-        $food->name = $request->name;
-        $food->detail = $request->detail;
-        $food->expired_date = $request->expired_date;
-        $food->amount = $request->amount;
-        $food->unit = $request->unit;
-        $food->photo = $photo;
-        $food->user_id = $request->user_id;
-        $food->category_id = SubCategory::find($request->sub_category)->category_id;
-        $food->sub_category_id = $request->sub_category;
-        $food->save();
+        try {
+            DB::beginTransaction();
+            $food = new Food();
+            $food->name = $request->name;
+            $food->detail = $request->detail;
+            $food->expired_date = $request->expired_date;
+            $food->amount = $request->amount;
+            $food->unit_id = $request->unit;
+            $food->photo = $photo;
+            $food->user_id = $user->id;
+            $food->category_id = SubCategory::find($request->sub_category)->category_id;
+            $food->sub_category_id = $request->sub_category;
+            $food->save();
 
-        $foodRescue = new FoodRescue();
-        $foodRescue->food_id = $food->id;
-        $foodRescue->rescue_id = $rescue->id;
-        $foodRescue->save();
+            $foodRescue = new FoodRescue();
+            $foodRescue->food_id = $food->id;
+            $foodRescue->rescue_id = $rescue->id;
+            $foodRescue->save();
 
-        // save rescue photo logs
-        $rescue = Rescue::where('id', $rescue->id)->first();
-        $rescueUserID = $rescue->user_logs->first()->pivot->id;
-        $userID = auth()->user()->id;
-        $rescuePhoto = new RescuePhoto();
-        $rescuePhoto->photo = $photo;
-        $rescuePhoto->rescue_user_id = $rescueUserID;
-        $rescuePhoto->user_id = $userID;
-        $rescuePhoto->food_id = $food->id;
-        $rescuePhoto->save();
-
-        // save to vaults
-        $foodVault = new FoodVault();
-        $foodVault->food_id = $food->id;
-        $foodVault->vault_id = 1;
-        $foodVault->save();
+            $foodRescueUser = new FoodRescueUser();
+            $foodRescueUser->user_id = $user->id;
+            $foodRescueUser->food_rescue_id = $foodRescue->id;
+            $foodRescueUser->amount = $request->amount;
+            $foodRescueUser->photo = $photo;
+            $foodRescueUser->rescue_status_id = $rescue->rescue_status_id;
+            $foodRescueUser->unit_id = $request->unit;
+            $foodRescueUser->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e);
+        }
 
         return redirect()->route('rescues.show', ["rescue" => $rescue]);
     }
