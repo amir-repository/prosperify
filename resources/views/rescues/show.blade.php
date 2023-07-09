@@ -34,6 +34,10 @@
                         <x-heroicon-o-bookmark class="w-6 h-6" />
                     @elseif($rescue->rescue_status_id === 2)
                         <x-heroicon-o-paper-airplane class="w-6 h-6" />
+                    @elseif($rescue->rescue_status_id === 3)
+                        <x-heroicon-o-cog class="w-6 h-6" />
+                    @elseif($rescue->rescue_status_id === 4)
+                        <x-heroicon-o-truck class="w-6 h-6" />
                     @endif
                 </div>
                 <div>
@@ -46,7 +50,7 @@
                 </div>
             </section>
             <section>
-                @if (!$rescue->rescue_status_id == 2)
+                @if ($rescue->rescue_status_id === 1)
                     <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">
                         @method('put')
                         @csrf
@@ -62,7 +66,7 @@
         <div class="mt-11">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-bold">Makanan</h2>
-                @if (!$rescue->rescue_status_id == 2)
+                @if ($rescue->rescue_status_id === 1)
                     <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}" class="flex items-center gap-1">
                         <x-heroicon-o-plus class="w-5 h-5" />Tambah
                     </a>
@@ -90,7 +94,7 @@
                                     </h3>
                                     <p class="text-slate-500">{{ $food->name }}</p>
                                     <p class="text-xs text-slate-500">
-                                        {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
+                                        Exp. {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
                                 </div>
                             </section>
                         @endforeach

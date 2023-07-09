@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FoodRescueUser;
 use App\Models\Point;
+use App\Models\PointRescueUser;
 use App\Models\Rescue;
 use App\Models\RescueUser;
 use App\Models\User;
@@ -11,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use PhpParser\Node\Stmt\TryCatch;
 
 class RescueController extends Controller
 {
@@ -145,38 +148,69 @@ class RescueController extends Controller
      */
     public function update(Request $request, Rescue $rescue)
     {
-        $rescue->rescue_status_id = $request->status;
-        $rescue->save();
-
-        $rescueUser = new RescueUser();
-        $rescueUser->user_id = auth()->user()->id;
-        $rescueUser->rescue_id = $rescue->id;
-        $rescueUser->rescue_status_id = $request->status;
-        $rescueUser->save();
-
-        if ($rescue->status == Rescue::DIAJUKAN) {
-            // give score to rescue based on food amount
-            $score = $rescue->foods()->get()->map(function ($rescue) {
-                return $rescue->amount;
-            })->sum();
-            $rescue->score = $score;
-            $rescue->status = $request->status;
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            $rescue->rescue_status_id = $request->status;
             $rescue->save();
+
+            // save rescue log
+            $rescueUser = new RescueUser();
+            $rescueUser->user_id = auth()->user()->id;
+            $rescueUser->rescue_id = $rescue->id;
+            $rescueUser->rescue_status_id = $request->status;
+            $rescueUser->save();
+
+            // save food log
+            foreach ($rescue->foods as $food) {
+                $foodRescueID = $food->pivot->id;
+                $foodRescueUser = new FoodRescueUser();
+                $foodRescueUser->user_id = $user->id;
+                $foodRescueUser->food_rescue_id = $foodRescueID;
+                $foodRescueUser->amount = $food->amount;
+                $foodRescueUser->photo =
+                    count($request->file()) === 0
+                    ? $food->photo
+                    : $this->storePhoto($request, $food->id);
+                $foodRescueUser->rescue_status_id = $request->status;
+                $foodRescueUser->unit_id = $food->unit_id;
+                $foodRescueUser->save();
+            }
+
+            if ($rescue->rescue_status_id == Rescue::DIAJUKAN) {
+                // give score to rescue based on food amount
+                $score = $rescue->foods()->get()->map(function ($rescue) {
+                    return $rescue->amount;
+                })->sum();
+                $rescue->score = $score;
+                $rescue->save();
+            }
+
+            // add point to donor when rescue complete
+            if ($rescue->rescue_status_id == Rescue::DISIMPAN) {
+                $donorPoint = Point::where('user_id', $rescue->user_id)->first();
+                $donorPoint->point = $donorPoint->point + 100;
+                $donorPoint->save();
+
+                $pointRescueUser = new PointRescueUser();
+                $pointRescueUser->rescue_user_id = $rescueUser->id;
+                $pointRescueUser->point_id = $donorPoint->id;
+                $pointRescueUser->point = 100;
+                $pointRescueUser->save();
+
+                $rescue->foods()->get()->each(function ($food) {
+                    $food->stored_at = Carbon::now();
+                    $food->in_stock = $food->amount;
+                    $food->save();
+                });
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e);
         }
 
-        // add point to donor and add stored timestamp for food
-        if ($rescue->status === 'selesai') {
-            $donorPoint = Point::where('user_id', $rescue->user_id)->first();
-            $donorPoint->point = $donorPoint->point + 100;
-            $donorPoint->save();
-
-            $rescue->foods()->get()->each(function ($food) {
-                $food->stored_timestamp = Carbon::now();
-                $food->save();
-            });
-        }
-
-        return redirect()->route("rescues.index");
+        return redirect()->route("rescues.show", ['rescue' => $rescue]);
     }
 
     /**
@@ -198,6 +232,12 @@ class RescueController extends Controller
         });
 
         return $filtered;
+    }
+
+    private function storePhoto($request, $foodID)
+    {
+        $photoURL = $request->file("$foodID-photo")->store('rescue-documentations');
+        return $photoURL;
     }
 
     function formatDateTime($dateTimeString)

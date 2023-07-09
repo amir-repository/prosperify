@@ -1,84 +1,138 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main class="p-4">
-        <section>
-            <div class="flex justify-between">
-                <div class="flex gap-2">
-                    <p>📅 {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}</p>
-                    <p>⏰ {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
-                </div>
-                <h2 class="font-bold">{{ $rescue->donor_name }} 😇</h2>
-            </div>
-            <p class="mt-1">📍 {{ $rescue->pickup_address }}</p>
-            <h1 class="capitalize text-2xl font-bold mt-4">{{ $rescue->title }}</h1>
-            <p>{{ $rescue->description }}</p>
 
-            <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">
-                @method('put')
-                @csrf
-                <input type="datetime-local" value="{{ $rescue->rescue_date }}" name="rescue_date" hidden>
-                <div>
-                    <input type="text" name='status'
-                        value="
-                          @if ($rescue->status === 'diajukan') diproses 
-                          @elseif ($rescue->status === 'diproses')diambil 
-                          @elseif($rescue->status === 'diambil')disimpan 
-                          @elseif($rescue->status === 'disimpan')selesai
-                          @elseif($rescue->status === 'selesai') @endif"
-                        hidden>
-                </div>
-                @if ($rescue->status !== 'selesai')
-                    <button type="submit" class="w-full p-2 bg-blue-600 text-white font-bold mt-4">
-                        @if ($rescue->status === 'diajukan')
-                            Proses
-                        @elseif ($rescue->status === 'diproses')
-                            Ambil
-                        @elseif ($rescue->status === 'diambil')
-                            Simpan
-                        @elseif ($rescue->status === 'disimpan')
-                            Selesai
-                        @else
-                            Berhasil Diselamatkan
+    <main class="p-6 text-slate-900">
+        <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
+        <div class="mt-4 text-sm">
+            <div class="flex gap-4">
+                <p class="flex items-center gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}
+                </p>
+                <p class="flex gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}
+                </p>
+            </div>
+            <p class="mt-2 flex gap-1">
+                <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />{{ $rescue->pickup_address }}
+            </p>
+        </div>
+        <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post" enctype="multipart/form-data">
+            @method('put')
+            @csrf
+            <div class="mt-6">
+                <section class="flex items-center gap-2">
+                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                        <x-heroicon-o-user class="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p>{{ $rescue->donor_name }}</p>
+                        <p class="text-xs text-slate-500 capitalize">Donor</p>
+                    </div>
+                </section>
+                <section class="flex items-center gap-2 mt-4">
+                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                        @if ($rescue->rescue_status_id === 1)
+                            <x-heroicon-o-bookmark class="w-6 h-6" />
+                        @elseif($rescue->rescue_status_id === 2)
+                            <x-heroicon-o-paper-airplane class="w-6 h-6" />
+                        @elseif($rescue->rescue_status_id === 3)
+                            <x-heroicon-o-cog class="w-6 h-6" />
+                        @elseif($rescue->rescue_status_id === 4)
+                            <x-heroicon-o-truck class="w-6 h-6" />
+                        @elseif($rescue->rescue_status_id === 5)
+                            <x-heroicon-o-archive-box class="w-6 h-6" />
                         @endif
-                    </button>
-                @endif
-            </form>
-        </section>
+                    </div>
+                    <div>
+                        <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh
+                            {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->name }}
+                        </p>
+                        <p class="text-xs text-slate-500 capitalize">
+                            {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->roles->first()->name }}
+                        </p>
+                    </div>
+                </section>
+                <section>
+                    <input type="text"
+                        value="
+                        @if ($rescue->rescue_status_id == 2) 3
+                    @elseif ($rescue->rescue_status_id == 3) 4
+                    @elseif ($rescue->rescue_status_id == 4) 5 @endif"
+                        name="status" hidden>
+                    <Button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white"
+                        {{ $rescue->rescue_status_id == 5 ? 'hidden' : '' }}>
+                        @if ($rescue->rescue_status_id == 2)
+                            Proses
+                        @elseif ($rescue->rescue_status_id == 3)
+                            Ambil
+                        @elseif ($rescue->rescue_status_id == 4)
+                            Simpan
+                        @endif
+                    </Button>
+                </section>
+            </div>
+            <div class="mt-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold">Makanan</h2>
+                    @if (!$rescue->rescue_status_id == 2)
+                        <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
+                            class="flex items-center gap-1">
+                            <x-heroicon-o-plus class="w-5 h-5" />Tambah
+                        </a>
+                    @endif
+                </div>
+                <div>
+                    @if ($rescue->foods->isEmpty())
+                        <p class="mt-6 font-medium text-center">Belum ada makanan yang ditambahkan</p>
+                        <div class="flex justify-center mt-3">
+                            <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
+                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Tambah
+                                makanan</a>
+                        </div>
+                    @else
+                        <div class="mt-4">
+                            @foreach ($rescue->foods as $food)
+                                <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
+                                    <section class="p-6 border border-slate-200 rounded-md mb-4 ">
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                                    src="{{ asset("storage/$food->photo") }}" alt="">
+                                            </div>
+                                            <div>
+                                                <h3 class="text-2xl font-bold">
+                                                    {{ $food->amount }}.<span
+                                                        class="text-base">{{ $food->unit->name }}</span>
+                                                </h3>
+                                                <p class="text-slate-500">{{ $food->name }}</p>
+                                                <p class="text-xs text-slate-500">Exp.
+                                                    {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
+                                            </div>
 
-        <section class="mt-11">
-            <div class="flex justify-between mb-8">
-                <h1 class="text-xl font-bold">Makanan</h1>
-                @if ($rescue->status === 'direncanakan')
-                    <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
-                        class="p-1 px-2 text-blue-800 bg-blue-100 border-blue-400 border text-sm font-bold">Tambah
-                        Makanan</a>
-                @endif
+                                        </div>
+                                        @if ($rescue->rescue_status_id > 2 && $rescue->rescue_status_id < 5)
+                                            <p class="mt-6 text-sm font-medium">Kondisi saat
+                                                @if ($rescue->rescue_status_id === 3)
+                                                    diambil
+                                                @elseif($rescue->rescue_status_id === 4)
+                                                    disimpan
+                                                @endif
+                                            </p>
+                                            <div class="border mt-2 rounded-md">
+                                                <input class="p-2" type="file" name="{{ $food->id }}-photo"
+                                                    required>
+                                            </div>
+                                        @endif
+                                    </section>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
-            <div>
-                @if (!$rescue->foods)
-                    <p class="text-center mt-10">Ayo tambahkan makanannya 🍎</p>
-                @else
-                    <main class="flex gap-4 flex-wrap justify-center">
-                        @foreach ($rescue->foods as $food)
-                            <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
-                                <div class="w-[132px] border-gray-500 border">
-                                    <img class="w-[132px] h-[132px] object-cover" src="{{ asset("storage/$food->photo") }}"
-                                        alt="">
-                                    <div class="p-2">
-                                        <h2 class="text-xl">{{ $food->name }}</h2>
-                                        <h3 class="font-bold">{{ $food->amount }} {{ $food->unit }}</h3>
-                                        <h3 class="text-sm text-gray-600 capitalize mt-2">🎁 {{ $food->subCategory->name }}
-                                        </h3>
-                                        <h3 class="text-sm text-gray-600">⚠️
-                                            {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</h3>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </main>
-                @endif
-            </div>
-        </section>
+        </form>
     </main>
 @endsection

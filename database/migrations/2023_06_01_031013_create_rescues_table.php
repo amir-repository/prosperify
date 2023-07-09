@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('title');
             $table->string('description');
-            $table->timestamp('rescue_date');
+            $table->dateTime('rescue_date');
             $table->integer('score')->nullable();
             $table->foreignId('rescue_status_id');
             $table->foreignId('user_id');

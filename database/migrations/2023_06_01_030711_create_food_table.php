@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('in_stock')->nullable();
             $table->integer('amount');
             $table->string('photo');
-            $table->timestamp('stored_at')->nullable();
+            $table->dateTime('stored_at')->nullable();
             $table->foreignId('user_id');
             $table->foreignId('category_id');
             $table->foreignId('sub_category_id');

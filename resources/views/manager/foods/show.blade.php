@@ -1,7 +1,49 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main>
+    <main class="p-6 text-slate-900">
+        <div>
+            <div>
+                <img class="h-36 w-full bg-slate-200 rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
+                    alt="">
+            </div>
+            <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+            <div class="flex items-center gap-4 mt-3">
+                <p class="text-sm flex gap-1">
+                    <x-heroicon-o-archive-box class="w-[18px] h-[18px]" />{{ $food->amount }}.{{ $food->unit->name }}
+                </p>
+                <p class="text-sm flex gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
+                    {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+
+                </p>
+            </div>
+        </div>
+        <div class="mt-8">
+            <h2 class="text-lg font-bold mb-3">Riwayat</h2>
+            @foreach ($foodRescueUsers as $foodRescueUser)
+                <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
+                    <div>
+                        <img class="w-[72px] h-[72px] rounded-md object-cover"
+                            src="{{ asset("storage/$foodRescueUser->photo") }}" alt="">
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">
+                            {{ $foodRescueUser->amount }}.<span class="text-base">{{ $foodRescueUser->unit->name }}</span>
+                        </h3>
+                        <p class="text-slate-500">
+                            {{ $foodRescueUser->user->name }}</p>
+                        <p class="text-xs text-slate-500">
+                            <span class="capitalize">{{ $foodRescueUser->rescueStatus->name }}</span>
+                            {{ Carbon\Carbon::parse($foodRescueUser->created_at)->format('d M Y h:i:s') }}
+                        </p>
+                    </div>
+                </section>
+            @endforeach
+
+        </div>
+    </main>
+    {{-- <main>
         <img class="w-full h-[375px] object-cover" src="{{ asset('storage/' . $rescuePhotos->first()->first()->photo) }}"
             alt="">
         <div class="p-4">
@@ -55,5 +97,5 @@
                 @endif
             </form>
         </section>
-    </main>
+    </main> --}}
 @endsection

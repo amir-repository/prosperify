@@ -93,20 +93,14 @@ class FoodController extends Controller
      */
     public function show(Rescue $rescue, Food $food)
     {
-        // get photo timeline for foods
-        $rescueUserIDs = $rescue->user_logs->map(function ($user_log) {
-            return $user_log->pivot->id;
-        });
-
-        $rescuePhotos = collect([]);
-        foreach ($rescueUserIDs as $rescueUserID) {
-            $rescuePhoto = RescuePhoto::where(['rescue_user_id' => $rescueUserID, 'food_id' => $food->id])->get();
-            if (!$rescuePhoto->isEmpty()) {
-                $rescuePhotos->push($rescuePhoto);
-            }
+        $foodRescueID = null;
+        foreach ($food->rescues as $rescue) {
+            $foodRescueID = $rescue->pivot->id;
         }
 
-        return view('manager.foods.show', ["food" => $food, "rescuePhotos" => $rescuePhotos, "rescue" => $rescue]);
+        $foodRescueUsers = FoodRescueUser::where('food_rescue_id', $foodRescueID)->get();
+
+        return view('manager.foods.show', ["food" => $food, "rescue" => $rescue, 'foodRescueUsers' => $foodRescueUsers]);
     }
 
     /**

@@ -40,4 +40,9 @@ class Food extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+
+    public function rescues()
+    {
+        return $this->belongsToMany(Rescue::class)->withPivot('id');
+    }
 }

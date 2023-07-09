@@ -21,6 +21,8 @@
                                 <x-heroicon-o-bookmark class="w-6 h-6" />
                             @elseif($rescue->rescue_status_id === 2)
                                 <x-heroicon-o-paper-airplane class="w-6 h-6" />
+                            @elseif($rescue->rescue_status_id === 3)
+                                <x-heroicon-o-cog class="w-6 h-6" />
                             @endif
                         </div>
                         <div>

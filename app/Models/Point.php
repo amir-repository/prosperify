@@ -15,4 +15,9 @@ class Point extends Model
     {
         return $this->hasOne(User::class);
     }
+
+    public function foodRescueUsers()
+    {
+        return $this->belongsToMany(FoodRescueUser::class)->withPivot('point');
+    }
 }
