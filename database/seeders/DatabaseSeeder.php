@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Recipient;
 use App\Models\RescueStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
                 SubCategorySeeder::class,
                 CitySeeder::class,
                 VaultSeeder::class,
+                RecipientSeeder::class
             ]
         );
 
