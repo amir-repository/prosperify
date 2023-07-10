@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodDonationController;
@@ -46,6 +47,7 @@ Route::resource('rescues.foods', FoodController::class);
 Route::resource('donations', DonationController::class);
 Route::resource('donations.foods', FoodDonationController::class);
 Route::resource('reports', ReportController::class);
+Route::get('/analytics', [AnalyticController::class, 'show']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
