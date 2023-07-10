@@ -15,7 +15,7 @@
         <a href="#">
             <div class="border border-slate-200 rounded-md p-6 mb-4">
                 <h2>Kadaluarsa minggu ini</h2>
-                <p class="font-bold text-[32px] mt-1">{{ $rescuedFoodInStock['kg'] }}.<span class="text-2xl">Kg</span></p>
+                <p class="font-bold text-[32px] mt-1">{{ $expiredThisWeek }}.<span class="text-2xl">Kg</span></p>
             </div>
         </a>
         <a href="#">
