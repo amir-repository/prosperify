@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class AnalyticController extends Controller
 {
-    public function show()
+    public function index()
     {
         // makanan yang stored_at nya tidak null
         $rescuedFoods = Food::all()->whereNotNull('stored_at');
@@ -48,6 +48,10 @@ class AnalyticController extends Controller
             'volunteers' => $volunteers,
             'recipients' => $recipients
         ]);
+    }
+
+    public function show()
+    {
     }
 
     private function rescuedFoodAmount($rescuedFoods, $unit, $column)
