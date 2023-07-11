@@ -19,6 +19,7 @@ class AnalyticController extends Controller
             'kg' => $this->rescuedFoodAmount($rescuedFoods, 1, 'amount'),
             'porsi' => $this->rescuedFoodAmount($rescuedFoods, 2, 'amount')
         ];
+
         $rescuedFoodInStock = [
             'kg' => $this->rescuedFoodAmount($rescuedFoods, 1, 'in_stock'),
             'porsi' => $this->rescuedFoodAmount($rescuedFoods, 2, 'in_stock')
@@ -50,8 +51,18 @@ class AnalyticController extends Controller
         ]);
     }
 
-    public function show()
+    public function show(Request $request, $category)
     {
+        switch ($category) {
+            case 'inventory':
+                $rescuedFoods = Food::all()->whereNotNull('stored_at');
+
+                return view('analytic.show.inventory', ['rescuedFoods' => $rescuedFoods]);
+                break;
+            default:
+                # code...
+                break;
+        }
     }
 
     private function rescuedFoodAmount($rescuedFoods, $unit, $column)
