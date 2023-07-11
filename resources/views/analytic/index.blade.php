@@ -42,6 +42,16 @@
         </div>
         <a href="#">
             <div class="border border-slate-200 rounded-md p-6 mb-4">
+                <h2>Pangan yang berhasil didonasikan</h2>
+                <div class="flex justify-between mt-1">
+                    <p class="font-bold text-[32px]">14.<span class="text-2xl">Kg</span></p>
+                    <p class="font-bold text-[32px]">205.<span class="text-2xl">Porsi</span>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="#">
+            <div class="border border-slate-200 rounded-md p-6 mb-4">
                 <h2>Penerima manfaat</h2>
                 <div class="flex justify-between mt-1">
                     <p class="font-bold text-[32px]">{{ $recipients['familyAmount'] }}.<span

@@ -1,7 +1,7 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main class="px-6">
+    <main class="p-6">
         <h2 class="text-2xl font-bold mb-4">Inventori</h2>
         @foreach ($rescuedFoods as $food)
             <a href="{{ route('foods.show', ['food' => $food]) }}">
