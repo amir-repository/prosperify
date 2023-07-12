@@ -20,7 +20,7 @@
         <div>
             @foreach ($rescues as $rescue)
                 <a href="{{ route('rescues.show', ['rescue' => $rescue]) }}">
-                    <section class="border border-slate-200 p-6 rounded-md text-slate-900">
+                    <section class="border border-slate-200 p-6 rounded-md text-slate-900 mb-4">
                         <h2 class="font-bold text-2xl">{{ $rescue->title }}</h2>
                         <p class="mt-1">Pada {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }} jam
                             {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
