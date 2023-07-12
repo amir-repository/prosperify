@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->hasOne(Point::class);
     }
 
+    public function foods()
+    {
+        return $this->hasMany(Food::class);
+    }
+
     public function foodRescue()
     {
         return $this->belongsToMany(FoodRescue::class);

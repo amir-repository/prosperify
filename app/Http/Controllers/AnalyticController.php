@@ -7,6 +7,7 @@ use App\Models\Recipient;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use PhpParser\Node\Expr\Cast\String_;
 
 class AnalyticController extends Controller
 {
@@ -25,15 +26,10 @@ class AnalyticController extends Controller
             'porsi' => $this->rescuedFoodAmount($rescuedFoods, 2, 'in_stock')
         ];
 
-        $expiredThisWeek = $this->expiredThisWeek($rescuedFoods);
+        $expiredThisWeek = $this->expiredThisWeek($rescuedFoods)->sum('in_stock');
 
-        $donors = User::with('roles')->get()->filter(
-            fn ($user) => $user->roles->where('name', 'donor')->toArray()
-        )->count();
-
-        $volunteers = User::with('roles')->get()->filter(
-            fn ($user) => $user->roles->where('name', 'volunteer')->toArray()
-        )->count();
+        $donors = $this->usersByRole('donor')->count();
+        $volunteers = $this->usersByRole('volunteer')->count();
 
         $recipients = Recipient::where('status', 'diterima');
         $recipients = [
@@ -53,11 +49,33 @@ class AnalyticController extends Controller
 
     public function show(Request $request, $category)
     {
+        $rescuedFoods = Food::all()->whereNotNull('stored_at');
+
         switch ($category) {
             case 'inventory':
-                $rescuedFoods = Food::all()->whereNotNull('stored_at');
-
-                return view('analytic.show.inventory', ['rescuedFoods' => $rescuedFoods]);
+                $rescuedFoods = $rescuedFoods->filter(function ($food) {
+                    return $food->in_stock > 0;
+                });
+                return view('analytic.show.inventory', ['rescuedFoods' => $rescuedFoods, 'header' => 'Inventori']);
+                break;
+            case 'rescued':
+                return view('analytic.show.inventory', ['rescuedFoods' => $rescuedFoods, 'header' => 'Pangan terselamatkan']);
+                break;
+            case 'expiring':
+                $rescuedFoods = $this->expiredThisWeek($rescuedFoods);
+                return view('analytic.show.inventory', ['rescuedFoods' => $rescuedFoods, 'header' => 'Kadaluarsa minggu ini']);
+                break;
+            case 'donors':
+                $users = $this->usersByRole('donor');
+                return view('analytic.show.users', ['users' => $users]);
+                break;
+            case 'volunteers':
+                $users = $this->usersByRole('volunteer');
+                return view('analytic.show.users', ['users' => $users]);
+                break;
+            case 'recipients':
+                $recipients = Recipient::where('status', 'diterima')->get();
+                return view('analytic.show.recipients', ['recipients' => $recipients]);
                 break;
             default:
                 # code...
@@ -74,6 +92,13 @@ class AnalyticController extends Controller
 
     private function expiredThisWeek($rescuedFoods)
     {
-        return $rescuedFoods->whereBetween('expired_date', [Carbon::now(), Carbon::now()->add(7, 'day')])->sum('in_stock');
+        return $rescuedFoods->whereBetween('expired_date', [Carbon::now(), Carbon::now()->add(7, 'day')]);
+    }
+
+    private function usersByRole($role)
+    {
+        return User::with('roles')->get()->filter(
+            fn ($user) => $user->roles->where('name', $role)->toArray()
+        );
     }
 }

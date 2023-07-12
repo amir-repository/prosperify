@@ -3,7 +3,7 @@
 @section('main')
     <main class="p-6">
         <h1 class="text-2xl font-bold mb-4">Analitik Pangan</h1>
-        <a href="#">
+        <a href="{{ route('analytics.show', ['category' => 'rescued']) }}">
             <div class="border border-slate-200 rounded-md p-6 mb-4">
                 <h2>Pangan yang berhasil diselamatkan</h2>
                 <div class="flex justify-between mt-1">
@@ -12,7 +12,7 @@
                 </div>
             </div>
         </a>
-        <a href="#">
+        <a href="{{ route('analytics.show', ['category' => 'expiring']) }}">
             <div class="border border-slate-200 rounded-md p-6 mb-4">
                 <h2>Kadaluarsa minggu ini</h2>
                 <p class="font-bold text-[32px] mt-1">{{ $expiredThisWeek }}.<span class="text-2xl">Kg</span></p>
@@ -30,14 +30,18 @@
         </a>
         <div class="flex gap-4">
             <div class="border border-slate-200 rounded-md p-6 mb-4 flex-1">
-                <h2>Donatur</h2>
-                <p class="font-bold text-[32px] mt-1">{{ $donors }}
-                </p>
+                <a href="{{ route('analytics.show', ['category' => 'donors']) }}">
+                    <h2>Donatur</h2>
+                    <p class="font-bold text-[32px] mt-1">{{ $donors }}
+                    </p>
+                </a>
             </div>
             <div class="border border-slate-200 rounded-md p-6 mb-4 flex-1">
-                <h2>Relawan</h2>
-                <p class="font-bold text-[32px] mt-1">{{ $volunteers }}
-                </p>
+                <a href="{{ route('analytics.show', ['category' => 'volunteers']) }}">
+                    <h2>Relawan</h2>
+                    <p class="font-bold text-[32px] mt-1">{{ $volunteers }}
+                    </p>
+                </a>
             </div>
         </div>
         <a href="#">
@@ -52,14 +56,16 @@
         </a>
         <a href="#">
             <div class="border border-slate-200 rounded-md p-6 mb-4">
-                <h2>Penerima manfaat</h2>
-                <div class="flex justify-between mt-1">
-                    <p class="font-bold text-[32px]">{{ $recipients['familyAmount'] }}.<span
-                            class="text-2xl">Keluarga</span></p>
-                    <p class="font-bold text-[32px]">{{ $recipients['familyMemberAmount'] }}.<span
-                            class="text-2xl">Orang</span>
-                    </p>
-                </div>
+                <a href="{{ route('analytics.show', ['category' => 'recipients']) }}">
+                    <h2>Penerima manfaat</h2>
+                    <div class="flex justify-between mt-1">
+                        <p class="font-bold text-[32px]">{{ $recipients['familyAmount'] }}.<span
+                                class="text-2xl">Keluarga</span></p>
+                        <p class="font-bold text-[32px]">{{ $recipients['familyMemberAmount'] }}.<span
+                                class="text-2xl">Orang</span>
+                        </p>
+                    </div>
+                </a>
             </div>
         </a>
     </main>

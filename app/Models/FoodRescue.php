@@ -17,4 +17,14 @@ class FoodRescue extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function food()
+    {
+        return $this->belongsTo(Food::class);
+    }
+
+    public function rescue()
+    {
+        return $this->belongsTo(Rescue::class);
+    }
 }

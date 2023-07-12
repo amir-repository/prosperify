@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Recipient;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class RecipientController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,15 +34,27 @@ class RecipientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Recipient $recipient)
+    public function show(User $user)
     {
-        return view('manager.recipients.show', ['recipient' => $recipient]);
+        $foods = null;
+        if ($user->hasRole('donor')) {
+            $foods = $user->foods->whereNotNull('stored_at');
+        } else if ($user->hasRole('volunteer')) {
+
+            $foodRescued = collect([]);
+            $foodRescue = $user->foodRescue->unique()->each(function ($rescue) use ($foodRescued) {
+                $foodRescued->push($rescue->food);
+            });
+            $foods = $foodRescued;
+        }
+
+        return view('manager.users.show', ['user' => $user, 'foods' => $foods]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Recipient $recipient)
+    public function edit(User $user)
     {
         //
     }
@@ -50,7 +62,7 @@ class RecipientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Recipient $recipient)
+    public function update(Request $request, User $user)
     {
         //
     }
@@ -58,7 +70,7 @@ class RecipientController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Recipient $recipient)
+    public function destroy(User $user)
     {
         //
     }

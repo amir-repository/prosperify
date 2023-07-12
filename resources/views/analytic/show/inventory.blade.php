@@ -2,7 +2,7 @@
 
 @section('main')
     <main class="p-6">
-        <h2 class="text-2xl font-bold mb-4">Inventori</h2>
+        <h2 class="text-2xl font-bold mb-4">{{ $header }}</h2>
         @foreach ($rescuedFoods as $food)
             <a href="{{ route('foods.show', ['food' => $food]) }}">
 
