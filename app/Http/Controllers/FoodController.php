@@ -12,6 +12,7 @@ use App\Models\SubCategory;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class FoodController extends Controller
@@ -100,15 +101,17 @@ class FoodController extends Controller
 
         $foodRescueUsers = FoodRescueUser::where('food_rescue_id', $foodRescueID)->get();
 
-        return view('manager.foods.show', ["food" => $food, "rescue" => $rescue, 'foodRescueUsers' => $foodRescueUsers]);
+        return view('foods.show', ["food" => $food, "rescue" => $rescue, 'foodRescueUsers' => $foodRescueUsers]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Food $food)
+    public function edit(Rescue $rescue, Food $food)
     {
-        //
+        $foodSubCategories = SubCategory::all();
+        $units = Unit::all();
+        return view('foods.edit', ['rescue' => $rescue, 'food' => $food, 'units' => $units, 'foodSubCategories' => $foodSubCategories]);
     }
 
     /**
@@ -116,32 +119,56 @@ class FoodController extends Controller
      */
     public function update(Request $request, Rescue $rescue, Food $food)
     {
-        // update amount
-        if ($food->amount !== $request->amount) {
-            $food->amount = $request->amount;
-            $food->save();
-        }
+        // update food only
+        // jangan sentuh food rescue gk perlu di ubah
+        // lalu buat log baru di food rescue user
 
-        // save rescue photo logs
-        $rescueUserIDs = $rescue->user_logs;
-        $rescueUserID = null;
+        $user = auth()->user();
 
-        foreach ($rescueUserIDs as $rescueUserID) {
-            if ($rescueUserID->pivot->status === $request->status) {
-                $rescueUserID = $rescueUserID->pivot->id;
-            }
-        }
+        $validated = $request->validate([
+            'name' => 'required|max:100',
+            'detail' => 'required|max:255',
+            'amount' => 'required|max:10',
+            'unit' => 'required|max:5',
+            'expired_date' => 'required|max:100',
+            'sub_category' => 'required|max:5',
+        ]);
 
         $photo = $request->file('photo')->store('rescue-documentations');
 
-        $rescuePhoto = new RescuePhoto();
-        $rescuePhoto->photo = $photo;
-        $rescuePhoto->rescue_user_id = $rescueUserID;
-        $rescuePhoto->user_id = auth()->user()->id;
-        $rescuePhoto->food_id = $food->id;
-        $rescuePhoto->save();
+        try {
+            DB::beginTransaction();
+            $food = Food::find($food->id);
+            $food->name = $request->name;
+            $food->detail = $request->detail;
+            $food->expired_date = $request->expired_date;
+            $food->amount = $request->amount;
+            $food->unit_id = $request->unit;
+            $food->category_id = SubCategory::find($request->sub_category)->category_id;
+            $food->sub_category_id = $request->sub_category;
+            $food->save();
 
-        return redirect()->route('rescues.show', ['rescue' => $rescue]);
+            // we need food rescue ID for food rescue logs
+            $foodRescueID = collect([]);
+            $food->rescues->each(function ($rescue) use ($foodRescueID) {
+                $foodRescueID->push($rescue->pivot->id);
+            });
+
+            $foodRescueUser = new FoodRescueUser();
+            $foodRescueUser->user_id = $user->id;
+            $foodRescueUser->food_rescue_id = $foodRescueID->first();
+            $foodRescueUser->amount = $request->amount;
+            $foodRescueUser->photo = $photo;
+            $foodRescueUser->rescue_status_id = $rescue->rescue_status_id;
+            $foodRescueUser->unit_id = $request->unit;
+            $foodRescueUser->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e);
+        }
+
+        return redirect()->route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]);
     }
 
     /**

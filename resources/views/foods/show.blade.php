@@ -1,4 +1,8 @@
-@extends('layouts.manager.index')
+@extends(
+    auth()->user()->hasRole('donor')
+        ? 'layouts.index'
+        : 'layouts.manager.index'
+)
 
 @section('main')
     <main class="p-6 text-slate-900">
@@ -8,6 +12,7 @@
                     alt="">
             </div>
             <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+            <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
                 <p class="text-sm flex gap-1">
                     <x-heroicon-o-archive-box class="w-[18px] h-[18px]" />{{ $food->amount }}.{{ $food->unit->name }}
@@ -18,6 +23,8 @@
 
                 </p>
             </div>
+            <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
+                class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
         </div>
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">Riwayat</h2>

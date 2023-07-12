@@ -82,35 +82,39 @@
                     @else
                         <div class="mt-4">
                             @foreach ($rescue->foods as $food)
-                                <section class="p-6 border border-slate-200 rounded-md mb-4">
+                                <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
+                                    <section class="p-6 border border-slate-200 rounded-md mb-4">
 
-                                    <div class="flex items-center gap-4">
-                                        <div>
-                                            <img class="w-[72px] h-[72px] rounded-md object-cover"
-                                                src="{{ asset("storage/$food->photo") }}" alt="">
-                                        </div>
-                                        <div>
-                                            <h3 class="text-2xl font-bold">
-                                                {{ $food->amount }}.<span class="text-base">{{ $food->unit->name }}</span>
-                                            </h3>
-                                            <p class="text-slate-500">{{ $food->name }}</p>
-                                            <p class="text-xs text-slate-500">
-                                                Exp. {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
-                                        </div>
-                                    </div>
-
-                                    @if ($rescue->rescue_status_id === 1)
-                                        <div>
-                                            <p class="mt-6 text-sm font-medium">Kondisi saat diajukan
-                                            </p>
-                                            <div class="border mt-2 rounded-md">
-                                                <input class="p-2" type="file" name="{{ $food->id }}-photo"
-                                                    required>
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                                    src="{{ asset("storage/$food->photo") }}" alt="">
+                                            </div>
+                                            <div>
+                                                <h3 class="text-2xl font-bold">
+                                                    {{ $food->amount }}.<span
+                                                        class="text-base">{{ $food->unit->name }}</span>
+                                                </h3>
+                                                <p class="text-slate-500">{{ $food->name }}</p>
+                                                <p class="text-xs text-slate-500">
+                                                    Exp. {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+                                                </p>
                                             </div>
                                         </div>
-                                    @endif
 
-                                </section>
+                                        @if ($rescue->rescue_status_id === 1)
+                                            <div>
+                                                <p class="mt-6 text-sm font-medium">Kondisi saat diajukan
+                                                </p>
+                                                <div class="border mt-2 rounded-md">
+                                                    <input class="p-2" type="file" name="{{ $food->id }}-photo"
+                                                        required>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                    </section>
+                                </a>
                             @endforeach
                         </div>
                     @endif
