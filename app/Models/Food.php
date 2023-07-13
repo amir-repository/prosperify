@@ -28,7 +28,7 @@ class Food extends Model
 
     public function donations()
     {
-        return $this->belongsToMany(Donation::class)->withPivot('id', 'outbound_plan', 'outbound_result', 'food_id');
+        return $this->belongsToMany(Donation::class)->withPivot('id', 'amount_plan', 'amount_result', 'food_id');
     }
 
     public function user()

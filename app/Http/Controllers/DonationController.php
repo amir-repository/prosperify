@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Donation;
 use App\Models\DonationFood;
+use App\Models\DonationFoodUser;
 use App\Models\DonationUser;
 use App\Models\Food;
 use App\Models\Recipient;
@@ -76,8 +77,7 @@ class DonationController extends Controller
      */
     public function show(Donation $donation)
     {
-        $donationFoods = DonationFood::where('donation_id', $donation->id)->get();
-        return view('donations.show', ['donation' => $donation, 'donationFoods' => $donationFoods]);
+        return view('donations.show', ['donation' => $donation]);
     }
 
     /**
@@ -93,30 +93,46 @@ class DonationController extends Controller
      */
     public function update(Request $request, Donation $donation)
     {
-        // ubah donation status
-        $donation->status = $request->status;
-        $donation->save();
+        $user = auth()->user();
+        try {
+            $donation->donation_status_id = $request->status;
+            $donation->save();
 
-        // if status is selesai, ambil jumlah outbound lalu kurangi dengan yang ada di utama
-        if ($donation->status === 'selesai') {
+            $donationUser = new DonationUser();
+            $donationUser->donation_id = $donation->id;
+            $donationUser->user_id = $user->id;
+            $donationUser->donation_status_id = $donation->donation_status_id;
+            $donationUser->save();
+
             foreach ($donation->foods as $food) {
-                $foodID = $food->pivot->food_id;
+                $donationFoodUser = new DonationFoodUser();
+                $donationFoodUser->user_id = $user->id;
+                $donationFoodUser->donation_food_id = $food->pivot->id;
+                $donationFoodUser->amount = $food->pivot->amount_plan;
+                $donationFoodUser->photo =
+                    count($request->file()) === 0
+                    ? $food->photo
+                    : $this->storePhoto($request, $food->id);
+                $donationFoodUser->donation_status_id = $donation->donation_status_id;
+                $donationFoodUser->unit_id = $food->unit_id;
+                $donationFoodUser->save();
 
-                $selectedFood = Food::find($foodID);
-                $foodOutbound = $food->pivot->outbound_result;
-                $foodAmount = $selectedFood->amount;
-                $amount = $foodAmount - $foodOutbound;
-                $selectedFood->amount = $amount;
-                $selectedFood->save();
+                if ($donationFoodUser->donation_status_id == Donation::DISERAHKAN) {
+                    $donationFood = DonationFood::find($food->pivot->id);
+                    $donationFood->amount_result = $donationFoodUser->amount;
+                    $donationFood->save();
+                }
             }
-        }
 
-        // add log ke donation food
-        $donationUser = new DonationUser();
-        $donationUser->user_id = auth()->user()->id;
-        $donationUser->donation_id = $donation->id;
-        $donationUser->status = $request->status;
-        $donationUser->save();
+            // if($donation->donation_status_id === Donation::DISERAHKAN) {
+            //     // update semua food dalam donation ini di tabel donation_food, value amount result jadi value terakhir dari food_rescue_user log
+            // }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e);
+        }
 
         return redirect()->route('donations.show', ['donation' => $donation]);
     }
@@ -151,5 +167,11 @@ class DonationController extends Controller
         $minute = $time[1];
 
         return Carbon::create($year, $month, $day, $hour, $minute, 0);
+    }
+
+    private function storePhoto($request, $foodID)
+    {
+        $photoURL = $request->file("$foodID-photo")->store('donation-documentations');
+        return $photoURL;
     }
 }

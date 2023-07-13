@@ -1,62 +1,51 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main>
-        <img class="w-full h-[375px] object-cover" src="{{ asset('storage/' . $food->photo) }}" alt="">
-        <div class="p-4">
-            <div class="flex justify-between">
-                <h2 class="capitalize text-2xl font-bold">
-                    {{ $food->donations->first()->pivot->outbound_plan }}
-                    {{ $food->unit }}</h2>
-                <p>⚠️ {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}</p>
+    <main class="p-6 text-slate-900">
+        <div>
+            <div>
+                <img class="h-36 w-full bg-slate-200 rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
+                    alt="">
             </div>
-            <h3 class="mt-1 capitalize"><span class="text-lg">{{ $food->name }}</span> <span
-                    class=" ml-1 text-xs py-[1px] px-2 bg-blue-50 text-blue-600 border border-blue-400">{{ $food->subCategory->name }}</span>
-            </h3>
-            <p class="mt-2">
-                📣 {{ $food->detail }}</p>
-            😇 Donasi pangan dari {{ $food->user->name }}</p>
+            <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+            <p>{{ $food->detail }}</p>
+            <div class="flex items-center gap-4 mt-3">
+                <p class="text-sm flex gap-1">
+                    <x-heroicon-o-archive-box class="w-[18px] h-[18px]" />
+                    {{ $donationFoodUsers->last()->amount }}.{{ $donationFoodUsers->last()->unit->name }}
+                </p>
+                <p class="text-sm flex gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
+                    {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+
+                </p>
+            </div>
+            <a href="{{ route('donations.foods.edit', ['donation' => $donation, 'food' => $food]) }}"
+                class="block font-medium py-2 w-full text-center bg-slate-900 rounded-md text-white mt-4 text-sm">Ubah</a>
         </div>
-        <section class="p-4">
-            <h2 class="text-lg font-bold">📸 Foto Dokumentasi</h2>
-            @foreach ($donationPhotos as $donationPhoto)
-                <div class="mt-4">
-                    <label class="mb-2 text-sm">Kondisi
-                        saat
-                        {{ $donationPhoto->first()->donationUser->status }}</label>
-                    <img class="w-[375px] h-[175px] object-cover"
-                        src="{{ asset('storage/' . $donationPhoto->first()->photo) }}" alt="" />
-                </div>
-            @endforeach
-        </section>
-
-        <section class="p-4">
-            <form action="{{ route('donations.foods.update', ['donation' => $donation, 'food' => $food]) }}" method="post"
-                enctype="multipart/form-data">
-
-                @method('put')
-                @csrf
-
-                @if ($donation->status !== 'direncanakan' && $donation->status !== 'selesai')
+        <div class="mt-8">
+            <h2 class="text-lg font-bold mb-3">Riwayat</h2>
+            @foreach ($donationFoodUsers as $donationFoodUser)
+                <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Kondisi
-                            saat {{ $donation->status }}</label>
-                        <input
-                            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                            id="file_input" type="file" name="photo">
+                        <img class="w-[72px] h-[72px] rounded-md object-cover"
+                            src="{{ asset("storage/$donationFoodUser->photo") }}" alt="">
                     </div>
-                    <input type="text" name="status" value="{{ $donation->status }}" hidden>
-                    <div class="mt-4">
-                        <label for="outbound_amount">Jumlah makanan saat {{ $donation->status }}</label>
-                        <div>
-                            <input type="number" name="outbound_amount" id="outbound_amount"
-                                value="{{ $food->donations->first()->pivot->outbound_plan }}">
-                            <span class="capitalize font-bold">{{ $food->unit }}</span>
-                        </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">
+                            {{ $donationFoodUser->amount }}.<span
+                                class="text-base">{{ $donationFoodUser->unit->name }}</span>
+                        </h3>
+                        <p class="text-slate-500">
+                            {{ $donationFoodUser->user->name }}</p>
+                        <p class="text-xs text-slate-500">
+                            <span class="capitalize">{{ $donationFoodUser->donationStatus->name }}</span>
+                            {{ Carbon\Carbon::parse($donationFoodUser->created_at)->format('d M Y h:i:s') }}
+                        </p>
                     </div>
-                    <button type="submit" class="w-full p-2 bg-blue-600 text-white font-bold mt-4">Simpan</button>
-                @endif
-            </form>
-        </section>
+                </section>
+            @endforeach
+
+        </div>
     </main>
 @endsection

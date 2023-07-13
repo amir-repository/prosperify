@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('donation_food_id');
-            $table->integer('amount_plan');
-            $table->integer('amount_result')->nullable();
+            $table->integer('amount');
             $table->string('photo');
+            $table->foreignId('unit_id');
             $table->foreignId('donation_status_id');
             $table->timestamps();
         });

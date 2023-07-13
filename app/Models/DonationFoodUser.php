@@ -11,10 +11,25 @@ class DonationFoodUser extends Model
 
     protected $table = "donation_food_user";
 
-    protected $fillable = ['user_id', 'donation_food_id', 'amount_plan', 'amount_result', 'photo', 'donation_status_id'];
+    protected $fillable = ['user_id', 'donation_food_id', 'amount', 'photo', 'donation_status_id', 'unit_id'];
 
     public function donationStatus()
     {
         return $this->belongsTo(DonationStatus::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function donationFood()
+    {
+        return $this->belongsTo(DonationFood::class);
     }
 }

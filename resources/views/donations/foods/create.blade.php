@@ -1,11 +1,42 @@
 @extends('layouts.manager.index')
 
 @section('main')
+    <main class="px-6">
+        <h1 class="text-lg font-bold">Tambah makanan</h1>
+        <form action="{{ route('donations.foods.store', ['donation' => $donation]) }}" method="post"
+            enctype="multipart/form-data">
+            @csrf
+            <section class="mt-4">
+                <div class="mb-4">
+                    <h1></h1>
+                    <label for="unit" class="text-sm font-medium block mb-[6px]">Kelompok</label>
+                    <select name="food_id" id="foodID" class="border border-slate-200 rounded-md w-full" required>
+                        @foreach ($foods as $food)
+                            <option value="{{ $food->id }}">{{ $food->name }},
+                                {{ $food->in_stock }}
+                                {{ $food->unit->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="detail" class="text-sm font-medium block mb-[6px]">Kuantitas</label>
+                    <input id="amount" type="text" class="border border-slate-200 rounded-md w-full" value=""
+                        placeholder="2" name="amount_plan" required>
+                </div>
+                <Button class="mt-8 py-2 w-full bg-slate-900 text-white rounded-md text-sm font-medium">Tambahkan</Button>
+            </section>
+        </form>
+    </main>
+@endsection
+
+@section('main')
     <main>
         <section class="flex justify-center items-center my-6">
             <div
                 class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-                <form class="space-y-6" method="POST" action="{{ route('donations.foods.store', ['donation' => $donation]) }}">
+                <form class="space-y-6" method="POST"
+                    action="{{ route('donations.foods.store', ['donation' => $donation]) }}">
                     @csrf
                     <h5 class="text-xl font-medium text-gray-900 dark:text-white">Tambah Makanan</h5>
                     <div>

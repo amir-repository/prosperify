@@ -40,7 +40,7 @@
                             <x-heroicon-o-cog class="w-6 h-6" />
                         @elseif($donation->donation_status_id === 3)
                             <x-heroicon-o-truck class="w-6 h-6" />
-                        @elseif($rescue->rescue_status_id === 3)
+                        @elseif($donation->donation_status_id === 4)
                             <x-heroicon-o-gift class="w-6 h-6" />
                         @endif
                     </div>
@@ -54,10 +54,25 @@
                     </div>
                 </section>
                 <section>
-                    <input type="text" value="2" name="status" hidden>
-                    @if (!$donation->foods->isEmpty() && $donation->rescue_status_id === 1)
-                        <Button
-                            class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">Ajukan</Button>
+                    <input type="text"
+                        value="
+                        @if ($donation->donation_status_id === 1) 2
+                        @elseif ($donation->donation_status_id === 2)
+                        3
+                        @elseif ($donation->donation_status_id === 3)
+                        4 @endif
+                        "
+                        name="status" hidden>
+                    @if (!$donation->foods->isEmpty() && in_array($donation->donation_status_id, [1, 2, 3]))
+                        <Button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
+                            @if ($donation->donation_status_id === 1)
+                                Laksanakan
+                            @elseif ($donation->donation_status_id === 2)
+                                Antarkan
+                            @elseif ($donation->donation_status_id === 3)
+                                serahkan
+                            @endif
+                        </Button>
                     @endif
                 </section>
             </div>
@@ -92,7 +107,7 @@
                                             </div>
                                             <div>
                                                 <h3 class="text-2xl font-bold">
-                                                    {{ $food->amount }}.<span
+                                                    {{ $food->donations->filter(fn($d) => $d->id === $donation->id)->first()->pivot->amount_plan }}.<span
                                                         class="text-base">{{ $food->unit->name }}</span>
                                                 </h3>
                                                 <p class="text-slate-500">{{ $food->name }}</p>
@@ -101,18 +116,23 @@
                                                 </p>
                                             </div>
                                         </div>
-
-                                        @if ($donation->donation_status_id === 1)
+                                        @if ($donation->donation_status_id === 1 || $donation->donation_status_id === 2 || $donation->donation_status_id === 3)
                                             <div>
-                                                <p class="mt-6 text-sm font-medium">Kondisi saat berlangsung
+                                                <p class="mt-6 text-sm font-medium">Kondisi saat
+                                                    @if ($donation->donation_status_id === 1)
+                                                        dilaksanakan
+                                                    @elseif ($donation->donation_status_id === 2)
+                                                        diantarkan
+                                                    @elseif ($donation->donation_status_id === 3)
+                                                        diserahkan
+                                                    @endif
                                                 </p>
                                                 <div class="border mt-2 rounded-md">
-                                                    <input class="p-2" type="file" name="{{ $food->id }}-photo"
-                                                        required>
+                                                    <input class="p-2 w-full" type="file"
+                                                        name="{{ $food->id }}-photo" required>
                                                 </div>
                                             </div>
                                         @endif
-
                                     </section>
                                 </a>
                             @endforeach
