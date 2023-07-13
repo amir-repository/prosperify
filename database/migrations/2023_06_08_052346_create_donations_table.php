@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('description');
-            $table->enum('status', ['direncanakan', 'berlangsung', 'diserahkan', 'selesai']);
-            $table->timestamp('donation_date');
+            $table->dateTime('donation_date');
+            $table->foreignId('donation_status_id');
             $table->foreignId('recipient_id');
             $table->timestamps();
         });

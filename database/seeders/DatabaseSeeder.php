@@ -36,7 +36,8 @@ class DatabaseSeeder extends Seeder
                 SubCategorySeeder::class,
                 CitySeeder::class,
                 VaultSeeder::class,
-                RecipientSeeder::class
+                RecipientSeeder::class,
+                DonationStatusSeeder::class
             ]
         );
 

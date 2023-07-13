@@ -11,5 +11,20 @@ class DonationUser extends Model
 
     protected $table = 'donation_user';
 
-    protected $fillable = ['donation_id', 'user_id', 'status'];
+    protected $fillable = ['donation_id', 'user_id', 'donation_status_id'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function donationStatus()
+    {
+        return $this->belongsTo(DonationStatus::class);
+    }
+
+    public function donation()
+    {
+        return $this->belongsTo(Donation::class);
+    }
 }

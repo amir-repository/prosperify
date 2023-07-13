@@ -9,7 +9,7 @@ class DonationFood extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['outbound_plan', 'outbound_plan_date', 'outbound_result', 'outbound_result_date', 'donation_id', 'food_id', 'vault_id'];
+    protected $fillable = ['amount_plan', 'outbound_result', 'donation_id', 'food_id'];
 
     public function food()
     {

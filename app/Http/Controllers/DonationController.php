@@ -18,20 +18,13 @@ class DonationController extends Controller
      */
     public function index(Request $request)
     {
-        $manager = Gate::allows('is-admin') || Gate::allows('is-volunteer');
-        if (!$manager) {
-            abort(403);
-        }
-
-        $donationStatus = ['direncanakan', 'berlangsung', 'diserahkan', 'selesai'];
         $status = $request->query('status');
-        $donations = null;
-
-        if (in_array($status, $donationStatus)) {
-            $donations = Donation::where('status', $status)->get();
-        } else {
+        $donations = (in_array($status, [Donation::DIRENCANAKAN, Donation::BERLANGSUNG, Donation::DISERAHKAN]))
+            ?
+            $donations = Donation::where('status', $status)->get()
+            :
             $donations = Donation::all();
-        }
+
 
         return view('donations.index', ['donations' => $donations]);
     }
@@ -41,15 +34,9 @@ class DonationController extends Controller
      */
     public function create()
     {
-        $admin = Gate::allows('is-admin');
-
-        if ($admin) {
-            $user = auth()->user();
-            $recipients = Recipient::where('status', 'diterima')->get();
-            return view('donations.create', ['user' => $user, 'recipients' => $recipients]);
-        }
-
-        return redirect()->route('donations.index');
+        $user = auth()->user();
+        $recipients = Recipient::where('status', 'diterima')->get();
+        return view('donations.create', ['user' => $user, 'recipients' => $recipients]);
     }
 
     /**
@@ -57,22 +44,27 @@ class DonationController extends Controller
      */
     public function store(Request $request)
     {
+        try {
+            // save donation
+            $donation = new Donation();
+            $donation->title = $request->title;
+            $donation->description = $request->description;
+            $donation->donation_date = $this->formatDateTime($request->donation_date);
+            $donation->recipient_id = $request->recipient_id;
+            $donation->donation_status_id = Donation::DIRENCANAKAN;
+            $donation->save();
 
-        // save donation
-        $donation = new Donation();
-        $donation->title = $request->title;
-        $donation->description = $request->description;
-        $donation->donation_date = $this->formatDateAndHour($request->donation_date, 0);
-        $donation->recipient_id = $request->recipientID;
-        $donation->status = 'direncanakan';
-        $donation->save();
+            // save who's making the donation
+            $donationUser = new DonationUser();
+            $donationUser->user_id = auth()->user()->id;
+            $donationUser->donation_id = $donation->id;
+            $donationUser->donation_status_id = $donation->donation_status_id;
+            $donationUser->save();
+        } catch (\Exception $e) {
+            throw new \Exception($e);
+        }
 
-        // save donation logs
-        $donationLog = new DonationUser();
-        $donationLog->user_id = auth()->user()->id;
-        $donationLog->donation_id = $donation->id;
-        $donationLog->status = $donation->status;
-        $donationLog->save();
+        return redirect()->route('donations.index');
     }
 
     /**
@@ -141,5 +133,19 @@ class DonationController extends Controller
         $day = $rescue_date[2];
         $timestamp = Carbon::create($year, $month, $day, $hour, 0, 0, 'UTC');
         return $timestamp;
+    }
+
+    function formatDateTime($dateTimeString)
+    {
+        $dateTime = explode('T', $dateTimeString);
+        $date = explode('-', $dateTime[0]);
+        $time = explode(':', $dateTime[1]);
+        $year = $date[0];
+        $month = $date[1];
+        $day = $date[2];
+        $hour = $time[0];
+        $minute = $time[1];
+
+        return Carbon::create($year, $month, $day, $hour, $minute, 0);
     }
 }

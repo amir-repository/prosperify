@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('donation_id');
             $table->foreignId('user_id');
-            $table->enum('status', ['direncanakan', 'berlangsung', 'diserahkan', 'selesai']);
+            $table->foreignId('donation_status_id');
             $table->timestamps();
         });
     }
