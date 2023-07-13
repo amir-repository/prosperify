@@ -114,6 +114,17 @@ class FoodDonationController extends Controller
         try {
             DB::beginTransaction();
             $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
+
+            if ((int)$request->amount > $donationFood->amount_plan) {
+                $diff = (int)$request->amount - $donationFood->amount_plan;
+                $food->in_stock = $food->in_stock - $diff;
+                $food->save();
+            } else if ((int)$request->amount < $donationFood->amount_plan) {
+                $excess = $donationFood->amount_plan - (int)$request->amount;
+                $food->in_stock = $food->in_stock + $excess;
+                $food->save();
+            }
+
             $donationFood->amount_plan = $request->amount;
             $donationFood->save();
 
