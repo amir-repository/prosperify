@@ -18,7 +18,11 @@ class DonationStatusSeeder extends Seeder
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'berlangsung',
+            'name' => 'dilaksanakan',
+        ]);
+
+        DB::table('donation_statuses')->insert([
+            'name' => 'diantar',
         ]);
 
         DB::table('donation_statuses')->insert([

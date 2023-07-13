@@ -9,6 +9,7 @@ use App\Models\Food;
 use App\Models\Recipient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class DonationController extends Controller
@@ -19,7 +20,7 @@ class DonationController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
-        $donations = (in_array($status, [Donation::DIRENCANAKAN, Donation::BERLANGSUNG, Donation::DISERAHKAN]))
+        $donations = (in_array($status, [Donation::DIRENCANAKAN, Donation::DILAKSANAKAN, Donation::DIANTAR, Donation::DISERAHKAN]))
             ?
             $donations = Donation::where('status', $status)->get()
             :
@@ -45,6 +46,7 @@ class DonationController extends Controller
     public function store(Request $request)
     {
         try {
+            DB::beginTransaction();
             // save donation
             $donation = new Donation();
             $donation->title = $request->title;
@@ -60,7 +62,9 @@ class DonationController extends Controller
             $donationUser->donation_id = $donation->id;
             $donationUser->donation_status_id = $donation->donation_status_id;
             $donationUser->save();
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new \Exception($e);
         }
 

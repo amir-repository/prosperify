@@ -1,91 +1,125 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main class="p-4">
-        <section>
-            <div class="flex justify-between">
-                <div class="flex gap-2">
-                    <p>📅 {{ Carbon\Carbon::parse($donation->donation_date)->format('d M Y') }}</p>
-                </div>
-                <h2 class="font-bold">{{ $donation->recipient->name }} 😇</h2>
+    <main class="p-6 text-slate-900">
+        <h1 class="text-2xl font-bold">{{ $donation->title }}</h1>
+        <div class="mt-4 text-sm">
+            <div class="flex gap-4">
+                <p class="flex items-center gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($donation->donation_date)->format('d M Y') }}
+                </p>
+                <p class="flex gap-1">
+                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                    {{ Carbon\Carbon::parse($donation->donation_date)->format('H:i') }}
+                </p>
             </div>
-            <p class="mt-1">📍 {{ $donation->recipient->address }}</p>
-            <h1 class="capitalize text-2xl font-bold mt-4">{{ $donation->title }}</h1>
-            <p>{{ $donation->description }}</p>
-            <form action="{{ route('donations.update', ['donation' => $donation]) }}" method="post">
-                @method('put')
-                @csrf
-                <input type="text" name="status" id="status"
-                    value="
-            @if ($donation->status === 'direncanakan') berlangsung
-            @elseif ($donation->status === 'berlangsung') diserahkan
-            @else
-                selesai @endif
-            "
-                    hidden>
-
-                @if (!$donationFoods->isEmpty())
-                    <button type="submit" class="w-full p-2 bg-blue-600 text-white font-bold mt-4"
-                        @disabled($donation->status === 'selesai')>
-
-                        @if ($donation->status === 'direncanakan')
-                            Laksanakan
-                        @elseif ($donation->status === 'berlangsung')
-                            Lanjut serahkan
-                        @else
-                            Selesai
+            <p class="mt-2 flex gap-1">
+                <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />{{ $donation->recipient->address }}
+            </p>
+        </div>
+        <form action="{{ route('donations.update', ['donation' => $donation]) }}" method="post"
+            enctype="multipart/form-data">
+            @method('put')
+            @csrf
+            <div class="mt-6">
+                <section class="flex items-center gap-2">
+                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                        <x-heroicon-o-user class="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p>{{ $donation->recipient->name }}</p>
+                        <p class="text-xs text-slate-500 capitalize">Penerima manfaat</p>
+                    </div>
+                </section>
+                <section class="flex items-center gap-2 mt-4">
+                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                        @if ($donation->donation_status_id === 1)
+                            <x-heroicon-o-bookmark class="w-6 h-6" />
+                        @elseif($donation->donation_status_id === 2)
+                            <x-heroicon-o-cog class="w-6 h-6" />
+                        @elseif($donation->donation_status_id === 3)
+                            <x-heroicon-o-truck class="w-6 h-6" />
+                        @elseif($rescue->rescue_status_id === 3)
+                            <x-heroicon-o-gift class="w-6 h-6" />
                         @endif
-
-                    </button>
-                @endif
-
-            </form>
-        </section>
-        <section class="mt-11">
-            <div class="flex justify-between mb-8">
-                <h1 class="text-xl font-bold">Makanan</h1>
-                @if ($donation->status === 'direncanakan')
-                    <a href="{{ route('donations.foods.create', ['donation' => $donation]) }}"
-                        class="p-1 px-2 text-blue-800 bg-blue-100 border-blue-400 border text-sm font-bold">Tambah
-                        Makanan</a>
-                @endif
+                    </div>
+                    <div>
+                        <p><span class="capitalize">{{ $donation->donationStatus->name }}</span> oleh
+                            {{ $donation->donationUsers->filter(fn($d) => $d->donation_status_id === $donation->donation_status_id)->first()->user->name }}
+                        </p>
+                        <p class="text-xs text-slate-500 capitalize">
+                            {{ $donation->donationUsers->filter(fn($d) => $d->donation_status_id === $donation->donation_status_id)->first()->user->roles->first()->name }}
+                        </p>
+                    </div>
+                </section>
+                <section>
+                    <input type="text" value="2" name="status" hidden>
+                    @if (!$donation->foods->isEmpty() && $donation->rescue_status_id === 1)
+                        <Button
+                            class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">Ajukan</Button>
+                    @endif
+                </section>
             </div>
-        </section>
-        <section>
-            <main class="flex gap-4 flex-wrap justify-center">
-                @if ($donationFoods->isEmpty())
-                    <p>Tambahkan makanan yang ingin di donasikan 🍎</p>
-                @else
-                    @foreach ($donationFoods as $donationFood)
-                        <a
-                            href="{{ route('donations.foods.show', ['donation' => $donation, 'food' => $donationFood->food->id]) }}">
-                            <div class="cursor-pointer w-[132px] border-gray-500 border">
-                                <img class="w-[132px] h-[132px] object-cover"
-                                    src="{{ asset('storage/' . $donationFood->food->photo) }}" alt="">
-                                <div class="p-2">
-                                    <h2 class="text-xl">{{ $donationFood->food->name }}</h2>
-                                    <h3 class="font-bold">
-                                        @if ($donationFood->outbound_result === null)
-                                            {{ $donationFood->outbound_plan }}
-                                        @else
-                                            {{ $donationFood->outbound_result }}
-                                        @endif
-                                        {{ $donationFood->food->unit }}
-                                    </h3>
-                                    <h3 class="text-sm text-gray-600 capitalize mt-2">🎁
-                                        {{ $donationFood->food->subCategory->name }}
-                                    </h3>
-                                    <h3 class="text-sm text-gray-600">⚠️
-                                        {{ Carbon\Carbon::parse($donationFood->food->expired_date)->format('d M Y') }}</h3>
-                                </div>
-                            </div>
+            <div class="mt-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold">Makanan</h2>
+                    @if ($donation->donation_status_id === 1)
+                        <a href="{{ route('donations.foods.create', ['donation' => $donation]) }}"
+                            class="flex items-center gap-1">
+                            <x-heroicon-o-plus class="w-5 h-5" />Tambah
                         </a>
-                    @endforeach
-                @endif
+                    @endif
+                </div>
+                <div>
+                    @if ($donation->foods->isEmpty())
+                        <p class="mt-6 font-medium text-center">Belum ada makanan yang ditambahkan</p>
+                        <div class="flex justify-center mt-3">
+                            <a href="{{ route('donations.foods.create', ['donation' => $donation]) }}"
+                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Tambah
+                                makanan</a>
+                        </div>
+                    @else
+                        <div class="mt-4">
+                            @foreach ($donation->foods as $food)
+                                <a href="{{ route('donations.foods.show', ['donation' => $donation, 'food' => $food]) }}">
+                                    <section class="p-6 border border-slate-200 rounded-md mb-4">
 
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                                    src="{{ asset("storage/$food->photo") }}" alt="">
+                                            </div>
+                                            <div>
+                                                <h3 class="text-2xl font-bold">
+                                                    {{ $food->amount }}.<span
+                                                        class="text-base">{{ $food->unit->name }}</span>
+                                                </h3>
+                                                <p class="text-slate-500">{{ $food->name }}</p>
+                                                <p class="text-xs text-slate-500">
+                                                    Exp. {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+                                                </p>
+                                            </div>
+                                        </div>
 
-            </main>
+                                        @if ($donation->donation_status_id === 1)
+                                            <div>
+                                                <p class="mt-6 text-sm font-medium">Kondisi saat berlangsung
+                                                </p>
+                                                <div class="border mt-2 rounded-md">
+                                                    <input class="p-2" type="file" name="{{ $food->id }}-photo"
+                                                        required>
+                                                </div>
+                                            </div>
+                                        @endif
 
-        </section>
+                                    </section>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </form>
     </main>
 @endsection

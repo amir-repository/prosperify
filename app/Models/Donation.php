@@ -12,8 +12,9 @@ class Donation extends Model
     protected $fillable = ['title', 'description', 'donation_status_id', 'donation_date', 'recipient_id'];
 
     public const DIRENCANAKAN = 1;
-    public const BERLANGSUNG = 2;
-    public const DISERAHKAN = 3;
+    public const DILAKSANAKAN = 2;
+    public const DIANTAR = 3;
+    public const DISERAHKAN = 4;
 
     public function recipient()
     {
@@ -22,7 +23,7 @@ class Donation extends Model
 
     public function foods()
     {
-        return $this->belongsToMany(Food::class)->withPivot('id', 'outbound_plan', 'outbound_result', 'food_id');
+        return $this->belongsToMany(Food::class)->withPivot('id', 'amount_plan', 'amount_result', 'food_id', 'donation_id');
     }
 
     public function users()

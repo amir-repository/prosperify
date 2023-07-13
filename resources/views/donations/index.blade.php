@@ -20,6 +20,8 @@
                             @if ($donation->donation_status_id === 1)
                                 <x-heroicon-o-bookmark class="w-6 h-6" />
                             @elseif($donation->donation_status_id === 2)
+                                <x-heroicon-o-cog class="w-6 h-6" />
+                            @elseif($donation->donation_status_id === 3)
                                 <x-heroicon-o-truck class="w-6 h-6" />
                             @elseif($rescue->rescue_status_id === 3)
                                 <x-heroicon-o-gift class="w-6 h-6" />
