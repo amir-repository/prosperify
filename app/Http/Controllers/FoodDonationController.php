@@ -66,14 +66,9 @@ class FoodDonationController extends Controller
             $donationFood->save();
 
             $food = Food::find($request->food_id);
-            if ($ifFoodExist) {
-                $food->in_stock = $food->in_stock - (int)$request->amount_plan;
-            } else {
-                $food->in_stock = $food->in_stock - $donationFood->amount_plan;
-            }
+            $food->in_stock = $food->in_stock - (int)$request->amount_plan;
             $food->save();
 
-            // simpan siapa yang melakukan perubahan
             $donationFoodUser = new DonationFoodUser();
             $donationFoodUser->user_id = auth()->user()->id;
             $donationFoodUser->donation_food_id = $donationFood->id;
