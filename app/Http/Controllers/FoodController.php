@@ -174,8 +174,21 @@ class FoodController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Food $food)
+    public function destroy(Rescue $rescue, Food $food)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $food->delete();
+
+            $foodRescue = FoodRescue::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->first();
+            $foodRescue->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return redirect()->route('rescues.show', ['rescue' => $rescue]);
     }
 }
