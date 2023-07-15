@@ -7,7 +7,17 @@
                 <img class="h-36 w-full bg-slate-200 rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
                     alt="">
             </div>
-            <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+            <div class="flex items-end justify-between">
+                <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+                <form action="{{ route('donations.foods.destroy', ['donation' => $donation, 'food' => $food]) }}"
+                    method="post">
+                    @csrf
+                    @method('delete')
+                    <button class="w-8 h-8 flex items-center justify-center">
+                        <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                    </button>
+                </form>
+            </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
                 <p class="text-sm flex gap-1">
@@ -20,14 +30,6 @@
                 </p>
             </div>
             <div class="mt-4 flex gap-4">
-                <form
-                    class="block font-medium py-2 w-full text-center rounded-md text-red-700 text-sm border border-red-600 cursor-pointer"
-                    action="{{ route('donations.foods.destroy', ['donation' => $donation, 'food' => $food]) }}"
-                    method="post">
-                    @csrf
-                    @method('delete')
-                    <button>Hapus</button>
-                </form>
                 <a href="{{ route('donations.foods.edit', ['donation' => $donation, 'food' => $food]) }}"
                     class="block font-medium py-2 w-full text-center bg-slate-900 rounded-md text-white  text-sm">Ubah</a>
             </div>
