@@ -2,7 +2,16 @@
 
 @section('main')
     <main class="p-6 text-slate-900">
-        <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
+            <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
+                @csrf
+                @method('delete')
+                <button class="w-8 h-8 flex items-center justify-center">
+                    <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                </button>
+            </form>
+        </div>
         <div class="mt-4 text-sm">
             <div class="flex gap-4">
                 <p class="flex items-center gap-1">

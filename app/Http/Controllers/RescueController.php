@@ -218,7 +218,16 @@ class RescueController extends Controller
      */
     public function destroy(Rescue $rescue)
     {
-        //
+        $rescue->foods->each(function ($food) {
+            $foodRescue = $food->pivot;
+            $foodRescue->deleted_at = Carbon::now();
+            $foodRescue->save();
+
+            $food->delete();
+        });
+        $rescue->delete();
+
+        return redirect()->route('rescues.index');
     }
 
     private function filterRescueByStatus($rescues, $rescueStatusID)
