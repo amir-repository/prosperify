@@ -31,6 +31,26 @@ class RescueController extends Controller
             $rescues = User::find($userID)->rescues;
             $filtered = $this->filterRescueByStatus($rescues, Rescue::DIRENCANAKAN);
 
+            if ($request->query('q')) {
+                $filtered = $filtered->filter(function ($f) use ($request) {
+                    return str_contains($f->title, $request->query('q'));
+                });
+            }
+
+            // sort rescues
+            $urgent = request()->query('urgent');
+            $highAmount = request()->query('high-amount');
+            if ($urgent === 'on' && $highAmount === 'on') {
+                $filtered = $filtered->sortBy([
+                    ['rescue_date', 'asc'],
+                    ['score', 'desc']
+                ]);
+            } else if ($urgent === 'on') {
+                $filtered = $filtered->sortBy('rescue_date');
+            } else if ($highAmount === 'on') {
+                $filtered = $filtered->sortByDesc('score');
+            }
+
             return view('rescues.index', ['rescues' => $filtered]);
         } else if ($manager) {
             $rescues = Rescue::all();
