@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('category_id');
             $table->foreignId('sub_category_id');
             $table->foreignId('unit_id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
