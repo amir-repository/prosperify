@@ -77,7 +77,8 @@ class DonationController extends Controller
      */
     public function show(Donation $donation)
     {
-        return view('donations.show', ['donation' => $donation]);
+        $donationFoods = DonationFood::where('donation_id', $donation->id)->get();
+        return view('donations.show', ['donation' => $donation, 'donationFoods' => $donationFoods]);
     }
 
     /**

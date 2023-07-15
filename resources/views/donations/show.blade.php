@@ -96,7 +96,10 @@
                         </div>
                     @else
                         <div class="mt-4">
-                            @foreach ($donation->foods as $food)
+                            @foreach ($donationFoods as $donationFood)
+                                @php
+                                    $food = $donationFood->food;
+                                @endphp
                                 <a href="{{ route('donations.foods.show', ['donation' => $donation, 'food' => $food]) }}">
                                     <section class="p-6 border border-slate-200 rounded-md mb-4">
 

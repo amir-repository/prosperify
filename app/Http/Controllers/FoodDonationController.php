@@ -10,6 +10,7 @@ use App\Models\Food;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\TryCatch;
 
 class FoodDonationController extends Controller
 {
@@ -40,6 +41,7 @@ class FoodDonationController extends Controller
     public function store(Request $request, Donation $donation)
     {
         $ifFoodExist = in_array((int)$request->food_id, $donation->foods->map(fn ($food) => $food->id)->toArray());
+
         try {
             DB::beginTransaction();
 
@@ -47,7 +49,14 @@ class FoodDonationController extends Controller
 
             if ($ifFoodExist) {
                 $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $request->food_id])->first();
-                $donationFood->amount_plan = $donationFood->amount_plan + (int)$request->amount_plan;
+                if ($donationFood == true) {
+                    $donationFood->amount_plan = $donationFood->amount_plan + (int)$request->amount_plan;
+                } else {
+                    // if the donated food is trashed
+                    $donationFood = DonationFood::withTrashed()->where(['donation_id' => $donation->id, 'food_id' => $request->food_id])->first();
+                    $donationFood->amount_plan = (int)$request->amount_plan;
+                    $donationFood->deleted_at = null;
+                }
             } else {
                 $donationFood = new DonationFood();
                 $donationFood->food_id = $request->food_id;
@@ -79,7 +88,7 @@ class FoodDonationController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception($e->getMessage());
+            throw $e;
         }
         return redirect()->route('donations.show', ['donation' => $donation]);
     }
@@ -148,9 +157,23 @@ class FoodDonationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Food $food)
+    public function destroy(Donation $donation, Food $food)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
+
+            $food->in_stock = $food->in_stock + $donationFood->amount_plan;
+            $food->save();
+
+            $donationFood->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return redirect()->route('donations.show', ['donation' => $donation]);
     }
 
     private function storePhoto($request, $name)

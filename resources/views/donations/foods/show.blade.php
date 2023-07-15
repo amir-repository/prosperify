@@ -17,11 +17,20 @@
                 <p class="text-sm flex gap-1">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
                     {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
-
                 </p>
             </div>
-            <a href="{{ route('donations.foods.edit', ['donation' => $donation, 'food' => $food]) }}"
-                class="block font-medium py-2 w-full text-center bg-slate-900 rounded-md text-white mt-4 text-sm">Ubah</a>
+            <div class="mt-4 flex gap-4">
+                <form
+                    class="block font-medium py-2 w-full text-center rounded-md text-red-700 text-sm border border-red-600 cursor-pointer"
+                    action="{{ route('donations.foods.destroy', ['donation' => $donation, 'food' => $food]) }}"
+                    method="post">
+                    @csrf
+                    @method('delete')
+                    <button>Hapus</button>
+                </form>
+                <a href="{{ route('donations.foods.edit', ['donation' => $donation, 'food' => $food]) }}"
+                    class="block font-medium py-2 w-full text-center bg-slate-900 rounded-md text-white  text-sm">Ubah</a>
+            </div>
         </div>
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">Riwayat</h2>
