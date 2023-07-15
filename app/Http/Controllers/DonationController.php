@@ -143,7 +143,23 @@ class DonationController extends Controller
      */
     public function destroy(Donation $donation)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $donation->foods->each(function ($food) {
+                // ignore the donation food that been soft deleted
+                if ($food->pivot->deleted_at) {
+                    return;
+                }
+                $food->in_stock = $food->in_stock + $food->pivot->amount_plan;
+                $food->save();
+            });
+            $donation->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+        return redirect()->route('donations.index');
     }
 
     public function formatDateAndHour($datestring, $hour)
