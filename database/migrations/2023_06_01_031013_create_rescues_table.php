@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('score')->nullable();
             $table->foreignId('rescue_status_id');
             $table->foreignId('user_id');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

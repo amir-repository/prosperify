@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('food_id');
             $table->integer('amount_plan');
             $table->integer('amount_result')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
