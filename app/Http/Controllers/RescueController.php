@@ -32,43 +32,21 @@ class RescueController extends Controller
             $filtered = $this->filterRescueByStatus($rescues, Rescue::DIRENCANAKAN);
 
             if ($request->query('q')) {
-                $filtered = $filtered->filter(function ($f) use ($request) {
-                    return str_contains(strtolower($f->title), strtolower($request->query('q')));
-                });
+                $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            // sort rescues
-            $urgent = request()->query('urgent');
-            $highAmount = request()->query('high-amount');
-            if ($urgent === 'on' && $highAmount === 'on') {
-                $filtered = $filtered->sortBy([
-                    ['rescue_date', 'asc'],
-                    ['score', 'desc']
-                ]);
-            } else if ($urgent === 'on') {
-                $filtered = $filtered->sortBy('rescue_date');
-            } else if ($highAmount === 'on') {
-                $filtered = $filtered->sortByDesc('score');
-            }
+            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
 
             return view('rescues.index', ['rescues' => $filtered]);
         } else if ($manager) {
             $rescues = Rescue::all();
             $filtered = $this->filterRescueByStatus($rescues, Rescue::DIAJUKAN);
 
-            // sort rescues
-            $urgent = request()->query('urgent');
-            $highAmount = request()->query('high-amount');
-            if ($urgent === 'on' && $highAmount === 'on') {
-                $filtered = $filtered->sortBy([
-                    ['rescue_date', 'asc'],
-                    ['score', 'desc']
-                ]);
-            } else if ($urgent === 'on') {
-                $filtered = $filtered->sortBy('rescue_date');
-            } else if ($highAmount === 'on') {
-                $filtered = $filtered->sortByDesc('score');
+            if ($request->query('q')) {
+                $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
+
+            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
         }
@@ -267,6 +245,33 @@ class RescueController extends Controller
     {
         $photoURL = $request->file("$foodID-photo")->store('rescue-documentations');
         return $photoURL;
+    }
+
+    private function filterSearch($collections, $filterValue)
+    {
+        $filtered = $collections->filter(function ($f) use ($filterValue) {
+            return str_contains(strtolower($f->title), strtolower($filterValue));
+        });
+
+        return $filtered;
+    }
+
+    private function filterPriority($urgent, $highAmount, $collections)
+    {
+        $filtered = $collections;
+        if ($urgent === 'on' && $highAmount === 'on') {
+            $filtered = $collections->sortBy([
+                ['rescue_date', 'asc'],
+                ['score', 'desc']
+            ]);
+        } else if ($urgent === 'on') {
+            $filtered = $collections->sortBy('rescue_date');
+        } else if ($highAmount === 'on') {
+            $filtered = $collections->sortByDesc('score');
+        } else {
+            return $collections;
+        }
+        return $filtered;
     }
 
     function formatDateTime($dateTimeString)
