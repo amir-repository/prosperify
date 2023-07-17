@@ -65,6 +65,10 @@
                                 <x-heroicon-o-paper-airplane class="w-6 h-6" />
                             @elseif($rescue->rescue_status_id === 3)
                                 <x-heroicon-o-cog class="w-6 h-6" />
+                            @elseif($rescue->rescue_status_id === 4)
+                                <x-heroicon-o-truck class="w-6 h-6" />
+                            @elseif($rescue->rescue_status_id === 5)
+                                <x-heroicon-o-archive-box class="w-6 h-6" />
                             @endif
                         </div>
                         <div>

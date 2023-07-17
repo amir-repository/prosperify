@@ -4,13 +4,15 @@
     <main class="p-6 text-slate-900">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
-            <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
-                @csrf
-                @method('delete')
-                <button class="w-8 h-8 flex items-center justify-center">
-                    <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                </button>
-            </form>
+            @if ($rescue->rescue_status_id === 1)
+                <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
+                    @csrf
+                    @method('delete')
+                    <button class="w-8 h-8 flex items-center justify-center">
+                        <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                    </button>
+                </form>
+            @endif
         </div>
         <div class="mt-4 text-sm">
             <div class="flex gap-4">

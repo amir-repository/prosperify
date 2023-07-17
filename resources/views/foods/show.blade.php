@@ -13,13 +13,26 @@
             </div>
             <div class="flex items-end justify-between">
                 <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
-                <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
-                    @csrf
-                    @method('delete')
-                    <button class="w-8 h-8 flex items-center justify-center">
-                        <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                    </button>
-                </form>
+                @hasanyrole('volunteer|admin')
+                    <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
+                        @csrf
+                        @method('delete')
+                        <button class="w-8 h-8 flex items-center justify-center">
+                            <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                        </button>
+                    </form>
+                @else
+                    @if (in_array($rescue->rescue_status_id, [1]))
+                        <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
+                            method="post">
+                            @csrf
+                            @method('delete')
+                            <button class="w-8 h-8 flex items-center justify-center">
+                                <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                            </button>
+                        </form>
+                    @endif
+                @endhasanyrole
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
@@ -32,8 +45,16 @@
 
                 </p>
             </div>
-            <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
-                class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
+            @hasanyrole('volunteer|admin')
+                <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
+                    class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
+            @else
+                @if (in_array($rescue->rescue_status_id, [1]))
+                    <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
+                        class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
+                @endif
+            @endhasanyrole
+
         </div>
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">Riwayat</h2>
