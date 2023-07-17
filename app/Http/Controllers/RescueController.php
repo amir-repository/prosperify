@@ -33,7 +33,7 @@ class RescueController extends Controller
 
             if ($request->query('q')) {
                 $filtered = $filtered->filter(function ($f) use ($request) {
-                    return str_contains($f->title, $request->query('q'));
+                    return str_contains(strtolower($f->title), strtolower($request->query('q')));
                 });
             }
 
