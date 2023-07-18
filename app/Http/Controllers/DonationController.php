@@ -21,14 +21,15 @@ class DonationController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
-        $donations = (in_array($status, [Donation::DIRENCANAKAN, Donation::DILAKSANAKAN, Donation::DIANTAR, Donation::DISERAHKAN]))
-            ?
-            $donations = Donation::where('status', $status)->get()
-            :
-            $donations = Donation::all();
+        $filtered = $this->filterDonationByStatus($status);
 
+        if ($request->query('q')) {
+            $filtered = $this->filterSearch($filtered, $request->query('q'));
+        }
 
-        return view('donations.index', ['donations' => $donations]);
+        $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
+
+        return view('donations.index', ['donations' => $filtered]);
     }
 
     /**
@@ -190,5 +191,47 @@ class DonationController extends Controller
     {
         $photoURL = $request->file("$foodID-photo")->store('donation-documentations');
         return $photoURL;
+    }
+
+    private function filterDonationByStatus($status)
+    {
+        $donationStatus = [
+            Donation::DIRENCANAKAN,
+            Donation::DILAKSANAKAN,
+            Donation::DIANTAR,
+            Donation::DISERAHKAN
+        ];
+        return (in_array($status, $donationStatus))
+            ?
+            Donation::where('donation_status_id', $status)->get()
+            :
+            Donation::where('donation_status_id', Donation::DIRENCANAKAN)->get();
+    }
+
+    private function filterSearch($collections, $filterValue)
+    {
+        $filtered = $collections->filter(function ($f) use ($filterValue) {
+            return str_contains(strtolower($f->title), strtolower($filterValue));
+        });
+
+        return $filtered;
+    }
+
+    private function filterPriority($urgent, $highAmount, $collections)
+    {
+        $filtered = $collections;
+        if ($urgent === 'on' && $highAmount === 'on') {
+            $filtered = $collections->sortBy([
+                ['rescue_date', 'asc'],
+                ['score', 'desc']
+            ]);
+        } else if ($urgent === 'on') {
+            $filtered = $collections->sortBy('rescue_date');
+        } else if ($highAmount === 'on') {
+            $filtered = $collections->sortByDesc('score');
+        } else {
+            return $collections;
+        }
+        return $filtered;
     }
 }
