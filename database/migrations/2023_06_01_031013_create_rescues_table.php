@@ -21,9 +21,10 @@ return new class extends Migration
             $table->string('description');
             $table->dateTime('rescue_date');
             $table->integer('score')->nullable();
+            $table->integer('food_rescue_plan')->default(0);
+            $table->integer('food_rescue_result')->nullable();
             $table->foreignId('rescue_status_id');
             $table->foreignId('user_id');
-            $table->softDeletes();
             $table->timestamps();
         });
     }

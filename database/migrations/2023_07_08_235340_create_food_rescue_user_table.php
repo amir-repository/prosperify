@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('food_rescue_id');
             $table->integer('amount');
             $table->string('photo');
-            $table->foreignId('rescue_status_id');
+            $table->foreignId('food_rescue_status_id');
             $table->foreignId('unit_id');
             $table->timestamps();
         });

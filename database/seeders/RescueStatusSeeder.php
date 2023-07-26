@@ -15,27 +15,27 @@ class RescueStatusSeeder extends Seeder
     public function run(): void
     {
         DB::table('rescue_statuses')->insert([
-            'name' => 'direncanakan',
+            'name' => 'planned',
         ]);
 
         DB::table('rescue_statuses')->insert([
-            'name' => 'diajukan',
+            'name' => 'submitted',
         ]);
 
         DB::table('rescue_statuses')->insert([
-            'name' => 'diproses',
+            'name' => 'processed',
         ]);
 
         DB::table('rescue_statuses')->insert([
-            'name' => 'diambil',
+            'name' => 'assigned',
         ]);
 
         DB::table('rescue_statuses')->insert([
-            'name' => 'disimpan',
+            'name' => 'completed',
         ]);
 
         DB::table('rescue_statuses')->insert([
-            'name' => 'dibatalkan',
+            'name' => 'rejected',
         ]);
     }
 }

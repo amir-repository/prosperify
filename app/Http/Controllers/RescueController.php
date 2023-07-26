@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRescueRequest;
 use App\Models\FoodRescueUser;
 use App\Models\Point;
 use App\Models\PointRescueUser;
@@ -29,7 +30,7 @@ class RescueController extends Controller
         if ($donor) {
             $userID = auth()->user()->id;
             $rescues = User::find($userID)->rescues;
-            $filtered = $this->filterRescueByStatus($rescues, Rescue::DIRENCANAKAN);
+            $filtered = $this->filterRescueByStatus($rescues, Rescue::PLANNED);
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
@@ -69,51 +70,27 @@ class RescueController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRescueRequest $request)
     {
-        $user = auth()->user();
-        $donor = $user->hasRole(User::DONOR);
-        $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
-
-        if (!$user->hasRole('donor')) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'title' => 'required|max:100',
-            'description' => 'required|max:255',
-            'pickup_address' => 'required|max:255',
-            'rescue_date' => 'required|max:255',
-            'donor_name' => 'required|max:100',
-            'phone' => 'required|max:15',
-            'email' => 'required',
-        ]);
+        $validated = $request->validated();
 
         try {
             DB::beginTransaction();
             $rescue = new Rescue();
-            $rescue->donor_name = $request->donor_name;
-            $rescue->pickup_address = $request->pickup_address;
-            $rescue->phone = $request->phone;
-            $rescue->email = $request->email;
-            $rescue->title = $request->title;
-            $rescue->description = $request->description;
-            $rescue->rescue_status_id = Rescue::DIRENCANAKAN;
-            $rescue->rescue_date = $this->formatDateTime($request->rescue_date);
+
+            $attributes = $request->only(['title', 'description', 'pickup_address', 'rescue_date', 'donor_name', 'phone', 'email']);
+            $rescue = new Rescue();
+            $rescue->fill($attributes);
+            $rescue->rescue_status_id = Rescue::PLANNED;
             $rescue->user_id = auth()->user()->id;
             $rescue->save();
-
-            $rescue_user_log = new RescueUser();
-            $rescue_user_log->user_id = auth()->user()->id;
-            $rescue_user_log->rescue_id = $rescue->id;
-            $rescue_user_log->rescue_status_id = Rescue::DIRENCANAKAN;
-            $rescue_user_log->save();
 
             DB::commit();
 
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
         } catch (\Exception $e) {
             DB::rollBack();
+            return $e;
         }
     }
 
@@ -138,7 +115,13 @@ class RescueController extends Controller
      */
     public function edit(Rescue $rescue)
     {
-        //
+        $user = auth()->user();
+        if (!$user->hasRole('donor')) {
+            abort(403);
+        }
+
+        $user = auth()->user();
+        return view('rescues.edit', ['user' => $user, 'rescue' => $rescue]);
     }
 
     /**
@@ -146,66 +129,17 @@ class RescueController extends Controller
      */
     public function update(Request $request, Rescue $rescue)
     {
-        $user = auth()->user();
         try {
             DB::beginTransaction();
-            $rescue->rescue_status_id = $request->status;
+
+            $attributes = $request->only(['title', 'description', 'pickup_address', 'rescue_date', 'donor_name', 'phone', 'email']);
+            $rescue->fill($attributes);
             $rescue->save();
 
-            // save rescue log
-            $rescueUser = new RescueUser();
-            $rescueUser->user_id = auth()->user()->id;
-            $rescueUser->rescue_id = $rescue->id;
-            $rescueUser->rescue_status_id = $request->status;
-            $rescueUser->save();
-
-            // save food log
-            foreach ($rescue->foods as $food) {
-                $foodRescueID = $food->pivot->id;
-                $foodRescueUser = new FoodRescueUser();
-                $foodRescueUser->user_id = $user->id;
-                $foodRescueUser->food_rescue_id = $foodRescueID;
-                $foodRescueUser->amount = $food->amount;
-                $foodRescueUser->photo =
-                    count($request->file()) === 0
-                    ? $food->photo
-                    : $this->storePhoto($request, $food->id);
-                $foodRescueUser->rescue_status_id = $request->status;
-                $foodRescueUser->unit_id = $food->unit_id;
-                $foodRescueUser->save();
-            }
-
-            if ($rescue->rescue_status_id == Rescue::DIAJUKAN) {
-                // give score to rescue based on food amount
-                $score = $rescue->foods()->get()->map(function ($rescue) {
-                    return $rescue->amount;
-                })->sum();
-                $rescue->score = $score;
-                $rescue->save();
-            }
-
-            // add point to donor when rescue complete
-            if ($rescue->rescue_status_id == Rescue::DISIMPAN) {
-                $donorPoint = Point::where('user_id', $rescue->user_id)->first();
-                $donorPoint->point = $donorPoint->point + 100;
-                $donorPoint->save();
-
-                $pointRescueUser = new PointRescueUser();
-                $pointRescueUser->rescue_user_id = $rescueUser->id;
-                $pointRescueUser->point_id = $donorPoint->id;
-                $pointRescueUser->point = 100;
-                $pointRescueUser->save();
-
-                $rescue->foods()->get()->each(function ($food) {
-                    $food->stored_at = Carbon::now();
-                    $food->in_stock = $food->amount;
-                    $food->save();
-                });
-            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception($e);
+            return $e;
         }
 
         return redirect()->route("rescues.show", ['rescue' => $rescue]);
@@ -272,19 +206,5 @@ class RescueController extends Controller
             return $collections;
         }
         return $filtered;
-    }
-
-    function formatDateTime($dateTimeString)
-    {
-        $dateTime = explode('T', $dateTimeString);
-        $date = explode('-', $dateTime[0]);
-        $time = explode(':', $dateTime[1]);
-        $year = $date[0];
-        $month = $date[1];
-        $day = $date[2];
-        $hour = $time[0];
-        $minute = $time[1];
-
-        return Carbon::create($year, $month, $day, $hour, $minute, 0);
     }
 }

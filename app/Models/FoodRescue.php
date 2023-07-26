@@ -12,7 +12,7 @@ class FoodRescue extends Model
 
     protected $table = 'food_rescue';
 
-    protected $fillable = ['user_id', 'rescue_id'];
+    protected $fillable = ['user_id', 'rescue_id', 'food_rescue_status_id', 'rescue_user_id'];
 
     public function users()
     {

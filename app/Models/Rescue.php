@@ -2,42 +2,41 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Rescue extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    protected $fillable = [
-        'donor_name',
-        'pickup_address',
-        'phone',
-        'email',
-        'title',
-        'description',
-        'rescue_date',
-        'score',
-        'rescue_status_id',
-        'user_id'
-    ];
+    protected $fillable = ['title', 'description', 'pickup_address', 'rescue_date', 'donor_name', 'phone', 'email'];
 
-    public const DIRENCANAKAN = 1;
-    public const DIAJUKAN = 2;
-    public const DIPROSES = 3;
-    public const DIAMBIL = 4;
-    public const DISIMPAN = 5;
-    public const DIBATALKAN = 6;
+    public const PLANNED = 1;
+    public const SUBMITTED = 2;
+    public const PROCESSED = 3;
+    public const ASSIGNED = 4;
+    public const COMPLETED = 5;
+    public const REJECTED = 6;
+
+    protected function rescueDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => Carbon::parse($value)->format('d M Y H:i')
+        );
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => Carbon::parse($value)->format('d M Y H:i')
+        );
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function user_logs()
-    {
-        return $this->belongsToMany(User::class)->withPivot('id', 'status');
     }
 
     public function foods()

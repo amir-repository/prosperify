@@ -12,11 +12,6 @@ class RescueUser extends Model
 
     use HasFactory;
 
-    public function rescuePhotos()
-    {
-        return $this->hasMany(RescuePhoto::class);
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -25,10 +20,5 @@ class RescueUser extends Model
     public function rescue()
     {
         return $this->belongsTo(Rescue::class);
-    }
-
-    public function rescueStatus()
-    {
-        return $this->belongsTo(RescueStatus::class);
     }
 }

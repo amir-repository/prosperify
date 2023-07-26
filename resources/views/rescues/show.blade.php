@@ -2,37 +2,34 @@
 
 @section('main')
     <main class="p-6 text-slate-900">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
-            @if ($rescue->rescue_status_id === 1)
-                <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
-                    @csrf
-                    @method('delete')
-                    <button class="w-8 h-8 flex items-center justify-center">
-                        <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                    </button>
-                </form>
-            @endif
-        </div>
-        <div class="mt-4 text-sm">
-            <div class="flex gap-4">
-                <p class="flex items-center gap-1">
+        <div>
+            <div>
+                <div class="flex items-center justify-between">
+                    <a class="flex items-center gap-2" href="{{ route('rescues.edit', ['rescue' => $rescue]) }}">
+                        <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
+                        <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                    </a>
+                    @if ($rescue->rescue_status_id === 1)
+                        <form onclick="return confirm('Are you sure?')"
+                            action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
+                            @csrf
+                            @method('delete')
+                            <button class="w-8 h-8 flex items-center justify-center">
+                                <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
+                            </button>
+                        </form>
+                    @endif
+                </div>
+                <div class="mt-3 flex items-center gap-1 text-slate-500">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
-                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }}
-                </p>
-                <p class="flex gap-1">
-                    <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
-                    {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}
-                </p>
+                    <p class="text-sm">Created at {{ $rescue->created_at }}
+                </div>
             </div>
-            <p class="mt-2 flex gap-1">
-                <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />{{ $rescue->pickup_address }}
-            </p>
         </div>
         <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post" enctype="multipart/form-data">
             @method('put')
             @csrf
-            <div class="mt-6">
+            <div class="mt-3">
                 <section class="flex items-center gap-2">
                     <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
                         <x-heroicon-o-user class="w-6 h-6" />
@@ -42,53 +39,41 @@
                         <p class="text-xs text-slate-500 capitalize">Donor</p>
                     </div>
                 </section>
-                <section class="flex items-center gap-2 mt-4">
-                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
-                        @if ($rescue->rescue_status_id === 1)
-                            <x-heroicon-o-bookmark class="w-6 h-6" />
-                        @elseif($rescue->rescue_status_id === 2)
-                            <x-heroicon-o-paper-airplane class="w-6 h-6" />
-                        @elseif($rescue->rescue_status_id === 3)
-                            <x-heroicon-o-cog class="w-6 h-6" />
-                        @elseif($rescue->rescue_status_id === 4)
-                            <x-heroicon-o-truck class="w-6 h-6" />
-                        @endif
+                <section class="mt-6">
+                    <h2 class="text-lg font-bold">Rescue Date</h2>
+                    <div class="mt-2 flex items-center gap-1">
+                        <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
+                        <p class="text-sm">{{ $rescue->rescue_date }}
                     </div>
-                    <div>
-                        <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh
-                            {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->name }}
-                        </p>
-                        <p class="text-xs text-slate-500 capitalize">
-                            {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->roles->first()->name }}
-                        </p>
+                    <div class="mt-2 flex items-center gap-1">
+                        <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />
+                        <p class="text-sm">{{ $rescue->pickup_address }}
                     </div>
                 </section>
                 <section>
-
                     <input type="text" value="2" name="status" hidden>
                     @if (!$rescue->foods->isEmpty() && $rescue->rescue_status_id === 1)
                         <Button
-                            class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">Ajukan</Button>
+                            class="py-2 w-full rounded-md bg-slate-900 mt-8 text-sm font-medium text-white">Submit</Button>
                     @endif
                 </section>
             </div>
             <div class="mt-8">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold">Makanan</h2>
+                    <h2 class="text-lg font-bold">Foods</h2>
                     @if ($rescue->rescue_status_id === 1)
                         <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
                             class="flex items-center gap-1">
-                            <x-heroicon-o-plus class="w-5 h-5" />Tambah
+                            <x-heroicon-o-plus class="w-5 h-5" />Add
                         </a>
                     @endif
                 </div>
                 <div>
                     @if ($rescue->foods->isEmpty())
-                        <p class="mt-6 font-medium text-center">Belum ada makanan yang ditambahkan</p>
+                        <p class="mt-6 font-medium text-center">There's no food here yet</p>
                         <div class="flex justify-center mt-3">
                             <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
-                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Tambah
-                                makanan</a>
+                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Add a new food</a>
                         </div>
                     @else
                         <div class="mt-4">
