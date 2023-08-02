@@ -24,9 +24,44 @@
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
                     <p class="text-sm">Created at {{ $rescue->created_at }}
                 </div>
+                <div class="mt-3 flex items-center gap-1 text-slate-500">
+                    @if ($rescue->rescue_status_id == 1)
+                        <x-heroicon-o-bookmark class="w-[18px] h-[18px]" />
+                    @elseif ($rescue->rescue_status_id == 2)
+                        <x-heroicon-o-paper-airplane class="w-[18px] h-[18px]" />
+                    @elseif ($rescue->rescue_status_id == 3)
+                        <x-heroicon-o-cog class="w-[18px] h-[18px]" />
+                    @elseif ($rescue->rescue_status_id == 4)
+                        <x-heroicon-o-user-group class="w-[18px] h-[18px]" />
+                    @elseif ($rescue->rescue_status_id == 5)
+                        <x-heroicon-o-truck class="w-[18px] h-[18px]" />
+                    @elseif ($rescue->rescue_status_id == 6)
+                        <x-heroicon-o-archive-box-arrow-down class="w-[18px] h-[18px]" />
+                    @else
+                        <x-heroicon-o-trash class="w-[18px] h-[18px]" />
+                    @endif
+                    <p class="text-sm">Rescue is <span>
+                            @if ($rescue->rescue_status_id == 1)
+                                Planned
+                            @elseif($rescue->rescue_status_id == 2)
+                                Submitted
+                            @elseif($rescue->rescue_status_id == 3)
+                                Processed
+                            @elseif($rescue->rescue_status_id == 4)
+                                Assigned
+                            @elseif($rescue->rescue_status_id == 5)
+                                Taken
+                            @elseif($rescue->rescue_status_id == 6)
+                                Stored
+                            @elseif($rescue->rescue_status_id == 7)
+                                Rejected
+                            @endif
+                        </span>
+                </div>
             </div>
         </div>
-        <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post"
+            enctype="multipart/form-data">
             @method('put')
             @csrf
             <div class="mt-3">
@@ -80,7 +115,6 @@
                             @foreach ($rescue->foods as $food)
                                 <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
                                     <section class="p-6 border border-slate-200 rounded-md mb-4">
-
                                         <div class="flex items-center gap-4">
                                             <div>
                                                 <img class="w-[72px] h-[72px] rounded-md object-cover"
@@ -145,6 +179,32 @@
                                                 </p>
                                             </div>
                                         </section>
+                                        @if ($foodRescueStatus < 2)
+                                            <section class="mt-6">
+                                                <p>On <span>
+                                                        @php
+                                                            $foodRescueStatus = $food->pivot->food_rescue_status_id + 1;
+                                                        @endphp
+                                                        @if ($foodRescueStatus == 1)
+                                                            Planned
+                                                        @elseif($foodRescueStatus == 2)
+                                                            Submitted
+                                                        @elseif($foodRescueStatus == 3)
+                                                            Processed
+                                                        @elseif($foodRescueStatus == 4)
+                                                            Assigned
+                                                        @elseif($foodRescueStatus == 5)
+                                                            Taken
+                                                        @elseif($foodRescueStatus == 6)
+                                                            Stored
+                                                        @elseif($foodRescueStatus == 7)
+                                                            Rejected
+                                                        @endif
+                                                    </span> condition</p>
+                                                <input class="mt-2 w-full border border-slate-200 rounded-md p-2"
+                                                    type="file" name="{{ $food->id }}-photo" required>
+                                            </section>
+                                        @endif
                                     </section>
                                 </a>
                             @endforeach

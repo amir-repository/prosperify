@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRescueRequest;
+use App\Models\Food;
+use App\Models\FoodRescue;
 use App\Models\FoodRescueUser;
 use App\Models\Point;
 use App\Models\PointRescueUser;
@@ -143,6 +145,43 @@ class RescueController extends Controller
         }
 
         return redirect()->route("rescues.show", ['rescue' => $rescue]);
+    }
+
+    public function updateStatus(Request $request, Rescue $rescue)
+    {
+
+        $user = auth()->user();
+
+        try {
+            DB::beginTransaction();
+            $rescue->rescue_status_id = $request->status;
+            $rescue->save();
+
+            foreach ($rescue->foods as $food) {
+                $foodRescueID = $food->pivot->id;
+                $foodRescue = FoodRescue::find($foodRescueID);
+                $foodRescue->food_rescue_status_id = $request->status;
+                $foodRescue->save();
+
+                $food = Food::find($foodRescue->food_id);
+
+                $foodRescueUser = new FoodRescueUser();
+                $foodRescueUser->user_id = $user->id;
+                $foodRescueUser->food_rescue_id = $foodRescue->id;
+                $foodRescueUser->amount = $food->amount;
+                $foodRescueUser->photo = $this->storePhoto($request, $food->id);
+                $foodRescueUser->food_rescue_status_id = $request->status;
+                $foodRescueUser->unit_id = $food->unit_id;
+                $foodRescueUser->save();
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            throw $e;
+            DB::rollBack();
+        }
+
+        return redirect()->route('rescues.show', ['rescue' => $rescue]);
     }
 
     /**
