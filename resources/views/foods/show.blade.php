@@ -23,7 +23,8 @@
                     </form>
                 @else
                     @if (in_array($rescue->rescue_status_id, [1]))
-                        <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
+                        <form onclick="return confirm('Are you sure?')"
+                            action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
                             method="post">
                             @csrf
                             @method('delete')
@@ -41,23 +42,23 @@
                 </p>
                 <p class="text-sm flex gap-1">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
-                    {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+                    {{ $food->expired_date }}
 
                 </p>
             </div>
             @hasanyrole('volunteer|admin')
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
-                    class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
+                    class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
             @else
                 @if (in_array($rescue->rescue_status_id, [1]))
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
-                        class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Ubah</a>
+                        class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
                 @endif
             @endhasanyrole
 
         </div>
         <div class="mt-8">
-            <h2 class="text-lg font-bold mb-3">Riwayat</h2>
+            <h2 class="text-lg font-bold mb-3">History</h2>
             @foreach ($foodRescueUsers as $foodRescueUser)
                 <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
                     <div>
@@ -71,8 +72,28 @@
                         <p class="text-slate-500">
                             {{ $foodRescueUser->user->name }}</p>
                         <p class="text-xs text-slate-500">
-                            <span class="capitalize">{{ $foodRescueUser->rescueStatus->name }}</span>
-                            {{ Carbon\Carbon::parse($foodRescueUser->created_at)->format('d M Y h:i:s') }}
+                            <span class="capitalize">
+                                @php
+                                    $foodRescueStatus = $foodRescueUser->food_rescue_status_id;
+                                @endphp
+                                @if ($foodRescueStatus == 1)
+                                    Planned
+                                @elseif($foodRescueStatus == 2)
+                                    Submitted
+                                @elseif($foodRescueStatus == 3)
+                                    Processed
+                                @elseif($foodRescueStatus == 4)
+                                    Assigned
+                                @elseif($foodRescueStatus == 5)
+                                    Taken
+                                @elseif($foodRescueStatus == 6)
+                                    Stored
+                                @elseif($foodRescueStatus == 7)
+                                    Rejected
+                                @endif
+                            </span>
+                            at
+                            {{ $foodRescueUser->created_at }}
                         </p>
                     </div>
                 </section>

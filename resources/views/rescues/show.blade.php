@@ -97,18 +97,54 @@
                                                 </p>
                                             </div>
                                         </div>
-
-                                        @if ($rescue->rescue_status_id === 1)
-                                            <div>
-                                                <p class="mt-6 text-sm font-medium">Kondisi saat diajukan
-                                                </p>
-                                                <div class="border mt-2 rounded-md">
-                                                    <input class="p-2" type="file" name="{{ $food->id }}-photo"
-                                                        required>
-                                                </div>
+                                        <section class="flex items-center gap-2 mt-4">
+                                            <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                                                @if ($food->pivot->food_rescue_status_id == 1)
+                                                    <x-heroicon-o-bookmark class="w-6 h-6" />
+                                                @elseif ($food->pivot->food_rescue_status_id == 2)
+                                                    <x-heroicon-o-paper-airplane class="w-6 h-6" />
+                                                @elseif ($food->pivot->food_rescue_status_id == 3)
+                                                    <x-heroicon-o-cog class="w-6 h-6" />
+                                                @elseif ($food->pivot->food_rescue_status_id == 4)
+                                                    <x-heroicon-o-user-group class="w-6 h-6" />
+                                                @elseif ($food->pivot->food_rescue_status_id == 5)
+                                                    <x-heroicon-o-truck class="w-6 h-6" />
+                                                @elseif ($food->pivot->food_rescue_status_id == 6)
+                                                    <x-heroicon-o-archive-box-arrow-down class="w-6 h-6" />
+                                                @else
+                                                    <x-heroicon-o-trash class="w-6 h-6" />
+                                                @endif
                                             </div>
-                                        @endif
-
+                                            <div>
+                                                <p>
+                                                    <span>
+                                                        @php
+                                                            $foodRescueStatus = $food->pivot->food_rescue_status_id;
+                                                        @endphp
+                                                        @if ($foodRescueStatus == 1)
+                                                            Planned
+                                                        @elseif($foodRescueStatus == 2)
+                                                            Submitted
+                                                        @elseif($foodRescueStatus == 3)
+                                                            Processed
+                                                        @elseif($foodRescueStatus == 4)
+                                                            Assigned
+                                                        @elseif($foodRescueStatus == 5)
+                                                            Taken
+                                                        @elseif($foodRescueStatus == 6)
+                                                            Stored
+                                                        @elseif($foodRescueStatus == 7)
+                                                            Rejected
+                                                        @endif
+                                                    </span> by
+                                                    {{ $food->pivot->doer }}
+                                                </p>
+                                                <p class="text-xs text-slate-500 capitalize">
+                                                    At
+                                                    {{ Carbon\Carbon::parse($food->pivot->updated_at)->format('d M Y H:i') }}
+                                                </p>
+                                            </div>
+                                        </section>
                                     </section>
                                 </a>
                             @endforeach

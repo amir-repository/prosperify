@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreFoodRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueUser;
@@ -11,9 +12,11 @@ use App\Models\RescuePhoto;
 use App\Models\SubCategory;
 use App\Models\Unit;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class FoodController extends Controller
 {
@@ -38,38 +41,30 @@ class FoodController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Rescue $rescue)
+    public function store(StoreFoodRequest $request, Rescue $rescue)
     {
         $user = auth()->user();
 
-        $validated = $request->validate([
-            'name' => 'required|max:100',
-            'detail' => 'required|max:255',
-            'amount' => 'required|max:10',
-            'unit' => 'required|max:5',
-            'expired_date' => 'required|max:100',
-            'sub_category' => 'required|max:5',
-        ]);
+        $validated = $request->validated();
 
         $photo = $request->file('photo')->store('rescue-documentations');
-
         try {
             DB::beginTransaction();
+
+            $attributes = $request->only(['name', 'detail', 'expired_date', 'amount', 'unit_id', 'sub_category_id']);
             $food = new Food();
-            $food->name = $request->name;
-            $food->detail = $request->detail;
-            $food->expired_date = $request->expired_date;
-            $food->amount = $request->amount;
-            $food->unit_id = $request->unit;
-            $food->photo = $photo;
+            $food->fill($attributes);
             $food->user_id = $user->id;
-            $food->category_id = SubCategory::find($request->sub_category)->category_id;
-            $food->sub_category_id = $request->sub_category;
+            $food->photo = $photo;
+            $food->category_id = SubCategory::find($request->sub_category_id)->category_id;
             $food->save();
 
             $foodRescue = new FoodRescue();
-            $foodRescue->food_id = $food->id;
             $foodRescue->rescue_id = $rescue->id;
+            $foodRescue->food_id = $food->id;
+            $foodRescue->user_id = $user->id;
+            $foodRescue->doer = $user->name;
+            $foodRescue->food_rescue_status_id = Food::PLANNED;
             $foodRescue->save();
 
             $foodRescueUser = new FoodRescueUser();
@@ -77,13 +72,15 @@ class FoodController extends Controller
             $foodRescueUser->food_rescue_id = $foodRescue->id;
             $foodRescueUser->amount = $request->amount;
             $foodRescueUser->photo = $photo;
-            $foodRescueUser->rescue_status_id = $rescue->rescue_status_id;
-            $foodRescueUser->unit_id = $request->unit;
+            $foodRescueUser->food_rescue_status_id = Food::PLANNED;
+            $foodRescueUser->unit_id = $request->unit_id;
             $foodRescueUser->save();
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception($e);
+            Storage::disk('public')->delete($photo);
+            throw $e;
         }
 
         return redirect()->route('rescues.show', ["rescue" => $rescue]);
@@ -119,53 +116,42 @@ class FoodController extends Controller
      */
     public function update(Request $request, Rescue $rescue, Food $food)
     {
-        // update food only
-        // jangan sentuh food rescue gk perlu di ubah
-        // lalu buat log baru di food rescue user
-
         $user = auth()->user();
-
-        $validated = $request->validate([
-            'name' => 'required|max:100',
-            'detail' => 'required|max:255',
-            'amount' => 'required|max:10',
-            'unit' => 'required|max:5',
-            'expired_date' => 'required|max:100',
-            'sub_category' => 'required|max:5',
-        ]);
+        // $validated = $request->validated();
 
         $photo = $request->file('photo')->store('rescue-documentations');
 
         try {
             DB::beginTransaction();
-            $food = Food::find($food->id);
             $food->name = $request->name;
             $food->detail = $request->detail;
             $food->expired_date = $request->expired_date;
             $food->amount = $request->amount;
-            $food->unit_id = $request->unit;
-            $food->category_id = SubCategory::find($request->sub_category)->category_id;
-            $food->sub_category_id = $request->sub_category;
+            $food->unit_id = $request->unit_id;
+            $food->sub_category_id = $request->sub_category_id;
+            $food->user_id = $user->id;
+            $food->photo = $photo;
+            $food->category_id = SubCategory::find($request->sub_category_id)->category_id;
             $food->save();
 
-            // we need food rescue ID for food rescue logs
-            $foodRescueID = collect([]);
-            $food->rescues->each(function ($rescue) use ($foodRescueID) {
-                $foodRescueID->push($rescue->pivot->id);
-            });
+            $foodRescue = null;
+            foreach ($rescue->foods as $f) {
+                $food->id === $f->pivot->food_id ? $foodRescue = $f->pivot : null;
+            }
 
             $foodRescueUser = new FoodRescueUser();
             $foodRescueUser->user_id = $user->id;
-            $foodRescueUser->food_rescue_id = $foodRescueID->first();
-            $foodRescueUser->amount = $request->amount;
+            $foodRescueUser->food_rescue_id = $foodRescue->id;
+            $foodRescueUser->amount = $food->amount;
             $foodRescueUser->photo = $photo;
-            $foodRescueUser->rescue_status_id = $rescue->rescue_status_id;
-            $foodRescueUser->unit_id = $request->unit;
+            $foodRescueUser->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+            $foodRescueUser->unit_id = $food->unit_id;
             $foodRescueUser->save();
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new \Exception($e);
+            throw $e;
         }
 
         return redirect()->route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]);
@@ -182,6 +168,10 @@ class FoodController extends Controller
 
             $foodRescue = FoodRescue::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->first();
             $foodRescue->delete();
+
+            foreach ($foodRescue->foodRescueUsers as $foodRescueUser) {
+                $foodRescueUser->delete();
+            }
 
             DB::commit();
         } catch (\Exception $e) {

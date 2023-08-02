@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rescue_id');
             $table->foreignId('food_id');
+            $table->foreignId('user_id');
+            $table->string('doer');
             $table->foreignId('food_rescue_status_id');
             $table->foreignId('rescue_user_id')->nullable();
             $table->timestamps();

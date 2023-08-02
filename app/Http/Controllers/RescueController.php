@@ -90,7 +90,7 @@ class RescueController extends Controller
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $e;
+            throw $e;
         }
     }
 
@@ -139,7 +139,7 @@ class RescueController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return $e;
+            throw $e;
         }
 
         return redirect()->route("rescues.show", ['rescue' => $rescue]);
