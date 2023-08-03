@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('points', function (Blueprint $table) {
+        Schema::create('food_rescue_point', function (Blueprint $table) {
             $table->id();
             $table->integer('point');
-            $table->foreignId('user_id');
+            $table->foreignId('point_id')->constrained();
+            $table->foreignId('rescue_id')->constrained();
+            $table->foreignId('food_id')->constrained();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('points');
+        Schema::dropIfExists('food_rescue_points');
     }
 };

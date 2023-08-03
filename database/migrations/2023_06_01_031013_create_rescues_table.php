@@ -23,8 +23,8 @@ return new class extends Migration
             $table->integer('score')->nullable();
             $table->integer('food_rescue_plan')->default(0);
             $table->integer('food_rescue_result')->nullable();
-            $table->foreignId('rescue_status_id');
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('rescue_status_id')->constrained();
             $table->timestamps();
         });
     }

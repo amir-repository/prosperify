@@ -10,14 +10,4 @@ class FoodRescueStatus extends Model
     use HasFactory;
 
     protected $fillable = ['name'];
-
-    public function foodRescueUser()
-    {
-        return $this->hasMany(FoodRescueUser::class);
-    }
-
-    public function foodRescue()
-    {
-        return $this->hasMany(FoodRescue::class);
-    }
 }
