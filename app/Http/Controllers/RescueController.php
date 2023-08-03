@@ -6,11 +6,13 @@ use App\Http\Requests\StoreRescueRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueUser;
+use App\Models\FoodVault;
 use App\Models\Point;
 use App\Models\PointRescueUser;
 use App\Models\Rescue;
 use App\Models\RescueUser;
 use App\Models\User;
+use App\Models\Vault;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +45,7 @@ class RescueController extends Controller
             return view('rescues.index', ['rescues' => $filtered]);
         } else if ($manager) {
             $rescues = Rescue::all();
-            $filtered = $this->filterRescueByStatus($rescues, Rescue::DIAJUKAN);
+            $filtered = $this->filterRescueByStatus($rescues, Rescue::SUBMITTED);
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
@@ -108,7 +110,13 @@ class RescueController extends Controller
         if ($donor) {
             return view('rescues.show', ['rescue' => $rescue]);
         } else if ($manager) {
-            return view('manager.rescues.show', ['rescue' => $rescue]);
+            $volunteers = [];
+            $vaults = [];
+            if ($rescue->rescue_status_id >= 3) {
+                $volunteers = User::role(User::VOLUNTEER)->get();
+                $vaults = Vault::all();
+            }
+            return view('manager.rescues.show', ['rescue' => $rescue, 'volunteers' => $volunteers, 'vaults' => $vaults]);
         }
     }
 
@@ -149,8 +157,8 @@ class RescueController extends Controller
 
     public function updateStatus(Request $request, Rescue $rescue)
     {
-
         $user = auth()->user();
+        $isPhotoInRequest = count($request->file());
 
         try {
             DB::beginTransaction();
@@ -161,6 +169,8 @@ class RescueController extends Controller
                 $foodRescueID = $food->pivot->id;
                 $foodRescue = FoodRescue::find($foodRescueID);
                 $foodRescue->food_rescue_status_id = $request->status;
+                $foodRescue->user_id = $user->id;
+                $foodRescue->doer = $user->name;
                 $foodRescue->save();
 
                 $food = Food::find($foodRescue->food_id);
@@ -169,12 +179,27 @@ class RescueController extends Controller
                 $foodRescueUser->user_id = $user->id;
                 $foodRescueUser->food_rescue_id = $foodRescue->id;
                 $foodRescueUser->amount = $food->amount;
-                $foodRescueUser->photo = $this->storePhoto($request, $food->id);
+                $foodRescueUser->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
                 $foodRescueUser->food_rescue_status_id = $request->status;
                 $foodRescueUser->unit_id = $food->unit_id;
                 $foodRescueUser->save();
-            }
 
+                if ((int)$request->status === Rescue::ASSIGNED) {
+                    $rescueUser = new RescueUser();
+                    $rescueUser->user_id = $this->getVolunteerID($request, $food->id);
+                    $rescueUser->rescue_id = $rescue->id;
+                    $rescueUser->assigner_id = $user->id;
+                    $rescueUser->save();
+
+                    $foodRescue->rescue_user_id = $rescueUser->id;
+                    $foodRescue->save();
+
+                    $foodVault = new FoodVault();
+                    $foodVault->food_id = $food->id;
+                    $foodVault->vault_id = $this->getVaultID($request, $food->id);
+                    $foodVault->save();
+                }
+            }
             DB::commit();
         } catch (\Exception $e) {
             throw $e;
@@ -218,6 +243,16 @@ class RescueController extends Controller
     {
         $photoURL = $request->file("$foodID-photo")->store('rescue-documentations');
         return $photoURL;
+    }
+
+    private function getVolunteerID($request, $foodID)
+    {
+        return $request["food-$foodID-volunteer_id"];
+    }
+
+    private function getVaultID($request, $foodID)
+    {
+        return $request["food-$foodID-vault_id"];
     }
 
     private function filterSearch($collections, $filterValue)

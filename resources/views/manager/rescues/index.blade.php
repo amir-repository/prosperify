@@ -50,30 +50,30 @@
         <div>
             @foreach ($rescues as $rescue)
                 <a href="{{ route('rescues.show', ['rescue' => $rescue]) }}">
-                    <section class="border border-slate-200 p-6 rounded-md text-slate-900 mb-4">
+                    <section class="border border-slate-200 p-6 rounded-md text-slate-900">
                         <h2 class="font-bold text-2xl">{{ $rescue->title }}</h2>
-                        <p class="mt-1">Pada {{ Carbon\Carbon::parse($rescue->rescue_date)->format('d M Y') }} jam
-                            {{ Carbon\Carbon::parse($rescue->rescue_date)->format('H:i') }}</p>
+                        <div class="mt-1 flex items-center gap-1 text-slate-500">
+                            <x-heroicon-o-user class="w-[14px] h-[14px]" />
+                            <p class="text-xs">Donated by
+                                {{ $rescue->user->name }}</p>
+                            </p>
+                        </div>
+                        <div class="mt-1 flex items-center gap-1 text-slate-500">
+                            <x-heroicon-o-calendar class="w-[14px] h-[14px]" />
+                            <p class="text-xs">Created at
+                                {{ $rescue->created_at }}</p>
+                            </p>
+                        </div>
                         <div class="flex items-center gap-3 mt-3">
                             <div class="w-11 h-11 bg-slate-100 rounded-md flex items-center justify-center">
-                                @if ($rescue->rescue_status_id === 1)
-                                    <x-heroicon-o-bookmark class="w-6 h-6" />
-                                @elseif($rescue->rescue_status_id === 2)
-                                    <x-heroicon-o-paper-airplane class="w-6 h-6" />
-                                @elseif($rescue->rescue_status_id === 3)
-                                    <x-heroicon-o-cog class="w-6 h-6" />
-                                @elseif($rescue->rescue_status_id === 4)
-                                    <x-heroicon-o-truck class="w-6 h-6" />
-                                @elseif($rescue->rescue_status_id === 5)
-                                    <x-heroicon-o-archive-box class="w-6 h-6" />
-                                @endif
-
+                                <x-heroicon-o-calendar class="w-6 h-6" />
                             </div>
                             <div>
-                                <p><span class="capitalize">{{ $rescue->rescueStatus->name }}</span> oleh
-                                    {{ $rescue->rescueUser->filter(fn($r) => $r->rescue_status_id === $rescue->rescue_status_id)->first()->user->name }}
+                                <p><span class="capitalize">Rescue Date
                                 </p>
-                                <p class="text-xs text-slate-500">21 Juli 2023</p>
+                                <p class="text-xs text-slate-500">
+
+                                    {{ $rescue->rescue_date }}</p>
                             </div>
                         </div>
                     </section>

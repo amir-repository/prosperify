@@ -34,9 +34,7 @@
                     @elseif ($rescue->rescue_status_id == 4)
                         <x-heroicon-o-user-group class="w-[18px] h-[18px]" />
                     @elseif ($rescue->rescue_status_id == 5)
-                        <x-heroicon-o-truck class="w-[18px] h-[18px]" />
-                    @elseif ($rescue->rescue_status_id == 6)
-                        <x-heroicon-o-archive-box-arrow-down class="w-[18px] h-[18px]" />
+                        <x-heroicon-o-shield-check class="w-[18px] h-[18px]" />
                     @else
                         <x-heroicon-o-trash class="w-[18px] h-[18px]" />
                     @endif
@@ -50,10 +48,8 @@
                             @elseif($rescue->rescue_status_id == 4)
                                 Assigned
                             @elseif($rescue->rescue_status_id == 5)
-                                Taken
+                                Completed
                             @elseif($rescue->rescue_status_id == 6)
-                                Stored
-                            @elseif($rescue->rescue_status_id == 7)
                                 Rejected
                             @endif
                         </span>

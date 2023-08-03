@@ -31,7 +31,7 @@ class Food extends Model
 
     public function vaults()
     {
-        return $this->belongsToMany(Vault::class);
+        return $this->belongsToMany(Vault::class)->withPivot('vault_id');
     }
 
     public function category()

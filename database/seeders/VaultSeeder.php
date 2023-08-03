@@ -16,5 +16,8 @@ class VaultSeeder extends Seeder
         DB::table('vaults')->insert(
             ['name' => 'FoodBank HQ', 'city_id' => 1, 'address' => 'Jalan kemerdekaan No. 17']
         );
+        DB::table('vaults')->insert(
+            ['name' => 'Backup HQ', 'city_id' => 1, 'address' => 'Jalan Bersama No. 2']
+        );
     }
 }

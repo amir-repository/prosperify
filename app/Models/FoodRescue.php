@@ -37,4 +37,9 @@ class FoodRescue extends Model
     {
         return $this->hasMany(FoodRescueUser::class);
     }
+
+    public function rescueUser()
+    {
+        return $this->belongsTo(RescueUser::class);
+    }
 }
