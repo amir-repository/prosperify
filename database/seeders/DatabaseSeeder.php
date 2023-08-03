@@ -18,13 +18,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         $this->call(
             [
                 RoleAndPermissionSeeder::class,
@@ -40,17 +33,5 @@ class DatabaseSeeder extends Seeder
                 DonationStatusSeeder::class
             ]
         );
-
-        // // recipient seed
-        // DB::table('recipients')->insert([
-        //     [
-        //         'name' => 'Agus',
-        //         'address' => 'Jalan bersama',
-        //         'phone' => '08123456789',
-        //         'family_members' => 4,
-        //         'document' => '',
-        //         'status' => 'diterima'
-        //     ]
-        // ]);
     }
 }
