@@ -34,4 +34,9 @@ class Rescue extends Model
             get: fn (string $value) => Carbon::parse($value)->format('d M Y H:i')
         );
     }
+
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class);
+    }
 }

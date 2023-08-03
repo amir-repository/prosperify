@@ -78,7 +78,6 @@ class RescueController extends Controller
     {
         $validated = $request->validated();
 
-
         try {
             DB::beginTransaction();
             $attributes = $request->only(['donor_name', 'pickup_address', 'phone', 'email', 'title', 'description', 'rescue_date']);
