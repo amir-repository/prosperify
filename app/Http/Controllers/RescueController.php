@@ -78,19 +78,16 @@ class RescueController extends Controller
     {
         $validated = $request->validated();
 
+
         try {
             DB::beginTransaction();
-            $rescue = new Rescue();
-
-            $attributes = $request->only(['title', 'description', 'pickup_address', 'rescue_date', 'donor_name', 'phone', 'email']);
+            $attributes = $request->only(['donor_name', 'pickup_address', 'phone', 'email', 'title', 'description', 'rescue_date']);
             $rescue = new Rescue();
             $rescue->fill($attributes);
-            $rescue->rescue_status_id = Rescue::PLANNED;
             $rescue->user_id = auth()->user()->id;
+            $rescue->rescue_status_id = Rescue::PLANNED;
             $rescue->save();
-
             DB::commit();
-
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
         } catch (\Exception $e) {
             DB::rollBack();
