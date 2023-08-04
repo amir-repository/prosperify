@@ -24,7 +24,7 @@
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
                     <p class="text-sm">Created at {{ $rescue->created_at }}
                 </div>
-                <div class="mt-3 flex items-center gap-1 text-slate-500">
+                <div class="mt-3 flex items-center gap-1 text-slate-500 capitalize">
                     @include('rescues.partials.status-icon')
                     <p class="text-sm"> {{ $rescue->rescueStatus->name }}
                 </div>
@@ -122,7 +122,7 @@
                                             </div>
                                         </section>
                                         @if ($foodRescueStatus->id < 2)
-                                            <section class="mt-6">
+                                            <section class="mt-4">
                                                 <p>On <span>
                                                         @include('foods.partials.food-submit-photo-status')
                                                     </span> condition</p>
