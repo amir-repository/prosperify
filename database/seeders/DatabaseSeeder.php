@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
                 PointSeeder::class,
                 RescueStatusSeeder::class,
+                FoodRescueStatusSeeder::class,
                 UnitSeeder::class,
                 CategorySeeder::class,
                 SubCategorySeeder::class,

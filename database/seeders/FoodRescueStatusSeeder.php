@@ -13,31 +13,31 @@ class FoodRescueStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'planned',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'submitted',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'processed',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'assigned',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'taken',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'stored',
         ]);
 
-        DB::table('food_rescue_statues')->insert([
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'rejected',
         ]);
     }

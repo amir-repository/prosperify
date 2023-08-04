@@ -25,34 +25,8 @@
                     <p class="text-sm">Created at {{ $rescue->created_at }}
                 </div>
                 <div class="mt-3 flex items-center gap-1 text-slate-500">
-                    @if ($rescue->rescue_status_id == 1)
-                        <x-heroicon-o-bookmark class="w-[18px] h-[18px]" />
-                    @elseif ($rescue->rescue_status_id == 2)
-                        <x-heroicon-o-paper-airplane class="w-[18px] h-[18px]" />
-                    @elseif ($rescue->rescue_status_id == 3)
-                        <x-heroicon-o-cog class="w-[18px] h-[18px]" />
-                    @elseif ($rescue->rescue_status_id == 4)
-                        <x-heroicon-o-user-group class="w-[18px] h-[18px]" />
-                    @elseif ($rescue->rescue_status_id == 5)
-                        <x-heroicon-o-shield-check class="w-[18px] h-[18px]" />
-                    @else
-                        <x-heroicon-o-trash class="w-[18px] h-[18px]" />
-                    @endif
-                    <p class="text-sm">Rescue is <span>
-                            @if ($rescue->rescue_status_id == 1)
-                                Planned
-                            @elseif($rescue->rescue_status_id == 2)
-                                Submitted
-                            @elseif($rescue->rescue_status_id == 3)
-                                Processed
-                            @elseif($rescue->rescue_status_id == 4)
-                                Assigned
-                            @elseif($rescue->rescue_status_id == 5)
-                                Completed
-                            @elseif($rescue->rescue_status_id == 6)
-                                Rejected
-                            @endif
-                        </span>
+                    @include('rescues.partials.status-icon')
+                    <p class="text-sm"> {{ $rescue->rescueStatus->name }}
                 </div>
             </div>
         </div>
@@ -109,6 +83,10 @@
                     @else
                         <div class="mt-4">
                             @foreach ($rescue->foods as $food)
+                                @php
+                                    $foodRescueStatus = $food->pivot->foodRescueStatus;
+                                    $user = $food->pivot->user;
+                                @endphp
                                 <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
                                     <section class="p-6 border border-slate-200 rounded-md mb-4">
                                         <div class="flex items-center gap-4">
@@ -123,79 +101,30 @@
                                                 </h3>
                                                 <p class="text-slate-500">{{ $food->name }}</p>
                                                 <p class="text-xs text-slate-500">
-                                                    Exp. {{ Carbon\Carbon::parse($food->expired_date)->format('d M Y') }}
+                                                    Exp. {{ $food->expired_date }}
                                                 </p>
                                             </div>
                                         </div>
                                         <section class="flex items-center gap-2 mt-4">
                                             <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
-                                                @if ($food->pivot->food_rescue_status_id == 1)
-                                                    <x-heroicon-o-bookmark class="w-6 h-6" />
-                                                @elseif ($food->pivot->food_rescue_status_id == 2)
-                                                    <x-heroicon-o-paper-airplane class="w-6 h-6" />
-                                                @elseif ($food->pivot->food_rescue_status_id == 3)
-                                                    <x-heroicon-o-cog class="w-6 h-6" />
-                                                @elseif ($food->pivot->food_rescue_status_id == 4)
-                                                    <x-heroicon-o-user-group class="w-6 h-6" />
-                                                @elseif ($food->pivot->food_rescue_status_id == 5)
-                                                    <x-heroicon-o-truck class="w-6 h-6" />
-                                                @elseif ($food->pivot->food_rescue_status_id == 6)
-                                                    <x-heroicon-o-archive-box-arrow-down class="w-6 h-6" />
-                                                @else
-                                                    <x-heroicon-o-trash class="w-6 h-6" />
-                                                @endif
+                                                @include('foods.partials.food-status')
                                             </div>
                                             <div>
                                                 <p>
-                                                    <span>
-                                                        @php
-                                                            $foodRescueStatus = $food->pivot->food_rescue_status_id;
-                                                        @endphp
-                                                        @if ($foodRescueStatus == 1)
-                                                            Planned
-                                                        @elseif($foodRescueStatus == 2)
-                                                            Submitted
-                                                        @elseif($foodRescueStatus == 3)
-                                                            Processed
-                                                        @elseif($foodRescueStatus == 4)
-                                                            Assigned
-                                                        @elseif($foodRescueStatus == 5)
-                                                            Taken
-                                                        @elseif($foodRescueStatus == 6)
-                                                            Stored
-                                                        @elseif($foodRescueStatus == 7)
-                                                            Rejected
-                                                        @endif
-                                                    </span> by
-                                                    {{ $food->pivot->doer }}
+                                                    <span class="capitalize">{{ $foodRescueStatus->name }}</span>
+                                                    by
+                                                    {{ $user->name }}
                                                 </p>
                                                 <p class="text-xs text-slate-500 capitalize">
                                                     At
-                                                    {{ Carbon\Carbon::parse($food->pivot->updated_at)->format('d M Y H:i') }}
+                                                    {{ $food->pivot->updated_at }}
                                                 </p>
                                             </div>
                                         </section>
-                                        @if ($foodRescueStatus < 2)
+                                        @if ($foodRescueStatus->id < 2)
                                             <section class="mt-6">
                                                 <p>On <span>
-                                                        @php
-                                                            $foodRescueStatus = $food->pivot->food_rescue_status_id + 1;
-                                                        @endphp
-                                                        @if ($foodRescueStatus == 1)
-                                                            Planned
-                                                        @elseif($foodRescueStatus == 2)
-                                                            Submitted
-                                                        @elseif($foodRescueStatus == 3)
-                                                            Processed
-                                                        @elseif($foodRescueStatus == 4)
-                                                            Assigned
-                                                        @elseif($foodRescueStatus == 5)
-                                                            Taken
-                                                        @elseif($foodRescueStatus == 6)
-                                                            Stored
-                                                        @elseif($foodRescueStatus == 7)
-                                                            Rejected
-                                                        @endif
+                                                        @include('foods.partials.food-submit-photo-status')
                                                     </span> condition</p>
                                                 <input class="mt-2 w-full border border-slate-200 rounded-md p-2"
                                                     type="file" name="{{ $food->id }}-photo" required>

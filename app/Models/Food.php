@@ -20,12 +20,17 @@ class Food extends Model
     public const STORED = 6;
     public const REJECTED = 7;
 
-    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'stored_amount', 'photo', 'stored_at'];
+    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'stored_amount', 'photo', 'stored_amount', 'user_id', 'category_id', 'sub_category_id', 'unit_id'];
 
     protected function expiredDate(): Attribute
     {
         return Attribute::make(
             get: fn (string $value) => Carbon::parse($value)->format('d M Y')
         );
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

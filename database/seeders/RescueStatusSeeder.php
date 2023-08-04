@@ -31,6 +31,10 @@ class RescueStatusSeeder extends Seeder
         ]);
 
         DB::table('rescue_statuses')->insert([
+            'name' => 'incompleted',
+        ]);
+
+        DB::table('rescue_statuses')->insert([
             'name' => 'completed',
         ]);
 

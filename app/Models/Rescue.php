@@ -37,6 +37,11 @@ class Rescue extends Model
 
     public function foods()
     {
-        return $this->belongsToMany(Food::class);
+        return $this->belongsToMany(Food::class)->withPivot('food_rescue_status_id', 'user_id', 'updated_at')->using(FoodRescue::class);
+    }
+
+    public function rescueStatus()
+    {
+        return $this->belongsTo(RescueStatus::class);
     }
 }

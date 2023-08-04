@@ -43,7 +43,6 @@
                 <p class="text-sm flex gap-1">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
                     {{ $food->expired_date }}
-
                 </p>
             </div>
             @hasanyrole('volunteer|admin')
@@ -59,46 +58,27 @@
         </div>
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">History</h2>
-            @foreach ($foodRescueUsers as $foodRescueUser)
+            @foreach ($foodRescueLogs as $food)
                 <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
                     <div>
-                        <img class="w-[72px] h-[72px] rounded-md object-cover"
-                            src="{{ asset("storage/$foodRescueUser->photo") }}" alt="">
+                        <img class="w-[72px] h-[72px] rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
+                            alt="">
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold">
-                            {{ $foodRescueUser->amount }}.<span class="text-base">{{ $foodRescueUser->unit->name }}</span>
+                            {{ $food->amount }}.<span class="text-base">{{ $food->unit_name }}</span>
                         </h3>
-                        <p class="text-slate-500">
-                            {{ $foodRescueUser->user->name }}</p>
+                        <p class="text-slate-500">{{ $food->actor_name }}</p>
                         <p class="text-xs text-slate-500">
                             <span class="capitalize">
-                                @php
-                                    $foodRescueStatus = $foodRescueUser->food_rescue_status_id;
-                                @endphp
-                                @if ($foodRescueStatus == 1)
-                                    Planned
-                                @elseif($foodRescueStatus == 2)
-                                    Submitted
-                                @elseif($foodRescueStatus == 3)
-                                    Processed
-                                @elseif($foodRescueStatus == 4)
-                                    Assigned
-                                @elseif($foodRescueStatus == 5)
-                                    Taken
-                                @elseif($foodRescueStatus == 6)
-                                    Stored
-                                @elseif($foodRescueStatus == 7)
-                                    Rejected
-                                @endif
+                                {{ $food->food_rescue_status_name }}
                             </span>
                             at
-                            {{ $foodRescueUser->created_at }}
+                            {{ $food->created_at }}
                         </p>
                     </div>
                 </section>
             @endforeach
-
         </div>
     </main>
 @endsection
