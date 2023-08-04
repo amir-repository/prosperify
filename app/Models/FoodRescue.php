@@ -30,6 +30,11 @@ class FoodRescue extends Pivot
         return $this->belongsTo(FoodRescueStatus::class);
     }
 
+    public function food()
+    {
+        return $this->belongsTo(Food::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

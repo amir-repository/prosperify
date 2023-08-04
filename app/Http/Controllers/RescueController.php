@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRescueRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
+use App\Models\FoodRescueLog;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Point;
@@ -164,37 +165,25 @@ class RescueController extends Controller
             foreach ($rescue->foods as $food) {
                 $foodRescueID = $food->pivot->id;
                 $foodRescue = FoodRescue::find($foodRescueID);
-                $foodRescue->food_rescue_status_id = $request->status;
                 $foodRescue->user_id = $user->id;
-                $foodRescue->doer = $user->name;
+                $foodRescue->food_rescue_status_id = $request->status;
                 $foodRescue->save();
 
-                $food = Food::find($foodRescue->food_id);
+                $food = $foodRescue->food;
 
-                $foodRescueUser = new FoodRescueUser();
-                $foodRescueUser->user_id = $user->id;
-                $foodRescueUser->food_rescue_id = $foodRescue->id;
-                $foodRescueUser->amount = $food->amount;
-                $foodRescueUser->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
-                $foodRescueUser->food_rescue_status_id = $request->status;
-                $foodRescueUser->unit_id = $food->unit_id;
-                $foodRescueUser->save();
-
-                if ((int)$request->status === Rescue::ASSIGNED) {
-                    $rescueUser = new RescueUser();
-                    $rescueUser->user_id = $this->getVolunteerID($request, $food->id);
-                    $rescueUser->rescue_id = $rescue->id;
-                    $rescueUser->assigner_id = $user->id;
-                    $rescueUser->save();
-
-                    $foodRescue->rescue_user_id = $rescueUser->id;
-                    $foodRescue->save();
-
-                    $foodVault = new FoodVault();
-                    $foodVault->food_id = $food->id;
-                    $foodVault->vault_id = $this->getVaultID($request, $food->id);
-                    $foodVault->save();
-                }
+                $foodRescueLog = new FoodRescueLog();
+                $foodRescueLog->rescue_id = $rescue->id;
+                $foodRescueLog->food_id = $food->id;
+                $foodRescueLog->actor_id = $foodRescue->user_id;
+                $foodRescueLog->actor_name = $foodRescue->user->name;
+                $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+                $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
+                $foodRescueLog->amount = $food->amount;
+                $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+                $foodRescueLog->unit_id = $food->unit_id;
+                $foodRescueLog->unit_name = $food->unit->name;
+                $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
+                $foodRescueLog->save();
             }
             DB::commit();
         } catch (\Exception $e) {
