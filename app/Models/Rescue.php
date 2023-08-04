@@ -44,4 +44,9 @@ class Rescue extends Model
     {
         return $this->belongsTo(RescueStatus::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

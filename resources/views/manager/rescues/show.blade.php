@@ -45,7 +45,7 @@
             @else
                 <x-heroicon-o-trash class="w-[18px] h-[18px]" />
             @endif
-            <p class="text-sm">{{ $rescue->title }} is <span>
+            <p class="text-sm"><span>
                     @if ($rescue->rescue_status_id == 1)
                         Planned
                     @elseif($rescue->rescue_status_id == 2)
@@ -181,7 +181,7 @@
                                                             Rejected
                                                         @endif
                                                     </span> by
-                                                    {{ $food->pivot->doer }}
+                                                    {{ $food->pivot->user->name }}
                                                 </p>
                                                 <p class="text-xs text-slate-500 capitalize">
                                                     At
