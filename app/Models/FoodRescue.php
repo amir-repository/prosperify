@@ -16,7 +16,7 @@ class FoodRescue extends Pivot
 
     protected $table = 'food_rescue';
 
-    protected $fillable = ['rescue_id', 'food_id', 'user_id', 'food_rescue_status_id', 'assigner_id', 'volunteer_id', 'amount_plan', 'amount_result'];
+    protected $fillable = ['rescue_id', 'food_id', 'user_id', 'food_rescue_status_id', 'assigner_id', 'volunteer_id', 'vault_id', 'amount_plan', 'amount_result'];
 
     protected function updatedAt(): Attribute
     {
@@ -36,6 +36,16 @@ class FoodRescue extends Pivot
     }
 
     public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function vault()
+    {
+        return $this->belongsTo(Vault::class);
+    }
+
+    public function volunteer()
     {
         return $this->belongsTo(User::class);
     }

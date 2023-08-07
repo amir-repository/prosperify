@@ -22,6 +22,7 @@ return new class extends Migration
             );
             $table->foreignId('assigner_id')->nullable();
             $table->foreignId('volunteer_id')->nullable();
+            $table->foreignId('vault_id')->nullable()->constrained();
             $table->integer('amount_plan');
             $table->integer('amount_result')->nullable();
             $table->timestamps();

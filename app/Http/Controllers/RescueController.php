@@ -30,7 +30,8 @@ class RescueController extends Controller
     {
         $user = auth()->user();
         $donor = $user->hasRole(User::DONOR);
-        $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
+        $manager = $user->hasRole(User::ADMIN);
+        $volunteer = $user->hasRole(User::VOLUNTEER);
 
         if ($donor) {
             $userID = auth()->user()->id;
@@ -55,6 +56,7 @@ class RescueController extends Controller
             $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
+        } else if ($volunteer) {
         }
     }
 
@@ -109,7 +111,7 @@ class RescueController extends Controller
         } else if ($manager) {
             $volunteers = [];
             $vaults = [];
-            if ($rescue->rescue_status_id >= 3) {
+            if ($rescue->rescue_status_id === 3) {
                 $volunteers = User::role(User::VOLUNTEER)->get();
                 $vaults = Vault::all();
             }
@@ -160,16 +162,32 @@ class RescueController extends Controller
         try {
             DB::beginTransaction();
             $rescue->rescue_status_id = $request->status;
+
+            if ((int)$request->status === Rescue::ASSIGNED) {
+                $rescue->food_rescue_plan = count($rescue->foods);
+            }
+
             $rescue->save();
 
             foreach ($rescue->foods as $food) {
+                if ((int)$request->status === Food::TAKEN && $food->pivot->volunteer_id !== $user->id) {
+                    continue;
+                }
+
                 $foodRescueID = $food->pivot->id;
                 $foodRescue = FoodRescue::find($foodRescueID);
                 $foodRescue->user_id = $user->id;
-                $foodRescue->food_rescue_status_id = $request->status;
-                $foodRescue->save();
+                $foodRescue->food_rescue_status_id = (int)$request->status === $foodRescue->food_rescue_status_id ? Food::STORED : $request->status;
 
                 $food = $foodRescue->food;
+
+                if ((int)$request->status === Food::ASSIGNED) {
+                    $foodRescue->assigner_id = $user->id;
+                    $foodRescue->volunteer_id = $this->getVolunteerID($request, $food->id);
+                    $foodRescue->vault_id = $this->getVaultID($request, $food->id);
+                }
+
+                $foodRescue->save();
 
                 $foodRescueLog = new FoodRescueLog();
                 $foodRescueLog->rescue_id = $rescue->id;
@@ -183,7 +201,36 @@ class RescueController extends Controller
                 $foodRescueLog->unit_id = $food->unit_id;
                 $foodRescueLog->unit_name = $food->unit->name;
                 $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
+
+                if ((int)$request->status === Food::ASSIGNED && (int)$request->status === Food::TAKEN) {
+                    $foodRescueLog->assigner_id = $user->id;
+                    $foodRescueLog->assigner_name = $user->name;
+                    $foodRescueLog->volunteer_id = $this->getVolunteerID($request, $food->id);
+                    $foodRescueLog->volunteer_name = User::find($foodRescueLog->volunteer_id)->name;
+                    $foodRescueLog->vault_id = $this->getVaultID($request, $food->id);
+                    $foodRescueLog->vault_name = Vault::find($foodRescueLog->vault_id)->name;
+                }
                 $foodRescueLog->save();
+
+                // when food is stored, increment the food_rescue_result
+                if ($foodRescue->food_rescue_status_id === Food::STORED) {
+                    $rescue->food_rescue_result = $rescue->food_rescue_result + 1;
+                    $rescue->save();
+
+                    $foodRescue->amount_result = $foodRescueLog->amount;
+                    $foodRescue->save();
+
+                    $food->stored_at = Carbon::now();
+                    $food->stored_amount = $foodRescue->amount_result;
+                    $food->save();
+
+                    // check if rescue completed
+                    $rescueCompleted = $rescue->food_rescue_result === $rescue->food_rescue_plan;
+                    if ($rescueCompleted) {
+                        $rescue->rescue_status_id = Rescue::COMPLETED;
+                        $rescue->save();
+                    }
+                }
             }
             DB::commit();
         } catch (\Exception $e) {

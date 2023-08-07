@@ -28,6 +28,8 @@ return new class extends Migration
             $table->unsignedInteger('unit_id');
             $table->string('unit_name');
             $table->string('photo');
+            $table->unsignedBigInteger('vault_id')->nullable();
+            $table->string('vault_name')->nullable();
             $table->timestamps();
         });
     }

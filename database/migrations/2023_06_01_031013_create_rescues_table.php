@@ -22,7 +22,7 @@ return new class extends Migration
             $table->dateTime('rescue_date');
             $table->integer('score')->nullable();
             $table->integer('food_rescue_plan')->default(0);
-            $table->integer('food_rescue_result')->nullable();
+            $table->integer('food_rescue_result')->default(0);
             $table->foreignId('user_id')->constrained();
             $table->foreignId('rescue_status_id')->constrained();
             $table->timestamps();
