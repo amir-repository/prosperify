@@ -2,15 +2,36 @@
 
 @section('main')
     <main class="p-6 text-slate-900">
-        <div class="flex items-center justify-between">
+        <div class="flex justify-between">
             <div class="flex items-center justify-between">
-                <a class="flex items-center gap-2" href="{{ route('rescues.edit', ['rescue' => $rescue]) }}">
+                @php
+                    $rescueNotRejected = $rescue->rescue_status_id !== 7;
+                @endphp
+                <a class="flex items-center gap-2"
+                    @if ($rescueNotRejected) href="{{ route('rescues.edit', ['rescue' => $rescue]) }}" @endif>
                     <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
-                    <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                    @if ($rescueNotRejected)
+                        <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                    @endif
                 </a>
-                @if ($rescue->rescue_status_id === 1)
-                    <form onclick="return confirm('Are you sure?')"
-                        action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
+            </div>
+            @php
+                $rescueIsSubmitted = $rescue->rescue_status_id === 2;
+            @endphp
+            @if ($rescueIsSubmitted)
+                <div>
+                    <form action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post">
+                        @csrf
+                        @method('put')
+                        <input type="text" name="status" value="7" hidden>
+
+                        <Button
+                            class="block py-2 px-3 w-full rounded-md bg-white mt-4 text-sm font-medium text-slate-900 border border-slate-300">Reject</Button>
+                    </form>
+                </div>
+            @else
+                @if ($rescueNotRejected)
+                    <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
                         @csrf
                         @method('delete')
                         <button class="w-8 h-8 flex items-center justify-center">
@@ -18,14 +39,7 @@
                         </button>
                     </form>
                 @endif
-            </div>
-            <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
-                @csrf
-                @method('delete')
-                <button class="w-8 h-8 flex items-center justify-center">
-                    <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                </button>
-            </form>
+            @endif
         </div>
         <div class="mt-3 flex items-center gap-1 text-slate-500">
             <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
@@ -34,7 +48,7 @@
         <div class="mt-3 flex items-center gap-1 text-slate-500">
             @include('rescues.partials.status-icon')
 
-            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4)
+            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4 && $rescue->rescue_status_id !== 7)
                     <span>({{ $rescue->food_rescue_result }}/{{ $rescue->food_rescue_plan }})</span>
                 @endif
             </p>
@@ -97,7 +111,8 @@
                         <p class="mt-6 font-medium text-center">There's no food here yet</p>
                         <div class="flex justify-center mt-3">
                             <a href="{{ route('rescues.foods.create', ['rescue' => $rescue]) }}"
-                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Add a new food</a>
+                                class="py-2 px-4 rounded-md bg-slate-900 text-white font-medium text-sm">Add a new
+                                food</a>
                         </div>
                     @else
                         <div class="mt-4">
@@ -145,77 +160,85 @@
                                                     </p>
                                                 </div>
                                             </section>
-                                            @if ($rescue->rescue_status_id === 3)
-                                                <section class="flex justify-between">
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Volunteer
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer"
-                                                                required>
-                                                                @foreach ($volunteers as $volunteer)
-                                                                    <option value="{{ $volunteer->id }}">
-                                                                        {{ $volunteer->name }}
+                                            @php
+                                                $rescueNotRejected = $rescue->rescue_status_id !== 7;
+                                            @endphp
+                                            @if ($rescueNotRejected)
+                                                @if ($rescue->rescue_status_id === 3)
+                                                    <section class="flex justify-between">
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Volunteer
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-volunteer_id"
+                                                                    id="volunteer" required>
+                                                                    @foreach ($volunteers as $volunteer)
+                                                                        <option value="{{ $volunteer->id }}">
+                                                                            {{ $volunteer->name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Vaults
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-vault_id" id="vault"
+                                                                    required>
+                                                                    @foreach ($vaults as $vault)
+                                                                        <option value="{{ $vault->id }}">
+                                                                            {{ $vault->name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                @elseif($rescue->rescue_status_id > 3)
+                                                    <section class="flex justify-between">
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Volunteer
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-volunteer_id"
+                                                                    id="volunteer" disabled>
+                                                                    <option>
+                                                                        {{ $food->pivot->volunteer->name }}
                                                                     </option>
-                                                                @endforeach
-                                                            </select>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Vaults
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-vault_id" id="vault"
-                                                                required>
-                                                                @foreach ($vaults as $vault)
-                                                                    <option value="{{ $vault->id }}">
-                                                                        {{ $vault->name }}
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Vaults
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-vault_id" id="vault"
+                                                                    disabled>
+                                                                    <option value="">
+                                                                        {{ $food->pivot->vault->name }}
                                                                     </option>
-                                                                @endforeach
-                                                            </select>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </section>
-                                            @elseif($rescue->rescue_status_id > 3)
-                                                <section class="flex justify-between">
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Volunteer
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer"
-                                                                disabled>
-                                                                <option>
-                                                                    {{ $food->pivot->volunteer->name }}
-                                                                </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Vaults
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-vault_id" id="vault"
-                                                                disabled>
-                                                                <option value="">
-                                                                    {{ $food->pivot->vault->name }}
-                                                                </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </section>
+                                                    </section>
+                                                @endif
                                             @endif
 
                                             @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id < 6)
                                                 @role('volunteer')
-                                                    @if ($food->pivot->foodRescueStatus->id < 6)
+                                                    @php
+                                                        $foodRescueStatus = $food->pivot->foodRescueStatus;
+                                                    @endphp
+                                                    @if ($foodRescueStatus->id < 6)
                                                         <p class="mt-4 text-sm font-medium">Photo when it's
-                                                            @if ($rescue->rescue_status_id === 4)
+                                                            @if ($foodRescueStatus->id === 4)
                                                                 taken
-                                                            @elseif($rescue->rescue_status_id === 5)
+                                                            @elseif($foodRescueStatus->id === 5)
                                                                 stored
                                                             @endif
                                                         </p>
@@ -226,9 +249,9 @@
                                                         </div>
                                                         <button
                                                             class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
-                                                            @if ($rescue->rescue_status_id === 4)
+                                                            @if ($foodRescueStatus->id === 4)
                                                                 Take
-                                                            @elseif($rescue->rescue_status_id === 5)
+                                                            @elseif($foodRescueStatus->id === 5)
                                                                 Store
                                                             @endif
                                                         </button>

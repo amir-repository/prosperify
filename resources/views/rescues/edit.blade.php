@@ -1,5 +1,8 @@
-@extends('layouts.index')
-
+@extends(
+    auth()->user()->hasRole('donor')
+        ? 'layouts.index'
+        : 'layouts.manager.index'
+)
 @section('main')
     <main class="px-6">
         <form action="{{ route('rescues.update', ['rescue' => $rescue]) }}" method="post">

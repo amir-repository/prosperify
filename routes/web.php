@@ -46,7 +46,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::resource('rescues', RescueController::class);
-Route::put('/rescues/{rescue}', [RescueController::class, 'updateStatus'])->name('rescues.update.status');
+Route::put('/rescues/{rescue}/status', [RescueController::class, 'updateStatus'])->name('rescues.update.status');
 Route::resource('rescues.foods', FoodController::class);
 Route::resource('donations', DonationController::class);
 Route::resource('donations.foods', FoodDonationController::class);

@@ -4,6 +4,14 @@
         : 'layouts.manager.index'
 )
 
+@php
+    $rescueNotRejected = $rescue->rescue_status_id !== 7;
+    $rescueSubmitted = $rescue->rescue_status_id < 3;
+    $manager = auth()
+        ->user()
+        ->hasAnyRole(['admin', 'volunteer']);
+@endphp
+
 @section('main')
     <main class="p-6 text-slate-900">
         <div>
@@ -13,27 +21,16 @@
             </div>
             <div class="flex items-end justify-between">
                 <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
-                @hasanyrole('volunteer|admin')
-                    <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
+                @if (($rescueNotRejected && $rescueSubmitted) || $manager)
+                    <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
+                        method="post">
                         @csrf
                         @method('delete')
                         <button class="w-8 h-8 flex items-center justify-center">
                             <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
                         </button>
                     </form>
-                @else
-                    @if (in_array($rescue->rescue_status_id, [1]))
-                        <form onclick="return confirm('Are you sure?')"
-                            action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
-                            method="post">
-                            @csrf
-                            @method('delete')
-                            <button class="w-8 h-8 flex items-center justify-center">
-                                <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                            </button>
-                        </form>
-                    @endif
-                @endhasanyrole
+                @endif
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
@@ -45,15 +42,10 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
-            @hasanyrole('volunteer|admin')
+            @if (($rescueNotRejected && $rescueSubmitted) || $manager)
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
                     class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
-            @else
-                @if (in_array($rescue->rescue_status_id, [1]))
-                    <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
-                        class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
-                @endif
-            @endhasanyrole
+            @endif
 
         </div>
         <div class="mt-8">

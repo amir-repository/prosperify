@@ -18,7 +18,6 @@ return new class extends Migration
             $table->dateTime('donation_date');
             $table->foreignId('donation_status_id');
             $table->foreignId('recipient_id');
-            $table->softDeletes();
             $table->timestamps();
         });
     }

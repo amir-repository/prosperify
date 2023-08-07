@@ -11,6 +11,7 @@ use App\Models\FoodVault;
 use App\Models\Point;
 use App\Models\PointRescueUser;
 use App\Models\Rescue;
+use App\Models\RescueLog;
 use App\Models\RescueUser;
 use App\Models\User;
 use App\Models\Vault;
@@ -80,6 +81,7 @@ class RescueController extends Controller
     public function store(StoreRescueRequest $request)
     {
         $validated = $request->validated();
+        $user = auth()->user();
 
         try {
             DB::beginTransaction();
@@ -89,6 +91,23 @@ class RescueController extends Controller
             $rescue->user_id = auth()->user()->id;
             $rescue->rescue_status_id = Rescue::PLANNED;
             $rescue->save();
+
+            $rescueLog = new RescueLog();
+            $rescueLog->rescue_id = $rescue->id;
+            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+            $rescueLog->actor_id = $user->id;
+            $rescueLog->actor_name = $user->name;
+            $rescueLog->donor_name = $rescue->donor_name;
+            $rescueLog->pickup_address = $rescue->pickup_address;
+            $rescueLog->phone = $rescue->phone;
+            $rescueLog->email = $rescue->email;
+            $rescueLog->title = $rescue->title;
+            $rescueLog->description = $rescue->description;
+            $rescueLog->rescue_date = $request->rescue_date;
+            $rescueLog->user_id = $rescue->user_id;
+            $rescueLog->save();
+
             DB::commit();
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
         } catch (\Exception $e) {
@@ -125,7 +144,11 @@ class RescueController extends Controller
     public function edit(Rescue $rescue)
     {
         $user = auth()->user();
-        if (!$user->hasRole('donor')) {
+        if (!$user->hasAnyRole(['donor', 'admin'])) {
+            abort(403);
+        }
+
+        if ($user->hasRole('donor') && $rescue->rescue_status_id === Rescue::SUBMITTED) {
             abort(403);
         }
 
@@ -138,12 +161,29 @@ class RescueController extends Controller
      */
     public function update(Request $request, Rescue $rescue)
     {
+        $user = auth()->user();
         try {
             DB::beginTransaction();
 
             $attributes = $request->only(['title', 'description', 'pickup_address', 'rescue_date', 'donor_name', 'phone', 'email']);
             $rescue->fill($attributes);
             $rescue->save();
+
+            $rescueLog = new RescueLog();
+            $rescueLog->rescue_id = $rescue->id;
+            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+            $rescueLog->actor_id = $user->id;
+            $rescueLog->actor_name = $user->name;
+            $rescueLog->donor_name = $rescue->donor_name;
+            $rescueLog->pickup_address = $rescue->pickup_address;
+            $rescueLog->phone = $rescue->phone;
+            $rescueLog->email = $rescue->email;
+            $rescueLog->title = $rescue->title;
+            $rescueLog->description = $rescue->description;
+            $rescueLog->rescue_date = $request->rescue_date;
+            $rescueLog->user_id = $rescue->user_id;
+            $rescueLog->save();
 
             DB::commit();
         } catch (\Exception $e) {
@@ -159,8 +199,60 @@ class RescueController extends Controller
         $user = auth()->user();
         $isPhotoInRequest = count($request->file());
 
+        if ((int)$request->status === Rescue::REJECTED) {
+            try {
+                DB::beginTransaction();
+                $rescue->rescue_status_id = Rescue::REJECTED;
+                $rescue->save();
+
+                // save rescue logs
+                $rescueLog = new RescueLog();
+                $rescueLog->rescue_id = $rescue->id;
+                $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+                $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+                $rescueLog->actor_id = $user->id;
+                $rescueLog->actor_name = $user->name;
+                $rescueLog->donor_name = $rescue->donor_name;
+                $rescueLog->pickup_address = $rescue->pickup_address;
+                $rescueLog->phone = $rescue->phone;
+                $rescueLog->email = $rescue->email;
+                $rescueLog->title = $rescue->title;
+                $rescueLog->description = $rescue->description;
+                $rescueLog->rescue_date = Carbon::createFromFormat('d M Y H:i', $rescue->rescue_date);
+                $rescueLog->user_id = $rescue->user_id;
+                $rescueLog->save();
+
+                foreach ($rescue->foods as $food) {
+                    $foodRescueID = $food->pivot->id;
+                    $foodRescue = FoodRescue::find($foodRescueID);
+                    $foodRescue->food_rescue_status_id = Food::REJECTED;
+                    $foodRescue->save();
+
+                    $foodRescueLog = new FoodRescueLog();
+                    $foodRescueLog->rescue_id = $rescue->id;
+                    $foodRescueLog->food_id = $food->id;
+                    $foodRescueLog->actor_id = $user->id;
+                    $foodRescueLog->actor_name = $user->name;
+                    $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+                    $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
+                    $foodRescueLog->amount = $food->amount;
+                    $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+                    $foodRescueLog->unit_id = $food->unit_id;
+                    $foodRescueLog->unit_name = $food->unit->name;
+                    $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
+                    $foodRescueLog->save();
+                }
+                DB::commit();
+            } catch (\Exception $e) {
+                throw $e;
+                DB::rollBack();
+            }
+            return redirect()->route('rescues.show', ['rescue' => $rescue]);
+        }
+
         try {
             DB::beginTransaction();
+
             $rescue->rescue_status_id = $request->status;
 
             if ((int)$request->status === Rescue::ASSIGNED) {
@@ -168,6 +260,23 @@ class RescueController extends Controller
             }
 
             $rescue->save();
+
+            // save rescue logs
+            $rescueLog = new RescueLog();
+            $rescueLog->rescue_id = $rescue->id;
+            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+            $rescueLog->actor_id = $user->id;
+            $rescueLog->actor_name = $user->name;
+            $rescueLog->donor_name = $rescue->donor_name;
+            $rescueLog->pickup_address = $rescue->pickup_address;
+            $rescueLog->phone = $rescue->phone;
+            $rescueLog->email = $rescue->email;
+            $rescueLog->title = $rescue->title;
+            $rescueLog->description = $rescue->description;
+            $rescueLog->rescue_date = Carbon::createFromFormat('d M Y H:i', $rescue->rescue_date);
+            $rescueLog->user_id = $rescue->user_id;
+            $rescueLog->save();
 
             foreach ($rescue->foods as $food) {
                 if ((int)$request->status === Food::TAKEN && $food->pivot->volunteer_id !== $user->id) {

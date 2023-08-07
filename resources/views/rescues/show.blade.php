@@ -5,11 +5,18 @@
         <div>
             <div>
                 <div class="flex items-center justify-between">
-                    <a class="flex items-center gap-2" href="{{ route('rescues.edit', ['rescue' => $rescue]) }}">
+                    @php
+                        $rescueStatus = $rescue->rescue_status_id;
+                        $rescuePlanned = $rescueStatus === 1;
+                    @endphp
+                    <a class="flex items-center gap-2"
+                        @if ($rescuePlanned) href="{{ route('rescues.edit', ['rescue' => $rescue]) }}" @endif>
                         <h1 class="text-2xl font-bold">{{ $rescue->title }}</h1>
-                        <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                        @if ($rescuePlanned)
+                            <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                        @endif
                     </a>
-                    @if ($rescue->rescue_status_id === 1)
+                    @if ($rescuePlanned)
                         <form onclick="return confirm('Are you sure?')"
                             action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
                             @csrf
@@ -120,6 +127,38 @@
                                                     {{ $food->pivot->updated_at }}
                                                 </p>
                                             </div>
+                                        </section>
+                                        <section>
+                                            @if ($rescue->rescue_status_id > 3)
+                                                <section class="flex justify-between">
+                                                    <div>
+                                                        <p class="mt-4 text-sm font-medium">Volunteer
+                                                        </p>
+                                                        <div class="mt-2">
+                                                            <select class="rounded-md border border-slate-300"
+                                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer"
+                                                                disabled>
+                                                                <option>
+                                                                    {{ $food->pivot->volunteer->name }}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="mt-4 text-sm font-medium">Vaults
+                                                        </p>
+                                                        <div class="mt-2">
+                                                            <select class="rounded-md border border-slate-300"
+                                                                name="food-{{ $food->id }}-vault_id" id="vault"
+                                                                disabled>
+                                                                <option value="">
+                                                                    {{ $food->pivot->vault->name }}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            @endif
                                         </section>
                                         @if ($foodRescueStatus->id < 2)
                                             <section class="mt-4">
