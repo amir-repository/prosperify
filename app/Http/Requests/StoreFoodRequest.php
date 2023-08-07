@@ -13,7 +13,7 @@ class StoreFoodRequest extends FormRequest
     public function authorize(): bool
     {
         $user = auth()->user();
-        return $user->hasAnyRole(['donor', 'admin']);
+        return $user->hasAnyRole(['donor', 'admin', 'volunteer']);
     }
 
     /**

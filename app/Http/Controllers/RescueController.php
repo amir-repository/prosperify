@@ -6,6 +6,7 @@ use App\Http\Requests\StoreRescueRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueLog;
+use App\Models\FoodRescuePoint;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Point;
@@ -339,6 +340,19 @@ class RescueController extends Controller
                     $food->stored_at = Carbon::now();
                     $food->stored_amount = $foodRescue->amount_result;
                     $food->save();
+
+                    // add point to user
+                    $point = Point::where('user_id', $food->user_id)->first();
+                    $point->point = $point->point + $food->stored_amount;
+                    $point->save();
+
+                    // save point logs
+                    $fooRescuePoint = new FoodRescuePoint();
+                    $fooRescuePoint->point_id = $point->id;
+                    $fooRescuePoint->rescue_id = $rescue->id;
+                    $fooRescuePoint->food_id = $food->id;
+                    $fooRescuePoint->point = $food->stored_amount;
+                    $fooRescuePoint->save();
 
                     // check if rescue completed
                     $rescueCompleted = $rescue->food_rescue_result === $rescue->food_rescue_plan;
