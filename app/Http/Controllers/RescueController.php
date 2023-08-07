@@ -174,6 +174,13 @@ class RescueController extends Controller
                     continue;
                 }
 
+                if (in_array((int)$request->status, [Food::TAKEN, Food::STORED])) {
+                    $takenorSavedPhotoID = explode('-', array_keys($request->file())[0])[0];
+                    if ((int)$takenorSavedPhotoID !== $food->pivot->food_id) {
+                        continue;
+                    }
+                }
+
                 $foodRescueID = $food->pivot->id;
                 $foodRescue = FoodRescue::find($foodRescueID);
                 $foodRescue->user_id = $user->id;
@@ -285,6 +292,11 @@ class RescueController extends Controller
     private function getVaultID($request, $foodID)
     {
         return $request["food-$foodID-vault_id"];
+    }
+
+    private function getFoodID($request)
+    {
+        dd($request);
     }
 
     private function filterSearch($collections, $filterValue)

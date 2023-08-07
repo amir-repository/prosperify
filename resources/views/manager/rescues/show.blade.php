@@ -221,7 +221,8 @@
                                                         </p>
                                                         <div class="border mt-2 rounded-md">
                                                             <input class="p-2" type="file"
-                                                                name="{{ $food->id }}-photo" required>
+                                                                name="{{ $food->id }}-photo"
+                                                                {{ in_array($rescue->rescue_status_id, [4, 5]) ? '' : 'required' }}>
                                                         </div>
                                                         <button
                                                             class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
