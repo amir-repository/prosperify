@@ -30,16 +30,6 @@
                             class="block py-2 px-3 w-full rounded-md bg-white mt-4 text-sm font-medium text-slate-900 border border-slate-300">Reject</Button>
                     </form>
                 </div>
-            @else
-                @if ($rescueNotRejected && $rescueNotCompleted)
-                    <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
-                        @csrf
-                        @method('delete')
-                        <button class="w-8 h-8 flex items-center justify-center">
-                            <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                        </button>
-                    </form>
-                @endif
             @endif
         </div>
         <div class="mt-3 flex items-center gap-1 text-slate-500">
@@ -48,7 +38,6 @@
         </div>
         <div class="mt-3 flex items-center gap-1 text-slate-500">
             @include('rescues.partials.status-icon')
-
             <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4 && $rescue->rescue_status_id !== 7 && $rescue->rescue_status_id !== 8)
                     <span>({{ $rescue->food_rescue_result }}/{{ $rescue->food_rescue_plan }})</span>
                 @endif
