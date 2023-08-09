@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <p>{{ $rescue->donor_name }}</p>
-                        <p class="text-xs text-slate-500 capitalize">Donor</p>
+                        <p class="text-xs text-slate-500 capitalize">Donor - {{ $rescue->phone }}</p>
                     </div>
                 </section>
                 <section class="mt-6">
