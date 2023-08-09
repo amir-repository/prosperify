@@ -7,7 +7,9 @@
 @php
     $rescueNotRejected = $rescue->rescue_status_id !== 7;
     $foodNotCanceled = !$food->canceled_at;
+    $foodNotRejected = !$food->rejected_at;
     $rescueSubmitted = $rescue->rescue_status_id < 3;
+    $rescueNotFailed = $rescue->rescue_status_id !== 8;
     $manager = auth()
         ->user()
         ->hasAnyRole(['admin', 'volunteer']);
@@ -22,7 +24,9 @@
             </div>
             <div class="flex items-end justify-between">
                 <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
-                @if (($rescueNotRejected && $rescueSubmitted && $foodNotCanceled) || ($manager && $foodNotCanceled))
+                @if (
+                    ($rescueNotRejected && $rescueSubmitted && $foodNotCanceled && $rescueNotFailed && $foodNotRejected) ||
+                        ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected))
                     <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
                         method="post">
                         @csrf
@@ -43,7 +47,9 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
-            @if (($rescueNotRejected && $rescueSubmitted && $foodNotCanceled) || ($manager && $foodNotCanceled))
+            @if (
+                ($rescueNotRejected && $rescueSubmitted && $foodNotCanceled && $rescueNotFailed && $foodNotRejected) ||
+                    ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected))
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
                     class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
             @endif

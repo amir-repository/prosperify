@@ -242,6 +242,31 @@ class FoodController extends Controller
                 $foodRescueLog->photo = $food->photo;
                 $foodRescueLog->save();
 
+
+                if ($rescue->rescue_status_id >= Rescue::ASSIGNED) {
+                    $rescue->food_rescue_plan = $rescue->food_rescue_plan - 1;
+                    $rescue->save();
+
+                    $rescueLog = new RescueLog();
+                    $rescueLog->rescue_id = $rescue->id;
+                    $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+                    $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+                    $rescueLog->actor_id = $user->id;
+                    $rescueLog->actor_name = $user->name;
+                    $rescueLog->food_rescue_plan = $rescue->food_rescue_plan;
+                    $rescueLog->donor_name = $rescue->donor_name;
+                    $rescueLog->pickup_address = $rescue->pickup_address;
+                    $rescueLog->phone = $rescue->phone;
+                    $rescueLog->email = $rescue->email;
+                    $rescueLog->title = $rescue->title;
+                    $rescueLog->description = $rescue->description;
+                    $rescueLog->rescue_date = $rescue->rescue_date;
+                    $rescueLog->score = $rescue->score;
+                    $rescue->user_id = $rescue->user_id;
+                    $rescue->save();
+                }
+
+
                 // check if rescue has no food to rescue,
                 // it it so, change rescue to failed;
                 $ifNoFoodToRescue = $rescue->foods->filter(fn ($food) => $food->canceled_at === null && $food->rejected_at === null)->isEmpty();
