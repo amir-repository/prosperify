@@ -10,9 +10,13 @@
     $foodNotRejected = !$food->rejected_at;
     $rescueSubmitted = $rescue->rescue_status_id < 3;
     $rescueNotFailed = $rescue->rescue_status_id !== 8;
+    $foodNotStored = $rescue->rescue_status_id !== 6;
     $manager = auth()
         ->user()
         ->hasAnyRole(['admin', 'volunteer']);
+    $admin = auth()
+        ->user()
+        ->hasRole('admin');
 @endphp
 
 @section('main')
@@ -25,8 +29,13 @@
             <div class="flex items-end justify-between">
                 <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
                 @if (
-                    ($rescueNotRejected && $rescueSubmitted && $foodNotCanceled && $rescueNotFailed && $foodNotRejected) ||
-                        ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected))
+                    ($rescueNotRejected &&
+                        $rescueSubmitted &&
+                        $foodNotCanceled &&
+                        $rescueNotFailed &&
+                        $foodNotRejected &&
+                        $foodNotStored) ||
+                        ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored))
                     <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
                         method="post">
                         @csrf
@@ -48,8 +57,14 @@
                 </p>
             </div>
             @if (
-                ($rescueNotRejected && $rescueSubmitted && $foodNotCanceled && $rescueNotFailed && $foodNotRejected) ||
-                    ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected))
+                ($rescueNotRejected &&
+                    $rescueSubmitted &&
+                    $foodNotCanceled &&
+                    $rescueNotFailed &&
+                    $foodNotRejected &&
+                    $foodNotStored) ||
+                    ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored) ||
+                    $admin)
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
                     class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
             @endif
