@@ -41,5 +41,8 @@ class RescueStatusSeeder extends Seeder
         DB::table('rescue_statuses')->insert([
             'name' => 'rejected',
         ]);
+        DB::table('rescue_statuses')->insert([
+            'name' => 'failed',
+        ]);
     }
 }

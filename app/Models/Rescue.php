@@ -20,6 +20,7 @@ class Rescue extends Model
     public const INCOMPLETED = 5;
     public const COMPLETED = 6;
     public const REJECTED = 7;
+    public const FAILED = 8;
 
     protected function rescueDate(): Attribute
     {

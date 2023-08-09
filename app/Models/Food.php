@@ -19,8 +19,9 @@ class Food extends Model
     public const TAKEN = 5;
     public const STORED = 6;
     public const REJECTED = 7;
+    public const CANCELED = 8;
 
-    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'stored_amount', 'photo', 'stored_amount', 'user_id', 'category_id', 'sub_category_id', 'unit_id'];
+    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'stored_amount', 'photo', 'stored_amount', 'user_id', 'category_id', 'sub_category_id', 'unit_id', 'rejected_at', 'canceled_at'];
 
     protected function expiredDate(): Attribute
     {

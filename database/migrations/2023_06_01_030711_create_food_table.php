@@ -24,6 +24,8 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained();
             $table->foreignId('sub_category_id')->constrained();
             $table->foreignId('unit_id')->constrained();
+            $table->dateTime('rejected_at')->nullable();
+            $table->dateTime('canceled_at')->nullable();
             $table->timestamps();
         });
     }

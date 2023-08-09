@@ -9,6 +9,7 @@ use App\Models\FoodRescueLog;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Rescue;
+use App\Models\RescueLog;
 use App\Models\RescuePhoto;
 use App\Models\SubCategory;
 use App\Models\Unit;
@@ -166,15 +167,106 @@ class FoodController extends Controller
      */
     public function destroy(Rescue $rescue, Food $food)
     {
+        // jika dalam tahap perencanaan gpp dihapus
+        // kalau dalam tahap submit itu canceled
+        // kalau dalam tahap send itu rejected
+
+        // kita handle delete, lalu confirmation, lalu perks-perks nya, terakhir kita buat database untuk handling food rescue
+
+        $user = auth()->user();
+
+        $foodRescue = FoodRescue::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->first();
+
+        $rescueStatusID = $rescue->rescue_status_id;
         try {
             DB::beginTransaction();
-            $food->delete();
 
-            $foodRescue = FoodRescue::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->first();
-            $foodRescue->delete();
+            if ($rescueStatusID === Rescue::PLANNED) {
+                $foodRescueLogs = FoodRescueLog::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->get();
 
-            foreach ($foodRescue->foodRescueUsers as $foodRescueUser) {
-                $foodRescueUser->delete();
+                foreach ($foodRescueLogs as $foodRescueLog) {
+                    $foodRescueLog->delete();
+                }
+                $foodRescue->delete();
+                $food->delete();
+            } else if ($rescueStatusID === Rescue::SUBMITTED) {
+                $food->canceled_at = Carbon::now();
+                $food->save();
+
+                $foodRescue->food_rescue_status_id = Food::CANCELED;
+                $foodRescue->user_id = $user->id;
+                $foodRescue->save();
+
+                $foodRescueLog = new FoodRescueLog();
+                $foodRescueLog->rescue_id = $rescue->id;
+                $foodRescueLog->food_id = $food->id;
+
+                if ($user->hasAnyRole(['admin', 'volunteer'])) {
+                    $foodRescueLog->actor_id = $user->id;
+                    $foodRescueLog->actor_name = $user->name;
+                } else {
+                    $foodRescueLog->actor_id = $foodRescue->user_id;
+                    $foodRescueLog->actor_name = $foodRescue->user->name;
+                }
+
+                $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+                $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
+                $foodRescueLog->amount = $foodRescue->amount_plan;
+                $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+                $foodRescueLog->unit_id = $food->unit_id;
+                $foodRescueLog->unit_name = $food->unit->name;
+                $foodRescueLog->photo = $food->photo;
+                $foodRescueLog->save();
+
+                // update food rescue status ke CAnceled
+                // update food ke canceled
+                // buat food logs baru canceled
+            } else {
+                $food->rejected_at = Carbon::now();
+                $food->save();
+
+                $foodRescue->food_rescue_status_id = Food::REJECTED;
+                $foodRescue->save();
+
+                $foodRescueLog = new FoodRescueLog();
+                $foodRescueLog->rescue_id = $rescue->id;
+                $foodRescueLog->food_id = $food->id;
+                $foodRescueLog->actor_id = $user->id;
+                $foodRescueLog->actor_name = $user->name;
+                $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+                $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
+                $foodRescueLog->amount = $foodRescue->amount_plan;
+                $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+                $foodRescueLog->unit_id = $food->unit_id;
+                $foodRescueLog->unit_name = $food->unit->name;
+                $foodRescueLog->photo = $food->photo;
+                $foodRescueLog->save();
+
+                // check if rescue has no food to rescue,
+                // it it so, change rescue to failed;
+                $ifNoFoodToRescue = $rescue->foods->filter(fn ($food) => $food->canceled_at === null && $food->rejected_at === null)->isEmpty();
+                if ($ifNoFoodToRescue) {
+                    $rescue->rescue_status_id = Rescue::FAILED;
+                    $rescue->save();
+
+                    $rescueLog = new RescueLog();
+                    $rescueLog->rescue_id = $rescue->id;
+                    $rescueLog->rescue_status_id = $rescue->rescue_status_id;
+                    $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
+                    $rescueLog->actor_id = $user->id;
+                    $rescueLog->actor_name = $user->name;
+                    $rescueLog->food_rescue_plan = $rescue->food_rescue_plan;
+                    $rescueLog->donor_name = $rescue->donor_name;
+                    $rescueLog->pickup_address = $rescue->pickup_address;
+                    $rescueLog->phone = $rescue->phone;
+                    $rescueLog->email = $rescue->email;
+                    $rescueLog->title = $rescue->title;
+                    $rescueLog->description = $rescue->description;
+                    $rescueLog->rescue_date = $rescue->rescue_date;
+                    $rescueLog->score = $rescue->score;
+                    $rescue->user_id = $rescue->user_id;
+                    $rescue->save();
+                }
             }
 
             DB::commit();

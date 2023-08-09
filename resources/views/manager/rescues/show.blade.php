@@ -6,6 +6,7 @@
             <div class="flex items-center justify-between">
                 @php
                     $rescueNotRejected = $rescue->rescue_status_id !== 7;
+                    $rescueNotCompleted = $rescue->rescue_status_id !== 6;
                 @endphp
                 <a class="flex items-center gap-2"
                     @if ($rescueNotRejected) href="{{ route('rescues.edit', ['rescue' => $rescue]) }}" @endif>
@@ -30,7 +31,7 @@
                     </form>
                 </div>
             @else
-                @if ($rescueNotRejected)
+                @if ($rescueNotRejected && $rescueNotCompleted)
                     <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
                         @csrf
                         @method('delete')
@@ -48,7 +49,7 @@
         <div class="mt-3 flex items-center gap-1 text-slate-500">
             @include('rescues.partials.status-icon')
 
-            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4 && $rescue->rescue_status_id !== 7)
+            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4 && $rescue->rescue_status_id !== 7 && $rescue->rescue_status_id !== 8)
                     <span>({{ $rescue->food_rescue_result }}/{{ $rescue->food_rescue_plan }})</span>
                 @endif
             </p>
@@ -118,13 +119,15 @@
                         <div class="mt-4">
                             @foreach ($rescue->foods as $food)
                                 @php
+                                    $foodRescueStatus = $food->pivot->foodRescueStatus;
+                                    $foodRescueNotCanceled = $foodRescueStatus->name !== 'canceled';
                                     $isAdminOrAssignedVolunteer =
                                         $food->pivot->volunteer_id === auth()->user()->id ||
                                         auth()
                                             ->user()
                                             ->hasRole('admin');
                                 @endphp
-                                @if ($isAdminOrAssignedVolunteer)
+                                @if ($isAdminOrAssignedVolunteer && $foodRescueNotCanceled)
                                     <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
                                         <section class="p-6 border border-slate-200 rounded-md mb-4 ">
                                             <div class="flex items-center gap-4">

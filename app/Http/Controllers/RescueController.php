@@ -257,7 +257,8 @@ class RescueController extends Controller
             $rescue->rescue_status_id = $request->status;
 
             if ((int)$request->status === Rescue::ASSIGNED) {
-                $rescue->food_rescue_plan = count($rescue->foods);
+                $foodNotCanceled = $rescue->foods->filter(fn ($food) => $food->canceled_at === null);
+                $rescue->food_rescue_plan = count($foodNotCanceled);
             }
 
             $rescue->save();
@@ -289,6 +290,11 @@ class RescueController extends Controller
                     if ((int)$takenorSavedPhotoID !== $food->pivot->food_id) {
                         continue;
                     }
+                }
+
+                // if food is already canceled, skip
+                if ($food->pivot->food_rescue_status_id === Food::CANCELED) {
+                    continue;
                 }
 
                 $foodRescueID = $food->pivot->id;

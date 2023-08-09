@@ -49,4 +49,9 @@ class FoodRescue extends Pivot
     {
         return $this->belongsTo(User::class);
     }
+
+    public function foodRescueLogs()
+    {
+        return $this->hasMany(FoodRescueLog::class);
+    }
 }
