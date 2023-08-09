@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('food_rescue_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('rescue_id')->constrained();
-            $table->foreignId('food_id')->constrained();
+            $table->foreignId('rescue_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('food_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('assigner_id')->nullable();
             $table->string('assigner_name')->nullable();
             $table->unsignedInteger('volunteer_id')->nullable();

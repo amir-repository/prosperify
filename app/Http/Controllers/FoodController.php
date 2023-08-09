@@ -226,6 +226,7 @@ class FoodController extends Controller
                 $food->save();
 
                 $foodRescue->food_rescue_status_id = Food::REJECTED;
+                $foodRescue->user_id = $user->id;
                 $foodRescue->save();
 
                 $foodRescueLog = new FoodRescueLog();
@@ -241,7 +242,6 @@ class FoodController extends Controller
                 $foodRescueLog->unit_name = $food->unit->name;
                 $foodRescueLog->photo = $food->photo;
                 $foodRescueLog->save();
-
 
                 if ($rescue->rescue_status_id >= Rescue::ASSIGNED) {
                     $rescue->food_rescue_plan = $rescue->food_rescue_plan - 1;
@@ -295,7 +295,7 @@ class FoodController extends Controller
 
                 // if after delete rescue plan is equal to rescue result
                 // change to complete
-                if ($rescue->food_rescue_plan === $rescue->food_rescue_result) {
+                if ($rescue->food_rescue_plan === $rescue->food_rescue_result && $rescue->rescue_status_id !== Rescue::FAILED) {
                     $rescue->rescue_status_id = Rescue::COMPLETED;
                     $rescue->save();
 

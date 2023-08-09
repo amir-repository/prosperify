@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rescue_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('rescue_id')->constrained();
+            $table->foreignId('rescue_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('rescue_status_id');
             $table->string('rescue_status_name');
             $table->unsignedBigInteger('actor_id');

@@ -64,7 +64,7 @@
                     $foodNotRejected &&
                     $foodNotStored) ||
                     ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored) ||
-                    $admin)
+                    ($admin && $foodNotRejected))
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
                     class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
             @endif

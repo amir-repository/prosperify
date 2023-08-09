@@ -384,8 +384,7 @@ class RescueController extends Controller
     {
         $rescue->foods->each(function ($food) {
             $foodRescue = $food->pivot;
-            $foodRescue->deleted_at = Carbon::now();
-            $foodRescue->save();
+            $foodRescue->delete();
 
             $food->delete();
         });
