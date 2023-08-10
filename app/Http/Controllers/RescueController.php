@@ -59,6 +59,27 @@ class RescueController extends Controller
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
         } else if ($volunteer) {
+            $rescues = Rescue::all();
+            $filtered = $this->filterRescueByStatus($rescues, Rescue::ASSIGNED);
+
+            if ($request->query('q')) {
+                $filtered = $this->filterSearch($filtered, $request->query('q'));
+            }
+
+            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
+
+            $rescues = collect([]);
+
+            foreach ($filtered as $rescue) {
+                foreach ($rescue->foods as $food) {
+                    if ($food->pivot->volunteer->id === $user->id) {
+                        $rescues->push($rescue);
+                        break;
+                    }
+                }
+            }
+
+            return view('manager.rescues.index', ['rescues' => $rescues]);
         }
     }
 

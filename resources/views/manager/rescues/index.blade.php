@@ -47,7 +47,7 @@
                 </div>
             </section>
         </div>
-        <div>
+        <div class="flex flex-col gap-4">
             @foreach ($rescues as $rescue)
                 <a href="{{ route('rescues.show', ['rescue' => $rescue]) }}">
                     <section class="border border-slate-200 p-6 rounded-md text-slate-900">
