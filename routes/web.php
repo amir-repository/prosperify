@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecipientController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RescueController;
+use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
 use App\Models\Donation;
@@ -57,6 +58,7 @@ Route::resource('recipients', RecipientController::class);
 Route::resource('users', UserController::class)->only('show');
 
 Route::resource('categories', CategoryController::class)->middleware(['auth']);
+Route::resource('subcategory', SubCategoryController::class)->middleware(['auth']);
 
 Route::get('/analytics', [AnalyticController::class, 'index'])->name('analytics.index');
 Route::get('/analytics/{category}', [AnalyticController::class, 'show'])->name('analytics.show');
