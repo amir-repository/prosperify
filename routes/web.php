@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalyticController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodDonationController;
@@ -54,6 +55,8 @@ Route::resource('reports', ReportController::class);
 Route::resource('foods', FoodController::class);
 Route::resource('recipients', RecipientController::class);
 Route::resource('users', UserController::class)->only('show');
+
+Route::resource('categories', CategoryController::class)->middleware(['auth']);
 
 Route::get('/analytics', [AnalyticController::class, 'index'])->name('analytics.index');
 Route::get('/analytics/{category}', [AnalyticController::class, 'show'])->name('analytics.show');
