@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RescueController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VaultController;
 use App\Models\Category;
 use App\Models\Donation;
 use App\Models\DonationFood;
@@ -59,6 +60,7 @@ Route::resource('users', UserController::class)->only('show');
 
 Route::resource('categories', CategoryController::class)->middleware(['auth']);
 Route::resource('subcategory', SubCategoryController::class)->middleware(['auth']);
+Route::resource('vaults', VaultController::class)->middleware(['auth']);
 
 Route::get('/analytics', [AnalyticController::class, 'index'])->name('analytics.index');
 Route::get('/analytics/{category}', [AnalyticController::class, 'show'])->name('analytics.show');

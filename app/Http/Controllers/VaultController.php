@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreVaultRequest;
+use App\Models\City;
 use App\Models\Vault;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VaultController extends Controller
 {
@@ -12,7 +15,8 @@ class VaultController extends Controller
      */
     public function index()
     {
-        //
+        $vaults = Vault::all();
+        return view('vault.index', compact('vaults'));
     }
 
     /**
@@ -20,15 +24,32 @@ class VaultController extends Controller
      */
     public function create()
     {
-        //
+        $cities = City::all();
+        return view('vault.create', compact('cities'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreVaultRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $attr = $request->only('name', 'address', 'city_id');
+
+        try {
+            DB::beginTransaction();
+
+            $vault = new Vault();
+            $vault->fill($attr);
+            $vault->save();
+
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            return $th;
+        }
+
+        return redirect()->route('vaults.index');
     }
 
     /**
@@ -44,15 +65,31 @@ class VaultController extends Controller
      */
     public function edit(Vault $vault)
     {
-        //
+        $cities = City::all();
+        return view('vault.edit', compact('vault', 'cities'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Vault $vault)
+    public function update(StoreVaultRequest $request, Vault $vault)
     {
-        //
+        $validated = $request->validated();
+        $attr = $request->only('name', 'address', 'city_id');
+
+        try {
+            DB::beginTransaction();
+
+            $vault->fill($attr);
+            $vault->save();
+
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            return $th;
+        }
+
+        return redirect()->route('vaults.index');
     }
 
     /**
@@ -60,6 +97,7 @@ class VaultController extends Controller
      */
     public function destroy(Vault $vault)
     {
-        //
+        $vault->delete();
+        return redirect()->route('vaults.index');
     }
 }
