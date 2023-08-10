@@ -36,8 +36,8 @@
                         $foodNotRejected &&
                         $foodNotStored) ||
                         ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored))
-                    <form action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}"
-                        method="post">
+                    <form onsubmit="return confirm('Are you sure');"
+                        action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
                         @csrf
                         @method('delete')
                         <button class="w-8 h-8 flex items-center justify-center">

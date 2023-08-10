@@ -21,7 +21,8 @@
             @endphp
             @if ($rescueIsSubmitted)
                 <div>
-                    <form action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post">
+                    <form onsubmit="return confirm('Are you sure');"
+                        action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post">
                         @csrf
                         @method('put')
                         <input type="text" name="status" value="7" hidden>
@@ -43,7 +44,8 @@
                 @endif
             </p>
         </div>
-        <form action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post"
+        <form onsubmit="return confirm('Are you sure');"
+            action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post"
             enctype="multipart/form-data">
             @method('put')
             @csrf

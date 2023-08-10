@@ -7,7 +7,8 @@
 @section('main')
     <main class="px-6">
         <h1 class="text-lg font-bold">Edit Food</h1>
-        <form action="{{ route('rescues.foods.update', ['rescue' => $rescue, 'food' => $food]) }}" method="post"
+        <form onsubmit="return confirm('Are you sure');"
+            action="{{ route('rescues.foods.update', ['rescue' => $rescue, 'food' => $food]) }}" method="post"
             enctype="multipart/form-data">
             @method('put')
             @csrf

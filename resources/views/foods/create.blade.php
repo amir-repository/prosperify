@@ -3,7 +3,8 @@
 @section('main')
     <main class="px-6">
         <h1 class="text-lg font-bold">Add a new food</h1>
-        <form action="{{ route('rescues.foods.store', ['rescue' => $rescue]) }}" method="post" enctype="multipart/form-data">
+        <form onsubmit="return confirm('Are you sure');" action="{{ route('rescues.foods.store', ['rescue' => $rescue]) }}"
+            method="post" enctype="multipart/form-data">
             @csrf
             <section class="mt-4">
                 <div class="mb-4">

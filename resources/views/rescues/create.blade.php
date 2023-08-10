@@ -2,7 +2,7 @@
 
 @section('main')
     <main class="px-6">
-        <form action="{{ route('rescues.store') }}" method="post">
+        <form onsubmit="return confirm('Are you sure');" action="{{ route('rescues.store') }}" method="post">
             @csrf
             <h1 class="text-lg font-bold">Food Rescue</h1>
             <section class="mt-4">
@@ -69,8 +69,7 @@
                     </div>
                 </div>
             </section>
-            <button onclick="return confirm('Are you sure?')"
-                class="py-2 bg-slate-900 text-white w-full rounded-md mt-8">Create</button>
+            <button class="py-2 bg-slate-900 text-white w-full rounded-md mt-8">Create</button>
         </form>
     </main>
 @endsection

@@ -17,7 +17,7 @@
                         @endif
                     </a>
                     @if ($rescuePlanned)
-                        <form onclick="return confirm('Are you sure?')"
+                        <form onsubmit="return confirm('Are you sure');"
                             action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
                             @csrf
                             @method('delete')
@@ -37,7 +37,8 @@
                 </div>
             </div>
         </div>
-        <form action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post"
+        <form onsubmit="return confirm('Are you sure');"
+            action="{{ route('rescues.update.status', ['rescue' => $rescue]) }}" method="post"
             enctype="multipart/form-data">
             @method('put')
             @csrf
@@ -132,7 +133,7 @@
                                                 </div>
                                             </section>
                                             <section>
-                                                @if ($rescue->rescue_status_id > 3)
+                                                @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id !== 7)
                                                     <section class="flex justify-between">
                                                         <div>
                                                             <p class="mt-4 text-sm font-medium">Volunteer
