@@ -17,12 +17,13 @@ class RecipientFactory extends Factory
     public function definition(): array
     {
         return [
+            'nik' => fake()->phoneNumber(),
             'name' => fake()->name(),
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
-            'document' => fake()->name(),
-            'status' => 'diterima'
+            'photo' => fake()->name(),
+            'recipient_status_id' => 3
         ];
     }
 }

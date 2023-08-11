@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('recipients', function (Blueprint $table) {
+        Schema::create('recipient_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address');
-            $table->string('phone');
-            $table->integer('family_members');
-            $table->string('document')->nullable();
-            $table->enum('status', ['diajukan', 'diterima', 'ditolak']);
             $table->timestamps();
         });
     }
@@ -28,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('recipients');
+        Schema::dropIfExists('recipient_statuses');
     }
 };
