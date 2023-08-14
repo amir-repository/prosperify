@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('donation_food', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('donation_id');
-            $table->foreignId('food_id');
+            $table->foreignId('donation_id')->constrained();
+            $table->foreignId('food_id')->constrained();
+            $table->foreignId('donation_food_status_id');
             $table->integer('amount_plan');
             $table->integer('amount_result')->nullable();
-            $table->softDeletes();
+            $table->foreignId('assigner_id');
+            $table->foreignId('volunteer_id');
             $table->timestamps();
         });
     }
