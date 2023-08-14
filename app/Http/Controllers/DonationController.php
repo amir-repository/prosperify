@@ -58,12 +58,6 @@ class DonationController extends Controller
             $donation->donation_status_id = Donation::DIRENCANAKAN;
             $donation->save();
 
-            // save who's making the donation
-            $donationUser = new DonationUser();
-            $donationUser->user_id = auth()->user()->id;
-            $donationUser->donation_id = $donation->id;
-            $donationUser->donation_status_id = $donation->donation_status_id;
-            $donationUser->save();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

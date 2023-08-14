@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('description');
             $table->integer('score');
-            $table->integer('food_donation_plan');
-            $table->integer('food_donation_result');
+            $table->integer('food_donation_plan')->default(0);
+            $table->integer('food_donation_result')->default(0);
             $table->dateTime('donation_date');
             $table->foreignId('recipient_id')->constrained();
             $table->foreignId('user_id')->constrained();

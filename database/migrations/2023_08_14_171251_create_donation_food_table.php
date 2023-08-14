@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('donation_id')->constrained();
             $table->foreignId('food_id')->constrained();
             $table->foreignId('donation_food_status_id');
-            $table->integer('amount_plan');
-            $table->integer('amount_result')->nullable();
+            $table->integer('amount_plan')->default(0);
+            $table->integer('amount_result')->default(0);
             $table->foreignId('assigner_id');
             $table->foreignId('volunteer_id');
             $table->timestamps();
