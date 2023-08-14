@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\DonationFood;
 use App\Models\Recipient;
 use App\Models\RecipientStatus;
 use App\Models\RescueStatus;
@@ -33,7 +34,8 @@ class DatabaseSeeder extends Seeder
                 VaultSeeder::class,
                 RecipientStatusSeeder::class,
                 RecipientSeeder::class,
-                DonationStatusSeeder::class
+                DonationStatusSeeder::class,
+                DonationFoodSeeder::class
             ]
         );
     }

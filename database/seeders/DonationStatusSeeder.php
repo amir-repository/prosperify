@@ -14,19 +14,23 @@ class DonationStatusSeeder extends Seeder
     public function run(): void
     {
         DB::table('donation_statuses')->insert([
-            'name' => 'direncanakan',
+            'name' => 'PLANNED',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'dilaksanakan',
+            'name' => 'LAUNCHED',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'diantar',
+            'name' => 'INCOMPLETE',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'diserahkan',
+            'name' => 'COMPLETE',
+        ]);
+
+        DB::table('donation_statuses')->insert([
+            'name' => 'FAILED',
         ]);
     }
 }

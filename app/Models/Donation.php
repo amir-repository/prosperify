@@ -10,35 +10,11 @@ class Donation extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'donation_status_id', 'donation_date', 'recipient_id'];
+    protected $fillable = ['title', 'description', 'score', 'food_donation_plan', 'food_donation_result', 'donation_date', 'recipient_id', 'user_id', 'donation_status_id'];
 
-    public const DIRENCANAKAN = 1;
-    public const DILAKSANAKAN = 2;
-    public const DIANTAR = 3;
-    public const DISERAHKAN = 4;
-
-    public function recipient()
-    {
-        return $this->belongsTo(Recipient::class);
-    }
-
-    public function foods()
-    {
-        return $this->belongsToMany(Food::class)->withPivot('id', 'amount_plan', 'amount_result', 'food_id', 'donation_id', 'deleted_at');
-    }
-
-    public function users()
-    {
-        return $this->belongsToMany(User::class)->withPivot('id');
-    }
-
-    public function donationUsers()
-    {
-        return $this->hasMany(DonationUser::class);
-    }
-
-    public function donationStatus()
-    {
-        return $this->belongsTo(DonationStatus::class);
-    }
+    public const PLANNED = 1;
+    public const LAUNCHED = 2;
+    public const INCOMPLETE = 3;
+    public const COMPLETE = 4;
+    public const FAILED = 4;
 }

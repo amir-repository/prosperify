@@ -4,16 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DonationFood extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    protected $fillable = ['amount_plan', 'outbound_result', 'donation_id', 'food_id'];
+    public const PLANNED = 1;
+    public const LAUNCHED = 2;
+    public const TAKEN = 3;
+    public const DELIVERED = 4;
+    public const GIVEN = 5;
+    public const FAILED = 5;
 
-    public function food()
-    {
-        return $this->belongsTo(Food::class);
-    }
+
+    protected $fillable = ['donation_id', 'food_id', 'user_id', 'donation_food_status_id', 'amount_plan', 'amount_result', 'assigner_id', 'volunteer_id'];
 }
