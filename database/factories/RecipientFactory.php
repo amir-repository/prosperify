@@ -23,7 +23,7 @@ class RecipientFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 3
+            'recipient_status_id' => 2
         ];
     }
 }

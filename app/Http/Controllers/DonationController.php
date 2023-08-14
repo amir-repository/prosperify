@@ -38,7 +38,7 @@ class DonationController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $recipients = Recipient::where('status', 'diterima')->get();
+        $recipients = Recipient::where('recipient_status_id', Recipient::ACCEPTED)->get();
         return view('donations.create', ['user' => $user, 'recipients' => $recipients]);
     }
 
