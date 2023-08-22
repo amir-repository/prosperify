@@ -18,7 +18,6 @@
 <body>
     <div>
         @include('layouts.manager.header')
-
         @yield('main')
     </div>
 </body>

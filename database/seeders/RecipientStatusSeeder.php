@@ -13,7 +13,7 @@ class RecipientStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = collect(['submitted', 'accepted', 'rejected', 'propered']);
+        $statuses = collect(['submitted', 'accepted', 'rejected', 'prospered', 'canceled']);
 
         $statuses->each(function ($status) {
             DB::table('recipient_statuses')->insert([

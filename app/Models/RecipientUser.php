@@ -12,4 +12,9 @@ class RecipientUser extends Model
     protected $table = 'recipient_user';
 
     protected $fillable = ['recipient_id', 'user_id', 'recipient_status_id'];
+
+    public function recipientStatus()
+    {
+        return $this->belongsTo(RecipientStatus::class);
+    }
 }

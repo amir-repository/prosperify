@@ -1,32 +1,68 @@
 @extends('layouts.manager.index')
 
 @section('main')
-    <main class="p-6">
-        <section class="flex gap-2 items-center">
-            <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex justify-center items-center">
-                <x-heroicon-o-user class="w-6 h-6" />
-
+    <main class="p-6 text-slate-900">
+        <div>
+            <img class="h-36 w-full object-cover rounded-md" src="{{ asset("storage/$recipient->photo") }}" alt="">
+        </div>
+        @php
+            $recipientCanceled = $recipient->recipient_status_id === 5;
+        @endphp
+        <div class="mt-3 flex items-center justify-between">
+            <a @if (!$recipientCanceled) href="{{ route('recipients.edit', compact('recipient')) }}" @endif>
+                <h1 class="text-2xl font-bold flex items-center gap-2">{{ $recipient->name }}
+                    @if (!$recipientCanceled)
+                        <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                    @endif
+                </h1>
+            </a>
+            @if (!$recipientCanceled)
+                <form onsubmit="return confirm('Are you sure');"
+                    action="{{ route('recipients.update', compact('recipient')) }}" method="post">
+                    @csrf
+                    @method('put')
+                    <input type="text" name="recipient_status_id" value="5" hidden>
+                    <button>
+                        <x-heroicon-o-trash class="w-[18px] h-[18px]" />
+                    </button>
+                </form>
+            @endif
+        </div>
+        <div class="mt-3 flex gap-4">
+            <p class="capitalize flex items-center gap-1"><x-heroicon-o-bell
+                    class="w-[18px] h-[18px]" />{{ $recipient->recipientStatus->name }}
+            </p>
+            <p class="capitalize flex items-center gap-1"><x-heroicon-o-user-group
+                    class="w-[18px] h-[18px]" />{{ $recipient->family_members }} Members
+            </p>
+        </div>
+        <div class="mt-6">
+            <div class="mb-4">
+                <label class="text-sm font-medium block mb-[6px]">NIK</label>
+                <input disabled type="text" class="border border-slate-200 rounded-md w-full"
+                    value="{{ $recipient->nik }}">
             </div>
-            <div>
-                <h2 class="capitalize">{{ $recipient->name }}</h2>
-                <p class="text-xs text-slate-500">{{ $recipient->family_members }} Anggota keluarga</p>
+            <div class="mb-4">
+                <label class="text-sm font-medium block mb-[6px]">Address</label>
+                <input disabled type="text" class="border border-slate-200 rounded-md w-full"
+                    value="{{ $recipient->address }}">
             </div>
-        </section>
-        <section class="mt-4 text-slate-900 flex flex-col gap-2">
-            <div class="flex items-center gap-1">
-                <x-heroicon-o-phone class="w-[18px] h-[18px]" />
-                <p class="text-sm">{{ $recipient->phone }}</p>
+            <div class="mb-4">
+                <label class="text-sm font-medium block mb-[6px]">Phone</label>
+                <input disabled type="text" class="border border-slate-200 rounded-md w-full"
+                    value="{{ $recipient->phone }}">
             </div>
-            <div class="flex items-center gap-1">
-                <x-heroicon-o-map-pin class="w-[18px] h-[18px]" />
-                <p class="text-sm">{{ $recipient->address }}</p>
-            </div>
-        </section>
-        <section class="mt-8">
-            <h2 class="text-lg font-bold">Riwayat penerimaan</h2>
-            <div class="mt-4">
-                {{-- donation here --}}
-            </div>
-        </section>
+        </div>
+        <div class="mt-7">
+            <h2 class="font-bold text-[18px] mb-3">History</h2>
+            @foreach ($recipientLogs as $recipientLog)
+                <div class="p-6 border rounded-md mb-4">
+                    <p>{{ $recipientLog->actor_name }}</p>
+                    <p class="text-xs"><span class="capitalize">{{ $recipientLog->recipient_status_name }}</span> at
+                        {{ $recipientLog->created_at }}
+                    </p>
+                </div>
+            @endforeach
+        </div>
     </main>
 @endsection

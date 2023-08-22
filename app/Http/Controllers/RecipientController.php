@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRecipientRequest;
 use App\Models\Recipient;
+use App\Models\RecipientLog;
 use App\Models\RecipientUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +15,11 @@ class RecipientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $recipients = Recipient::all();
-        return view();
+        $status = $request->query('status') ? $request->query('status') : Recipient::SUBMITTED;
+        $recipients = Recipient::where('recipient_status_id', $status)->get();
+        return view('recipient.index', compact('recipients'));
     }
 
     /**
@@ -34,7 +36,6 @@ class RecipientController extends Controller
     public function store(StoreRecipientRequest $request)
     {
         $user = auth()->user();
-        $validate = $request->validated();
         $attr = $request->only(['name', 'nik', 'address', 'phone', 'family_members']);
         $photo = $this->storePhoto($request);
         try {
@@ -42,6 +43,7 @@ class RecipientController extends Controller
             $recipient = new Recipient();
             $recipient->fill($attr);
             $recipient->recipient_status_id = Recipient::SUBMITTED;
+            $recipient->photo = $photo;
             $recipient->save();
 
             $recipientUser = new RecipientUser();
@@ -50,7 +52,14 @@ class RecipientController extends Controller
             $recipientUser->recipient_status_id = $recipient->recipient_status_id;
             $recipientUser->save();
 
-
+            $recipientLog = new RecipientLog();
+            $recipientLog->recipient_id =  $recipientUser->recipient_id;
+            $recipientLog->user_id = $recipientUser->user_id;
+            $recipientLog->actor_id = $user->id;
+            $recipientLog->actor_name = $user->name;
+            $recipientLog->recipient_status_id = $recipientUser->recipient_status_id;
+            $recipientLog->recipient_status_name = $recipientUser->recipientStatus->name;
+            $recipientLog->save();
 
             DB::commit();
         } catch (\Exception $th) {
@@ -58,7 +67,8 @@ class RecipientController extends Controller
             DB::rollBack();
             return $th;
         }
-        return to_route('recipients.index');
+
+        return redirect()->route('recipients.index');
     }
 
     /**
@@ -66,7 +76,8 @@ class RecipientController extends Controller
      */
     public function show(Recipient $recipient)
     {
-        return view('manager.recipients.show', ['recipient' => $recipient]);
+        $recipientLogs = RecipientLog::where('recipient_id', $recipient->id)->get();
+        return view('manager.recipients.show', compact('recipient', 'recipientLogs'));
     }
 
     /**
@@ -74,7 +85,7 @@ class RecipientController extends Controller
      */
     public function edit(Recipient $recipient)
     {
-        //
+        return view('recipient.edit', compact('recipient'));
     }
 
     /**
@@ -82,7 +93,38 @@ class RecipientController extends Controller
      */
     public function update(Request $request, Recipient $recipient)
     {
-        //
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            if ((int)$request->recipient_status_id ===  $recipient->recipient_status_id) {
+                $recipient->name = $request->name;
+                $recipient->address = $request->address;
+                $recipient->phone = $request->phone;
+                $recipient->family_members = $request->family_members;
+                $recipient->photo = $this->storePhoto($request);
+            }
+            $recipient->recipient_status_id = $request->recipient_status_id;
+            $recipient->save();
+
+            $recipientUser = RecipientUser::where('recipient_id', $recipient->id)->first();
+            $recipientUser->recipient_status_id = $recipient->recipient_status_id;
+            $recipientUser->save();
+
+            $recipientLog = new RecipientLog();
+            $recipientLog->recipient_id =  $recipientUser->recipient_id;
+            $recipientLog->user_id = $recipientUser->user_id;
+            $recipientLog->actor_id = $user->id;
+            $recipientLog->actor_name = $user->name;
+            $recipientLog->recipient_status_id = $recipientUser->recipient_status_id;
+            $recipientLog->recipient_status_name = $recipientUser->recipientStatus->name;
+            $recipientLog->save();
+
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
+        }
+        return redirect()->route('recipients.show', compact('recipient'));
     }
 
     /**
