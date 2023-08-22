@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRecipientRequest;
 use App\Models\Recipient;
+use App\Models\RecipientUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,7 @@ class RecipientController extends Controller
      */
     public function store(StoreRecipientRequest $request)
     {
+        $user = auth()->user();
         $validate = $request->validated();
         $attr = $request->only(['name', 'nik', 'address', 'phone', 'family_members']);
         $photo = $this->storePhoto($request);
@@ -41,6 +43,15 @@ class RecipientController extends Controller
             $recipient->fill($attr);
             $recipient->recipient_status_id = Recipient::SUBMITTED;
             $recipient->save();
+
+            $recipientUser = new RecipientUser();
+            $recipientUser->recipient_id = $recipient->id;
+            $recipientUser->user_id = $user->id;
+            $recipientUser->recipient_status_id = $recipient->recipient_status_id;
+            $recipientUser->save();
+
+
+
             DB::commit();
         } catch (\Exception $th) {
             Storage::delete($photo);

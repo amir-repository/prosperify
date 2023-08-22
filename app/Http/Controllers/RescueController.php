@@ -30,6 +30,7 @@ class RescueController extends Controller
      */
     public function index(Request $request)
     {
+        /** @var \App\Models\User */
         $user = auth()->user();
         $donor = $user->hasRole(User::DONOR);
         $manager = $user->hasRole(User::ADMIN);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDonationRequest;
 use App\Models\Donation;
 use App\Models\DonationFood;
 use App\Models\DonationFoodUser;
@@ -45,18 +46,17 @@ class DonationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDonationRequest $request)
     {
+        $validated = $request->validated();
+
         try {
             DB::beginTransaction();
+
+            $attr = $request->only(['title', 'description', 'donation_date', 'recipient_id']);
+
             // save donation
-            $donation = new Donation();
-            $donation->title = $request->title;
-            $donation->description = $request->description;
-            $donation->donation_date = $this->formatDateTime($request->donation_date);
-            $donation->recipient_id = $request->recipient_id;
-            $donation->donation_status_id = Donation::DIRENCANAKAN;
-            $donation->save();
+            // save donation logs
 
             DB::commit();
         } catch (\Exception $e) {
