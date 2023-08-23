@@ -7,25 +7,34 @@
         </div>
         @php
             $recipientCanceled = $recipient->recipient_status_id === 5;
+            $recipientRejected = $recipient->recipient_status_id === 3;
+            $recipientAccepted = $recipient->recipient_status_id === 2;
+            $recipientProspered = $recipient->recipient_status_id === 4;
         @endphp
         <div class="mt-3 flex items-center justify-between">
-            <a @if (!$recipientCanceled) href="{{ route('recipients.edit', compact('recipient')) }}" @endif>
+            <a @if (!$recipientCanceled && !$recipientRejected) href="{{ route('recipients.edit', compact('recipient')) }}" @endif>
                 <h1 class="text-2xl font-bold flex items-center gap-2">{{ $recipient->name }}
-                    @if (!$recipientCanceled)
+                    @if (!$recipientCanceled && !$recipientRejected)
                         <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
                     @endif
                 </h1>
             </a>
-            @if (!$recipientCanceled)
-                <form onsubmit="return confirm('Are you sure');"
-                    action="{{ route('recipients.update', compact('recipient')) }}" method="post">
-                    @csrf
-                    @method('put')
-                    <input type="text" name="recipient_status_id" value="5" hidden>
-                    <button>
-                        <x-heroicon-o-trash class="w-[18px] h-[18px]" />
-                    </button>
-                </form>
+            @if (!$recipientCanceled && !$recipientRejected)
+                @unless ($recipientProspered || $recipientAccepted)
+                    <form onsubmit="return confirm('Are you sure');"
+                        action="{{ route('recipients.update', compact('recipient')) }}" method="post">
+                        @csrf
+                        @method('put')
+                        @role('admin')
+                            <input type="text" name="recipient_status_id" value="3" hidden>
+                        @else
+                            <input type="text" name="recipient_status_id" value="5" hidden>
+                        @endrole
+                        <button>
+                            <x-heroicon-o-trash class="w-[18px] h-[18px]" />
+                        </button>
+                    </form>
+                @endunless
             @endif
         </div>
         <div class="mt-3 flex gap-4">
@@ -53,6 +62,31 @@
                     value="{{ $recipient->phone }}">
             </div>
         </div>
+        @role('admin')
+            @if (!$recipientRejected && !$recipientCanceled)
+                <div>
+                    <form action="{{ route('recipients.update', compact('recipient')) }}" method="post">
+                        @csrf
+                        @method('put')
+                        <input type="text" name="recipient_status_id"
+                            value="
+                        @if ($recipient->recipient_status_id === 1) 2
+                        @elseif ($recipient->recipient_status_id === 2) 4 @endif
+                        "
+                            hidden>
+                        @unless ($recipientProspered)
+                            <button class="mt-4 py-2 w-full bg-slate-900 text-white rounded-md text-sm font-medium">
+                                @if ($recipient->recipient_status_id === 1)
+                                    Accept
+                                @elseif ($recipient->recipient_status_id === 2)
+                                    Prosper
+                                @endif
+                            </button>
+                        @endunless
+                    </form>
+                </div>
+            @endif
+        @endrole
         <div class="mt-7">
             <h2 class="font-bold text-[18px] mb-3">History</h2>
             @foreach ($recipientLogs as $recipientLog)
