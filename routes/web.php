@@ -50,6 +50,7 @@ Route::get('/dashboard', function () {
 
 Route::resource('rescues', RescueController::class);
 Route::put('/rescues/{rescue}/status', [RescueController::class, 'updateStatus'])->name('rescues.update.status');
+Route::get('/rescues/{rescue}/foods/{food}/history', [RescueController::class, 'history']);
 Route::resource('rescues.foods', FoodController::class);
 Route::resource('donations', DonationController::class);
 Route::resource('donations.foods', FoodDonationController::class);

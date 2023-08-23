@@ -39,7 +39,7 @@ class RescueController extends Controller
         if ($donor) {
             $userID = auth()->user()->id;
             $rescues = User::find($userID)->rescues;
-            $filtered = $this->filterRescueByStatus($rescues, Rescue::PLANNED);
+            $filtered = $this->filterRescueByStatus($rescues, [Rescue::PLANNED]);
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
@@ -50,7 +50,7 @@ class RescueController extends Controller
             return view('rescues.index', ['rescues' => $filtered]);
         } else if ($manager) {
             $rescues = Rescue::all();
-            $filtered = $this->filterRescueByStatus($rescues, Rescue::SUBMITTED);
+            $filtered = $this->filterRescueByStatus($rescues, [Rescue::SUBMITTED]);
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
@@ -61,7 +61,8 @@ class RescueController extends Controller
             return view('manager.rescues.index', ['rescues' => $filtered]);
         } else if ($volunteer) {
             $rescues = Rescue::all();
-            $filtered = $this->filterRescueByStatus($rescues, Rescue::ASSIGNED);
+
+            $filtered = $this->filterRescueByStatus($rescues, [Rescue::ASSIGNED, Rescue::INCOMPLETED]);
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
@@ -415,12 +416,17 @@ class RescueController extends Controller
         return redirect()->route('rescues.index');
     }
 
-    private function filterRescueByStatus($rescues, $rescueStatusID)
+    public function history(Rescue $rescue, Food $food)
     {
-        $filtered = $rescues->filter(function ($rescues) use ($rescueStatusID) {
+        dd($food);
+    }
+
+    private function filterRescueByStatus($rescues, $arrRescueStatusID)
+    {
+        $filtered = $rescues->filter(function ($rescues) use ($arrRescueStatusID) {
             $status = request()->query('status');
             if ($status === null) {
-                return $rescues->rescue_status_id === $rescueStatusID;
+                return in_array($rescues->rescue_status_id, $arrRescueStatusID);
             }
             return $rescues->rescue_status_id === (int) request()->query('status');
         });
