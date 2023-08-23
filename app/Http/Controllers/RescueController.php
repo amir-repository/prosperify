@@ -348,9 +348,9 @@ class RescueController extends Controller
                 $foodRescueLog->unit_name = $food->unit->name;
                 $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
 
-                if ((int)$request->status === Food::ASSIGNED && (int)$request->status === Food::TAKEN) {
-                    $foodRescueLog->assigner_id = $user->id;
-                    $foodRescueLog->assigner_name = $user->name;
+                if ((int)$request->status === Food::ASSIGNED || (int)$request->status === Food::TAKEN) {
+                    $foodRescueLog->assigner_id = $foodRescue->assigner_id;
+                    $foodRescueLog->assigner_name = User::find($foodRescue->assigner_id)->name;
                     $foodRescueLog->volunteer_id = $this->getVolunteerID($request, $food->id);
                     $foodRescueLog->volunteer_name = User::find($foodRescueLog->volunteer_id)->name;
                     $foodRescueLog->vault_id = $this->getVaultID($request, $food->id);
@@ -448,11 +448,6 @@ class RescueController extends Controller
     private function getVaultID($request, $foodID)
     {
         return $request["food-$foodID-vault_id"];
-    }
-
-    private function getFoodID($request)
-    {
-        dd($request);
     }
 
     private function filterSearch($collections, $filterValue)

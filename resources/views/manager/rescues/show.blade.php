@@ -199,8 +199,8 @@
                                                             <div class="mt-2">
                                                                 <select class="rounded-md border border-slate-300"
                                                                     name="food-{{ $food->id }}-volunteer_id"
-                                                                    id="volunteer" disabled>
-                                                                    <option>
+                                                                    id="volunteer">
+                                                                    <option value="{{ $food->pivot->volunteer->id }}">
                                                                         {{ $food->pivot->volunteer->name }}
                                                                     </option>
                                                                 </select>
@@ -211,9 +211,9 @@
                                                             </p>
                                                             <div class="mt-2">
                                                                 <select class="rounded-md border border-slate-300"
-                                                                    name="food-{{ $food->id }}-vault_id" id="vault"
-                                                                    disabled>
-                                                                    <option value="">
+                                                                    name="food-{{ $food->id }}-vault_id"
+                                                                    id="vault">
+                                                                    <option value="{{ $food->pivot->vault->id }}">
                                                                         {{ $food->pivot->vault->name }}
                                                                     </option>
                                                                 </select>
