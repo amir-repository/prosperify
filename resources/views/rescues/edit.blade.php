@@ -79,5 +79,11 @@
             <button onclick="return confirm('Are you sure?')"
                 class="py-2 bg-slate-900 text-white w-full rounded-md mt-8">Update</button>
         </form>
+        <form action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
+            @csrf
+            @method('delete')
+            <button onclick="return confirm('Are you sure?')"
+                class="py-2 border border-slate-900 text-slate-900 w-full rounded-md mt-6">Delete</button>
+        </form>
     </main>
 @endsection

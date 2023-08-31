@@ -19,4 +19,9 @@ class FoodRescueLog extends Model
             get: fn (string $value) => Carbon::parse($value)->format('d M Y H:i')
         );
     }
+
+    public function food()
+    {
+        return $this->belongsTo(Food::class);
+    }
 }

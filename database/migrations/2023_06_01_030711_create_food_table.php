@@ -13,19 +13,19 @@ return new class extends Migration
     {
         Schema::create('food', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('rescue_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('vault_id')->nullable()->constrained();
             $table->string('name');
             $table->string('detail');
             $table->dateTime('expired_date');
             $table->integer('amount');
-            $table->string('photo');
             $table->integer('stored_amount')->nullable();
             $table->dateTime('stored_at')->nullable();
-            $table->foreignId('user_id')->constrained();
+            $table->string('photo');
             $table->foreignId('category_id')->constrained();
             $table->foreignId('sub_category_id')->constrained();
             $table->foreignId('unit_id')->constrained();
-            $table->dateTime('rejected_at')->nullable();
-            $table->dateTime('canceled_at')->nullable();
+            $table->foreignId('food_rescue_status_id')->constrained();
             $table->timestamps();
         });
     }

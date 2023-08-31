@@ -13,15 +13,21 @@ class Food extends Model
     use HasFactory;
 
     public const PLANNED = 1;
-    public const SUBMITTED = 2;
-    public const PROCESSED = 3;
-    public const ASSIGNED = 4;
-    public const TAKEN = 5;
-    public const STORED = 6;
-    public const REJECTED = 7;
-    public const CANCELED = 8;
+    public const ADJUSTED_AFTER_PLANNED = 2;
+    public const SUBMITTED = 3;
+    public const ADJUSTED_AFTER_SUBMITTED = 4;
+    public const PROCESSED = 5;
+    public const ADJUSTED_AFTER_PROCESSED = 6;
+    public const ASSIGNED = 7;
+    public const ADJUSTED_AFTER_ASSIGNED = 8;
+    public const TAKEN = 9;
+    public const STORED = 10;
+    public const ADJUSTED_BEFORE_STORED = 11;
+    public const ADJUSTED_AFTER_STORED = 12;
+    public const REJECTED = 13;
+    public const CANCELED = 14;
 
-    protected $fillable = ['name', 'detail', 'expired_date', 'amount', 'stored_amount', 'photo', 'stored_amount', 'user_id', 'category_id', 'sub_category_id', 'unit_id', 'rejected_at', 'canceled_at'];
+    protected $fillable = ['rescue_id', 'vault_id', 'name', 'detail', 'expired_date', 'amount', 'stored_amount', 'stored_at', 'photo', 'category_id', 'sub_category_id', 'unit_id', 'food_rescue_status_id'];
 
     protected function expiredDate(): Attribute
     {
@@ -30,8 +36,30 @@ class Food extends Model
         );
     }
 
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => Carbon::parse($value)->format('d M Y')
+        );
+    }
+
+    public function rescue()
+    {
+        return $this->belongsTo(Rescue::class);
+    }
+
+    public function foodRescueStatus()
+    {
+        return $this->belongsTo(FoodRescueStatus::class);
+    }
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function foodRescueLogs()
+    {
+        return $this->hasMany(FoodRescueLog::class);
     }
 }

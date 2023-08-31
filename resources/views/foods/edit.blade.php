@@ -78,5 +78,11 @@
                 <Button class="mt-8 py-2 w-full bg-slate-900 text-white rounded-md text-sm font-medium">Update</Button>
             </section>
         </form>
+        <form action="{{ route('foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
+            @csrf
+            @method('delete')
+            <Button
+                class="mt-6 py-2 w-full border border-slate-900 text-slate-900 rounded-md text-sm font-medium">Delete</Button>
+        </form>
     </main>
 @endsection

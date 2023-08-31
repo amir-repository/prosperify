@@ -90,6 +90,7 @@ class RescueController extends Controller
      */
     public function create()
     {
+        /** @var \App\Models\User */
         $user = auth()->user();
         if (!$user->hasRole('donor')) {
             abort(403);
@@ -145,12 +146,13 @@ class RescueController extends Controller
      */
     public function show(Rescue $rescue)
     {
+        /** @var \App\Models\User */
         $user = Auth::user();
         $donor = $user->hasRole(User::DONOR);
         $manager = $user->hasAnyRole(User::VOLUNTEER, User::ADMIN);
 
         if ($donor) {
-            return view('rescues.show', ['rescue' => $rescue]);
+            return view('rescues.show', ['rescue' => $rescue->load('foods')]);
         } else if ($manager) {
             $volunteers = [];
             $vaults = [];
@@ -167,6 +169,7 @@ class RescueController extends Controller
      */
     public function edit(Rescue $rescue)
     {
+        /** @var \App\Models\User */
         $user = auth()->user();
         if (!$user->hasAnyRole(['donor', 'admin'])) {
             abort(403);
@@ -176,7 +179,6 @@ class RescueController extends Controller
             abort(403);
         }
 
-        $user = auth()->user();
         return view('rescues.edit', ['user' => $user, 'rescue' => $rescue]);
     }
 
@@ -405,14 +407,7 @@ class RescueController extends Controller
      */
     public function destroy(Rescue $rescue)
     {
-        $rescue->foods->each(function ($food) {
-            $foodRescue = $food->pivot;
-            $foodRescue->delete();
-
-            $food->delete();
-        });
         $rescue->delete();
-
         return redirect()->route('rescues.index');
     }
 

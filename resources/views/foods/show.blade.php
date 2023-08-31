@@ -28,23 +28,6 @@
             </div>
             <div class="flex items-end justify-between">
                 <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
-                @if (
-                    ($rescueNotRejected &&
-                        $rescueSubmitted &&
-                        $foodNotCanceled &&
-                        $rescueNotFailed &&
-                        $foodNotRejected &&
-                        $foodNotStored) ||
-                        ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored))
-                    <form onsubmit="return confirm('Are you sure');"
-                        action="{{ route('rescues.foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
-                        @csrf
-                        @method('delete')
-                        <button class="w-8 h-8 flex items-center justify-center">
-                            <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                        </button>
-                    </form>
-                @endif
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">

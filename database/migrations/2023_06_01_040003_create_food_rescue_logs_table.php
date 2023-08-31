@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('actor_name');
             $table->unsignedBigInteger('food_rescue_status_id');
             $table->string('food_rescue_status_name');
+            $table->string('food_rescue_note')->nullable();
             $table->integer('amount');
             $table->dateTime('expired_date');
             $table->unsignedInteger('unit_id');

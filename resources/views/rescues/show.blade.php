@@ -16,16 +16,6 @@
                             <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
                         @endif
                     </a>
-                    @if ($rescuePlanned)
-                        <form onsubmit="return confirm('Are you sure');"
-                            action="{{ route('rescues.destroy', ['rescue' => $rescue]) }}" method="post">
-                            @csrf
-                            @method('delete')
-                            <button class="w-8 h-8 flex items-center justify-center">
-                                <x-heroicon-o-trash class="w-[18px] h-[18px] text-red-600" />
-                            </button>
-                        </form>
-                    @endif
                 </div>
                 <div class="mt-3 flex items-center gap-1 text-slate-500">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
@@ -90,92 +80,49 @@
                         </div>
                     @else
                         <div class="mt-4">
+
                             @foreach ($rescue->foods as $food)
                                 @php
-                                    $foodRescueStatus = $food->pivot->foodRescueStatus;
-                                    $foodRescueNotCanceled = $foodRescueStatus->name !== 'canceled';
-                                    $user = $food->pivot->user;
+                                    $foodLog = $food->foodRescueLogs->last();
                                 @endphp
-                                @if ($foodRescueNotCanceled)
-                                    <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
-                                        <section class="p-6 border border-slate-200 rounded-md mb-4">
-                                            <div class="flex items-center gap-4">
-                                                <div>
-                                                    <img class="w-[72px] h-[72px] rounded-md object-cover"
-                                                        src="{{ asset("storage/$food->photo") }}" alt="">
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-2xl font-bold">
-                                                        {{ $food->amount }}.<span
-                                                            class="text-base">{{ $food->unit->name }}</span>
-                                                    </h3>
-                                                    <p class="text-slate-500">{{ $food->name }}</p>
-                                                    <p class="text-xs text-slate-500">
-                                                        Exp. {{ $food->expired_date }}
-                                                    </p>
-                                                </div>
+                                <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
+                                    <section class="p-6 border border-slate-200 rounded-md mb-4">
+                                        <div class="flex items-center gap-4">
+                                            <div>
+                                                <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                                    src="{{ asset("storage/$food->photo") }}" alt="">
                                             </div>
-                                            <section class="flex items-center gap-2 mt-4">
-                                                <div
-                                                    class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
-                                                    @include('foods.partials.food-status')
-                                                </div>
-                                                <div>
-                                                    <p>
-                                                        <span class="capitalize">{{ $foodRescueStatus->name }}</span>
-                                                        by
-                                                        {{ $user->name }}
-                                                    </p>
-                                                    <p class="text-xs text-slate-500 capitalize">
-                                                        At
-                                                        {{ $food->pivot->updated_at }}
-                                                    </p>
-                                                </div>
-                                            </section>
-                                            <section>
-                                                @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id !== 7)
-                                                    <section class="flex justify-between">
-                                                        <div>
-                                                            <p class="mt-4 text-sm font-medium">Volunteer
-                                                            </p>
-                                                            <div class="mt-2">
-                                                                <select class="rounded-md border border-slate-300"
-                                                                    name="food-{{ $food->id }}-volunteer_id"
-                                                                    id="volunteer" disabled>
-                                                                    <option>
-                                                                        {{ $food->pivot->volunteer->name }}
-                                                                    </option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <p class="mt-4 text-sm font-medium">Vaults
-                                                            </p>
-                                                            <div class="mt-2">
-                                                                <select class="rounded-md border border-slate-300"
-                                                                    name="food-{{ $food->id }}-vault_id" id="vault"
-                                                                    disabled>
-                                                                    <option value="">
-                                                                        {{ $food->pivot->vault->name }}
-                                                                    </option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </section>
-                                                @endif
-                                            </section>
-                                            @if ($foodRescueStatus->id < 2)
-                                                <section class="mt-4">
-                                                    <p>On <span>
-                                                            @include('foods.partials.food-submit-photo-status')
-                                                        </span> condition</p>
-                                                    <input class="mt-2 w-full border border-slate-200 rounded-md p-2"
-                                                        type="file" name="{{ $food->id }}-photo" required>
-                                                </section>
-                                            @endif
+                                            <div>
+                                                <h3 class="text-2xl font-bold">
+                                                    {{ $food->amount }}.<span
+                                                        class="text-base">{{ $food->unit->name }}</span>
+                                                </h3>
+                                                <p class="text-slate-500">{{ $food->name }}</p>
+                                                <p class="text-xs text-slate-500">
+                                                    Exp. {{ $food->expired_date }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <section class="flex items-center gap-2 mt-4">
+                                            <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                                                @include('foods.partials.food-status')
+                                            </div>
+                                            <div>
+                                                <p>
+                                                    <span class="capitalize">
+                                                        {{ $foodLog->food_rescue_status_name }}
+                                                        By
+                                                        {{ $foodLog->actor_name }}
+                                                    </span>
+                                                </p>
+                                                <p class="text-xs text-slate-500 capitalize">
+                                                    At
+                                                    {{ $foodLog->created_at }}
+                                                </p>
+                                            </div>
                                         </section>
-                                    </a>
-                                @endif
+                                    </section>
+                                </a>
                             @endforeach
                         </div>
                     @endif

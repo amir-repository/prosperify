@@ -18,7 +18,15 @@ class FoodRescueStatusSeeder extends Seeder
         ]);
 
         DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted after planned',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'submitted',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted after submitted',
         ]);
 
         DB::table('food_rescue_statuses')->insert([
@@ -26,7 +34,15 @@ class FoodRescueStatusSeeder extends Seeder
         ]);
 
         DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted after processed',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
             'name' => 'assigned',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted after assigned',
         ]);
 
         DB::table('food_rescue_statuses')->insert([
@@ -35,6 +51,14 @@ class FoodRescueStatusSeeder extends Seeder
 
         DB::table('food_rescue_statuses')->insert([
             'name' => 'stored',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted before stored',
+        ]);
+
+        DB::table('food_rescue_statuses')->insert([
+            'name' => 'adjusted after stored',
         ]);
 
         DB::table('food_rescue_statuses')->insert([
