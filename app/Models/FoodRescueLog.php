@@ -24,4 +24,21 @@ class FoodRescueLog extends Model
     {
         return $this->belongsTo(Food::class);
     }
+
+    public static function Create($user, $rescue, $food)
+    {
+        $foodRescueLog = new FoodRescueLog();
+        $foodRescueLog->rescue_id = $rescue->id;
+        $foodRescueLog->food_id = $food->id;
+        $foodRescueLog->actor_id = $user->id;
+        $foodRescueLog->actor_name = $user->name;
+        $foodRescueLog->food_rescue_status_id = $food->food_rescue_status_id;
+        $foodRescueLog->food_rescue_status_name = $food->foodRescueStatus->name;
+        $foodRescueLog->amount = $food->amount;
+        $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+        $foodRescueLog->unit_id = $food->unit_id;
+        $foodRescueLog->unit_name = $food->unit->name;
+        $foodRescueLog->photo = $food->photo;
+        $foodRescueLog->save();
+    }
 }

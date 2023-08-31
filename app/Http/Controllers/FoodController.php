@@ -60,19 +60,7 @@ class FoodController extends Controller
             $food->food_rescue_status_id = Food::PLANNED;
             $food->save();
 
-            $foodRescueLog = new FoodRescueLog();
-            $foodRescueLog->rescue_id = $rescue->id;
-            $foodRescueLog->food_id = $food->id;
-            $foodRescueLog->actor_id = $user->id;
-            $foodRescueLog->actor_name = $user->name;
-            $foodRescueLog->food_rescue_status_id = $food->food_rescue_status_id;
-            $foodRescueLog->food_rescue_status_name = $food->foodRescueStatus->name;
-            $foodRescueLog->amount = $food->amount;
-            $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
-            $foodRescueLog->unit_id = $food->unit_id;
-            $foodRescueLog->unit_name = $food->unit->name;
-            $foodRescueLog->photo = $food->photo;
-            $foodRescueLog->save();
+            FoodRescueLog::Create($user, $rescue, $food);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -117,6 +105,10 @@ class FoodController extends Controller
 
             if ($food->food_rescue_status_id === Food::PLANNED) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PLANNED;
+            } else if ($food->food_rescue_status_id === Food::SUBMITTED) {
+                $food->food_rescue_status_id = Food::ADJUSTED_AFTER_SUBMITTED;
+            } else if ($food->food_rescue_status_id === Food::PROCESSED) {
+                $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PROCESSED;
             }
 
             $food->name = $request->name;
@@ -129,19 +121,7 @@ class FoodController extends Controller
             $food->category_id = SubCategory::find($request->sub_category_id)->category_id;
             $food->save();
 
-            $foodRescueLog = new FoodRescueLog();
-            $foodRescueLog->rescue_id = $rescue->id;
-            $foodRescueLog->food_id = $food->id;
-            $foodRescueLog->actor_id = $user->id;
-            $foodRescueLog->actor_name = $user->name;
-            $foodRescueLog->food_rescue_status_id = $food->food_rescue_status_id;
-            $foodRescueLog->food_rescue_status_name = $food->foodRescueStatus->name;
-            $foodRescueLog->amount = $food->amount;
-            $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
-            $foodRescueLog->unit_id = $food->unit_id;
-            $foodRescueLog->unit_name = $food->unit->name;
-            $foodRescueLog->photo = $food->photo;
-            $foodRescueLog->save();
+            FoodRescueLog::Create($user, $rescue, $food);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -155,19 +135,27 @@ class FoodController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rescue $rescue, Food $food)
+    public function destroy(Request $request, Rescue $rescue, Food $food)
     {
-
         /** @var \App\Models\User */
         $user = auth()->user();
+        $rescue = $food->rescue;
 
         $foodStatusID = $food->food_rescue_status_id;
         try {
             DB::beginTransaction();
-
             $foodPlanned = $foodStatusID === Food::PLANNED || $foodStatusID === Food::ADJUSTED_AFTER_PLANNED;
+            $foodSubmitted = $foodStatusID === Food::SUBMITTED || $foodStatusID === Food::ADJUSTED_AFTER_SUBMITTED;
+            $foodProcessed = $foodStatusID === Food::PROCESSED || $foodStatusID === Food::ADJUSTED_AFTER_PROCESSED;
+
             if ($foodPlanned) {
                 $food->delete();
+            } else if ($foodSubmitted) {
+                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
+            } else if ($foodProcessed) {
+                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -178,5 +166,37 @@ class FoodController extends Controller
         // below it doesn't work why ?
         // return redirect()->route("rescues.index");
         // return redirect()->route('rescues.show', compact('rescue'));
+    }
+
+    private function rejectOrCancelFood($user, $food, $rescue)
+    {
+        $isAdmin = $user->hasRole('admin');
+        if ($isAdmin) {
+            $food->food_rescue_status_id = Food::REJECTED;
+            $food->save();
+            FoodRescueLog::Create($user, $rescue, $food);
+        } else {
+            $food->food_rescue_status_id = Food::CANCELED;
+            $food->save();
+            FoodRescueLog::Create($user, $rescue, $food);
+        }
+    }
+
+    private function rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue)
+    {
+        // kalau ternyata di rescue, semua food nya rejected atau pun canceled, maka set otomatis  rescuenya ke rejected
+        $allFoodIsRejected = true;
+        foreach ($rescue->foods as $food) {
+            $theresStillFoodThatsNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [Food::REJECTED, Food::CANCELED]);
+            if ($theresStillFoodThatsNotRejectedNorCanceled) {
+                $allFoodIsRejected = false;
+            }
+        }
+
+        if ($allFoodIsRejected) {
+            $rescue->rescue_status_id = Rescue::REJECTED;
+            $rescue->save();
+            RescueLog::Create($user, $rescue);
+        }
     }
 }

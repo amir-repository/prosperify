@@ -117,21 +117,7 @@ class RescueController extends Controller
             $rescue->rescue_status_id = Rescue::PLANNED;
             $rescue->save();
 
-            $rescueLog = new RescueLog();
-            $rescueLog->rescue_id = $rescue->id;
-            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
-            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
-            $rescueLog->actor_id = $user->id;
-            $rescueLog->actor_name = $user->name;
-            $rescueLog->donor_name = $rescue->donor_name;
-            $rescueLog->pickup_address = $rescue->pickup_address;
-            $rescueLog->phone = $rescue->phone;
-            $rescueLog->email = $rescue->email;
-            $rescueLog->title = $rescue->title;
-            $rescueLog->description = $rescue->description;
-            $rescueLog->rescue_date = $request->rescue_date;
-            $rescueLog->user_id = $rescue->user_id;
-            $rescueLog->save();
+            RescueLog::Create($user, $rescue);
 
             DB::commit();
             return redirect()->route('rescues.show', ['rescue' => $rescue]);
@@ -195,21 +181,7 @@ class RescueController extends Controller
             $rescue->fill($attributes);
             $rescue->save();
 
-            $rescueLog = new RescueLog();
-            $rescueLog->rescue_id = $rescue->id;
-            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
-            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
-            $rescueLog->actor_id = $user->id;
-            $rescueLog->actor_name = $user->name;
-            $rescueLog->donor_name = $rescue->donor_name;
-            $rescueLog->pickup_address = $rescue->pickup_address;
-            $rescueLog->phone = $rescue->phone;
-            $rescueLog->email = $rescue->email;
-            $rescueLog->title = $rescue->title;
-            $rescueLog->description = $rescue->description;
-            $rescueLog->rescue_date = $request->rescue_date;
-            $rescueLog->user_id = $rescue->user_id;
-            $rescueLog->save();
+            RescueLog::Create($user, $rescue);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -225,174 +197,130 @@ class RescueController extends Controller
         $user = auth()->user();
         $isPhotoInRequest = count($request->file());
 
-        if ((int)$request->status === Rescue::REJECTED) {
-            try {
-                DB::beginTransaction();
-                $rescue->rescue_status_id = Rescue::REJECTED;
-                $rescue->save();
-
-                // save rescue logs
-                $rescueLog = new RescueLog();
-                $rescueLog->rescue_id = $rescue->id;
-                $rescueLog->rescue_status_id = $rescue->rescue_status_id;
-                $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
-                $rescueLog->actor_id = $user->id;
-                $rescueLog->actor_name = $user->name;
-                $rescueLog->donor_name = $rescue->donor_name;
-                $rescueLog->pickup_address = $rescue->pickup_address;
-                $rescueLog->phone = $rescue->phone;
-                $rescueLog->email = $rescue->email;
-                $rescueLog->title = $rescue->title;
-                $rescueLog->description = $rescue->description;
-                $rescueLog->rescue_date = Carbon::createFromFormat('d M Y H:i', $rescue->rescue_date);
-                $rescueLog->user_id = $rescue->user_id;
-                $rescueLog->save();
-
-                foreach ($rescue->foods as $food) {
-                    $foodRescueID = $food->pivot->id;
-                    $foodRescue = FoodRescue::find($foodRescueID);
-                    $foodRescue->food_rescue_status_id = Food::REJECTED;
-                    $foodRescue->save();
-
-                    $foodRescueLog = new FoodRescueLog();
-                    $foodRescueLog->rescue_id = $rescue->id;
-                    $foodRescueLog->food_id = $food->id;
-                    $foodRescueLog->actor_id = $user->id;
-                    $foodRescueLog->actor_name = $user->name;
-                    $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
-                    $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
-                    $foodRescueLog->amount = $food->amount;
-                    $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
-                    $foodRescueLog->unit_id = $food->unit_id;
-                    $foodRescueLog->unit_name = $food->unit->name;
-                    $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
-                    $foodRescueLog->save();
-                }
-                DB::commit();
-            } catch (\Exception $e) {
-                throw $e;
-                DB::rollBack();
-            }
-            return redirect()->route('rescues.show', ['rescue' => $rescue]);
-        }
-
         try {
             DB::beginTransaction();
 
-            $rescue->rescue_status_id = $request->status;
-
-            if ((int)$request->status === Rescue::ASSIGNED) {
-                $foodNotCanceled = $rescue->foods->filter(fn ($food) => $food->canceled_at === null);
-                $rescue->food_rescue_plan = count($foodNotCanceled);
-            }
-
+            $rescue->rescue_status_id = (int)$request->status;
             $rescue->save();
+            RescueLog::Create($user, $rescue);
 
-            // save rescue logs
-            $rescueLog = new RescueLog();
-            $rescueLog->rescue_id = $rescue->id;
-            $rescueLog->rescue_status_id = $rescue->rescue_status_id;
-            $rescueLog->rescue_status_name = $rescue->rescueStatus->name;
-            $rescueLog->actor_id = $user->id;
-            $rescueLog->actor_name = $user->name;
-            $rescueLog->donor_name = $rescue->donor_name;
-            $rescueLog->pickup_address = $rescue->pickup_address;
-            $rescueLog->phone = $rescue->phone;
-            $rescueLog->email = $rescue->email;
-            $rescueLog->title = $rescue->title;
-            $rescueLog->description = $rescue->description;
-            $rescueLog->rescue_date = Carbon::createFromFormat('d M Y H:i', $rescue->rescue_date);
-            $rescueLog->user_id = $rescue->user_id;
-            $rescueLog->save();
-
-            foreach ($rescue->foods as $food) {
-                if ((int)$request->status === Food::TAKEN && $food->pivot->volunteer_id !== $user->id) {
-                    continue;
+            if ($rescue->rescue_status_id === Rescue::SUBMITTED) {
+                foreach ($rescue->foods as $food) {
+                    $food->food_rescue_status_id = Food::SUBMITTED;
+                    $food->save();
+                    FoodRescueLog::Create($user, $rescue, $food);
                 }
-
-                if (in_array((int)$request->status, [Food::TAKEN, Food::STORED])) {
-                    $takenorSavedPhotoID = explode('-', array_keys($request->file())[0])[0];
-                    if ((int)$takenorSavedPhotoID !== $food->pivot->food_id) {
-                        continue;
+            } else if ($rescue->rescue_status_id === Rescue::REJECTED) {
+                foreach ($rescue->foods as $food) {
+                    $foodNotRejected = $food->food_rescue_status_id !== Food::REJECTED;
+                    $foodNotCanceled = $food->food_rescue_status_id !== Food::CANCELED;
+                    if ($foodNotRejected && $foodNotCanceled) {
+                        $food->food_rescue_status_id = Food::REJECTED;
+                        $food->save();
+                        FoodRescueLog::Create($user, $rescue, $food);
                     }
                 }
-
-                // if food is already canceled, skip
-                if ($food->pivot->food_rescue_status_id === Food::CANCELED) {
-                    continue;
-                }
-
-                $foodRescueID = $food->pivot->id;
-                $foodRescue = FoodRescue::find($foodRescueID);
-                $foodRescue->user_id = $user->id;
-                $foodRescue->food_rescue_status_id = (int)$request->status === $foodRescue->food_rescue_status_id ? Food::STORED : $request->status;
-
-                $food = $foodRescue->food;
-
-                if ((int)$request->status === Food::ASSIGNED) {
-                    $foodRescue->assigner_id = $user->id;
-                    $foodRescue->volunteer_id = $this->getVolunteerID($request, $food->id);
-                    $foodRescue->vault_id = $this->getVaultID($request, $food->id);
-                }
-
-                $foodRescue->save();
-
-                $foodRescueLog = new FoodRescueLog();
-                $foodRescueLog->rescue_id = $rescue->id;
-                $foodRescueLog->food_id = $food->id;
-                $foodRescueLog->actor_id = $foodRescue->user_id;
-                $foodRescueLog->actor_name = $foodRescue->user->name;
-                $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
-                $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
-                $foodRescueLog->amount = $food->amount;
-                $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
-                $foodRescueLog->unit_id = $food->unit_id;
-                $foodRescueLog->unit_name = $food->unit->name;
-                $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
-
-                if ((int)$request->status === Food::ASSIGNED || (int)$request->status === Food::TAKEN) {
-                    $foodRescueLog->assigner_id = $foodRescue->assigner_id;
-                    $foodRescueLog->assigner_name = User::find($foodRescue->assigner_id)->name;
-                    $foodRescueLog->volunteer_id = $this->getVolunteerID($request, $food->id);
-                    $foodRescueLog->volunteer_name = User::find($foodRescueLog->volunteer_id)->name;
-                    $foodRescueLog->vault_id = $this->getVaultID($request, $food->id);
-                    $foodRescueLog->vault_name = Vault::find($foodRescueLog->vault_id)->name;
-                }
-                $foodRescueLog->save();
-
-                // when food is stored, increment the food_rescue_result
-                if ($foodRescue->food_rescue_status_id === Food::STORED) {
-                    $rescue->food_rescue_result = $rescue->food_rescue_result + 1;
-                    $rescue->save();
-
-                    $foodRescue->amount_result = $foodRescueLog->amount;
-                    $foodRescue->save();
-
-                    $food->stored_at = Carbon::now();
-                    $food->stored_amount = $foodRescue->amount_result;
-                    $food->save();
-
-                    // add point to user
-                    $point = Point::where('user_id', $food->user_id)->first();
-                    $point->point = $point->point + $food->stored_amount;
-                    $point->save();
-
-                    // save point logs
-                    $fooRescuePoint = new FoodRescuePoint();
-                    $fooRescuePoint->point_id = $point->id;
-                    $fooRescuePoint->rescue_id = $rescue->id;
-                    $fooRescuePoint->food_id = $food->id;
-                    $fooRescuePoint->point = $food->stored_amount;
-                    $fooRescuePoint->save();
-
-                    // check if rescue completed
-                    $rescueCompleted = $rescue->food_rescue_result === $rescue->food_rescue_plan;
-                    if ($rescueCompleted) {
-                        $rescue->rescue_status_id = Rescue::COMPLETED;
-                        $rescue->save();
+            } else if ($rescue->rescue_status_id === Rescue::PROCESSED) {
+                foreach ($rescue->foods as $food) {
+                    $foodNotRejected = $food->food_rescue_status_id !== Food::REJECTED;
+                    $foodNotCanceled = $food->food_rescue_status_id !== Food::CANCELED;
+                    if ($foodNotRejected && $foodNotCanceled) {
+                        $food->food_rescue_status_id = Food::PROCESSED;
+                        $food->save();
+                        FoodRescueLog::Create($user, $rescue, $food);
                     }
                 }
             }
+
+            // update foods statys in rescue
+            // foreach ($rescue->foods as $food) {
+            //     // if ((int)$request->status === Food::TAKEN && $food->pivot->volunteer_id !== $user->id) {
+            //     //     continue;
+            //     // }
+
+            //     // if (in_array((int)$request->status, [Food::TAKEN, Food::STORED])) {
+            //     //     $takenorSavedPhotoID = explode('-', array_keys($request->file())[0])[0];
+            //     //     if ((int)$takenorSavedPhotoID !== $food->pivot->food_id) {
+            //     //         continue;
+            //     //     }
+            //     // }
+
+            //     // // if food is already canceled, skip
+            //     // if ($food->pivot->food_rescue_status_id === Food::CANCELED) {
+            //     //     continue;
+            //     // }
+
+            //     // $foodRescueID = $food->pivot->id;
+            //     // $foodRescue = FoodRescue::find($foodRescueID);
+            //     // $foodRescue->user_id = $user->id;
+            //     // $foodRescue->food_rescue_status_id = (int)$request->status === $foodRescue->food_rescue_status_id ? Food::STORED : $request->status;
+
+            //     // $food = $foodRescue->food;
+
+            //     // if ((int)$request->status === Food::ASSIGNED) {
+            //     //     $foodRescue->assigner_id = $user->id;
+            //     //     $foodRescue->volunteer_id = $this->getVolunteerID($request, $food->id);
+            //     //     $foodRescue->vault_id = $this->getVaultID($request, $food->id);
+            //     // }
+
+            //     // $foodRescue->save();
+
+            //     // $foodRescueLog = new FoodRescueLog();
+            //     // $foodRescueLog->rescue_id = $rescue->id;
+            //     // $foodRescueLog->food_id = $food->id;
+            //     // $foodRescueLog->actor_id = $foodRescue->user_id;
+            //     // $foodRescueLog->actor_name = $foodRescue->user->name;
+            //     // $foodRescueLog->food_rescue_status_id = $foodRescue->food_rescue_status_id;
+            //     // $foodRescueLog->food_rescue_status_name = $foodRescue->foodRescueStatus->name;
+            //     // $foodRescueLog->amount = $food->amount;
+            //     // $foodRescueLog->expired_date = Carbon::createFromFormat('d M Y', $food->expired_date);
+            //     // $foodRescueLog->unit_id = $food->unit_id;
+            //     // $foodRescueLog->unit_name = $food->unit->name;
+            //     // $foodRescueLog->photo = !$isPhotoInRequest ? $food->photo : $this->storePhoto($request, $food->id);
+
+            //     // if ((int)$request->status === Food::ASSIGNED || (int)$request->status === Food::TAKEN) {
+            //     //     $foodRescueLog->assigner_id = $foodRescue->assigner_id;
+            //     //     $foodRescueLog->assigner_name = User::find($foodRescue->assigner_id)->name;
+            //     //     $foodRescueLog->volunteer_id = $this->getVolunteerID($request, $food->id);
+            //     //     $foodRescueLog->volunteer_name = User::find($foodRescueLog->volunteer_id)->name;
+            //     //     $foodRescueLog->vault_id = $this->getVaultID($request, $food->id);
+            //     //     $foodRescueLog->vault_name = Vault::find($foodRescueLog->vault_id)->name;
+            //     // }
+            //     // $foodRescueLog->save();
+
+            //     // when food is stored, increment the food_rescue_result
+            //     // if ($foodRescue->food_rescue_status_id === Food::STORED) {
+            //     //     $rescue->food_rescue_result = $rescue->food_rescue_result + 1;
+            //     //     $rescue->save();
+
+            //     //     $foodRescue->amount_result = $foodRescueLog->amount;
+            //     //     $foodRescue->save();
+
+            //     //     $food->stored_at = Carbon::now();
+            //     //     $food->stored_amount = $foodRescue->amount_result;
+            //     //     $food->save();
+
+            //     //     // add point to user
+            //     //     $point = Point::where('user_id', $food->user_id)->first();
+            //     //     $point->point = $point->point + $food->stored_amount;
+            //     //     $point->save();
+
+            //     //     // save point logs
+            //     //     $fooRescuePoint = new FoodRescuePoint();
+            //     //     $fooRescuePoint->point_id = $point->id;
+            //     //     $fooRescuePoint->rescue_id = $rescue->id;
+            //     //     $fooRescuePoint->food_id = $food->id;
+            //     //     $fooRescuePoint->point = $food->stored_amount;
+            //     //     $fooRescuePoint->save();
+
+            //     //     // check if rescue completed
+            //     //     $rescueCompleted = $rescue->food_rescue_result === $rescue->food_rescue_plan;
+            //     //     if ($rescueCompleted) {
+            //     //         $rescue->rescue_status_id = Rescue::COMPLETED;
+            //     //         $rescue->save();
+            //     //     }
+            //     // }
+            // }
             DB::commit();
         } catch (\Exception $e) {
             throw $e;

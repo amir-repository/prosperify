@@ -5,18 +5,8 @@
 )
 
 @php
-    $rescueNotRejected = $rescue->rescue_status_id !== 7;
-    $foodNotCanceled = !$food->canceled_at;
-    $foodNotRejected = !$food->rejected_at;
-    $rescueSubmitted = $rescue->rescue_status_id < 3;
-    $rescueNotFailed = $rescue->rescue_status_id !== 8;
-    $foodNotStored = $rescue->rescue_status_id !== 6;
-    $manager = auth()
-        ->user()
-        ->hasAnyRole(['admin', 'volunteer']);
-    $admin = auth()
-        ->user()
-        ->hasRole('admin');
+    $foodNotRejected = $food->food_rescue_status_id !== 13;
+    $foodNotCanceled = $food->food_rescue_status_id !== 14;
 @endphp
 
 @section('main')
@@ -39,15 +29,7 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
-            @if (
-                ($rescueNotRejected &&
-                    $rescueSubmitted &&
-                    $foodNotCanceled &&
-                    $rescueNotFailed &&
-                    $foodNotRejected &&
-                    $foodNotStored) ||
-                    ($manager && $foodNotCanceled && $rescueNotFailed && $foodNotRejected && $foodNotStored) ||
-                    ($admin && $foodNotRejected))
+            @if ($foodNotRejected && $foodNotCanceled)
                 <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
                     class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
             @endif
