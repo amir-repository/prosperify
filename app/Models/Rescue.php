@@ -50,4 +50,9 @@ class Rescue extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function rescueAssignment()
+    {
+        return $this->hasMany(RescueAssignment::class);
+    }
 }

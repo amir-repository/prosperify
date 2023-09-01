@@ -9,10 +9,14 @@ use App\Models\FoodRescueLog;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Rescue;
+use App\Models\RescueAssignment;
 use App\Models\RescueLog;
 use App\Models\RescuePhoto;
+use App\Models\RescueSchedule;
 use App\Models\SubCategory;
 use App\Models\Unit;
+use App\Models\User;
+use App\Models\Vault;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,7 +64,7 @@ class FoodController extends Controller
             $food->food_rescue_status_id = Food::PLANNED;
             $food->save();
 
-            FoodRescueLog::Create($user, $rescue, $food);
+            FoodRescueLog::Create($user, $rescue, $food, null);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -121,7 +125,7 @@ class FoodController extends Controller
             $food->category_id = SubCategory::find($request->sub_category_id)->category_id;
             $food->save();
 
-            FoodRescueLog::Create($user, $rescue, $food);
+            FoodRescueLog::Create($user, $rescue, $food, null,);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -168,17 +172,67 @@ class FoodController extends Controller
         // return redirect()->route('rescues.show', compact('rescue'));
     }
 
+    public function assignment(Request $request, Rescue $rescue, Food $food)
+    {
+        $volunteers = [];
+        $vaults = [];
+        $rescueAssigned = $rescue->rescue_status_id === Rescue::ASSIGNED;
+        if ($rescueAssigned) {
+            $volunteers = User::role(User::VOLUNTEER)->get();
+            $volunteers = $volunteers->filter(function ($volunteer) use ($rescue) {
+
+                // dateformat to 2023-12-23
+                $rescue_date = Carbon::parse($rescue->rescue_date)->format('Y-m-d');
+
+                // volunteer hanya bisa handle 1 food dalam suatu hari
+                $maxFoodRescueInAday = 1;
+                return RescueSchedule::whereDate('rescue_date', $rescue_date)->where('user_id', $volunteer->id)->count() < $maxFoodRescueInAday;
+            });
+
+            $vaults = Vault::all();
+        }
+
+        return view('foods.assignment', compact('rescue', 'food', 'volunteers', 'vaults'));
+    }
+
+    public function createAssignment(Request $request, Rescue $rescue, Food $food)
+    {
+        $volunteerID = $this->getVolunteerID($request, $food->id);
+        $vaultID = $this->getVaultID($request, $food->id);
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+
+            // we need to clear up the assigned user on schedule first then assigned a new one
+            RescueSchedule::where('food_id', $food->id)->first()->delete();
+
+            RescueAssignment::Create($food, $rescue, $user, $volunteerID, $vaultID);
+
+            RescueSchedule::Create($rescue, $food, $volunteerID);
+
+            $vault = Vault::find($vaultID);
+            FoodRescueLog::Create($user, $rescue, $food, $vault);
+
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
+        }
+
+        return redirect()->route('rescues.show', ['rescue' => $rescue]);
+    }
+
     private function rejectOrCancelFood($user, $food, $rescue)
     {
         $isAdmin = $user->hasRole('admin');
         if ($isAdmin) {
             $food->food_rescue_status_id = Food::REJECTED;
             $food->save();
-            FoodRescueLog::Create($user, $rescue, $food);
+            FoodRescueLog::Create($user, $rescue, $food, null);
         } else {
             $food->food_rescue_status_id = Food::CANCELED;
             $food->save();
-            FoodRescueLog::Create($user, $rescue, $food);
+            FoodRescueLog::Create($user, $rescue, $food, null);
         }
     }
 
@@ -198,5 +252,15 @@ class FoodController extends Controller
             $rescue->save();
             RescueLog::Create($user, $rescue);
         }
+    }
+
+    private function getVolunteerID($request, $foodID)
+    {
+        return $request["food-$foodID-volunteer_id"];
+    }
+
+    private function getVaultID($request, $foodID)
+    {
+        return $request["food-$foodID-vault_id"];
     }
 }

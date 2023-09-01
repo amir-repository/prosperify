@@ -62,4 +62,9 @@ class Food extends Model
     {
         return $this->hasMany(FoodRescueLog::class);
     }
+
+    public function foodAssignments()
+    {
+        return $this->hasMany(RescueAssignment::class);
+    }
 }

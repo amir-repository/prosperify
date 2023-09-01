@@ -16,8 +16,13 @@
                 <img class="h-36 w-full bg-slate-200 rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
                     alt="">
             </div>
-            <div class="flex items-end justify-between">
-                <h1 class="text-2xl font-bold mt-3">{{ $food->name }}</h1>
+            <div class="mt-3 flex items-center gap-2">
+                <h1 class="text-2xl font-bold ">{{ $food->name }}</h1>
+                @if ($foodNotRejected && $foodNotCanceled)
+                    <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
+                        <x-heroicon-o-pencil-square class="w-6 h-6" />
+                    </a>
+                @endif
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
@@ -29,11 +34,14 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
-            @if ($foodNotRejected && $foodNotCanceled)
-                <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}"
-                    class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center ">Edit</a>
+            @php
+                $foodHasBeenAssigned = in_array($food->food_rescue_status_id, [7, 8, 9]);
+            @endphp
+            @if ($foodHasBeenAssigned)
+                <a href="{{ route('rescues.foods.assignment', ['rescue' => $rescue, 'food' => $food]) }}"
+                    class="block py-2 bg-slate-900 text-white w-full rounded-md text-sm font-medium mt-4 text-center">Edit
+                    Assignment</a>
             @endif
-
         </div>
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">History</h2>

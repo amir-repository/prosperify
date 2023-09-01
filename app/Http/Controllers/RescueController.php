@@ -12,10 +12,13 @@ use App\Models\FoodVault;
 use App\Models\Point;
 use App\Models\PointRescueUser;
 use App\Models\Rescue;
+use App\Models\RescueAssignment;
 use App\Models\RescueLog;
+use App\Models\RescueSchedule;
 use App\Models\RescueUser;
 use App\Models\User;
 use App\Models\Vault;
+use App\Models\VaultLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -142,8 +145,19 @@ class RescueController extends Controller
         } else if ($manager) {
             $volunteers = [];
             $vaults = [];
-            if ($rescue->rescue_status_id === 3) {
+            $rescueProcessed = $rescue->rescue_status_id === Rescue::PROCESSED;
+            if ($rescueProcessed) {
                 $volunteers = User::role(User::VOLUNTEER)->get();
+                $volunteers = $volunteers->filter(function ($volunteer) use ($rescue) {
+
+                    // dateformat to 2023-12-23
+                    $rescue_date = Carbon::parse($rescue->rescue_date)->format('Y-m-d');
+
+                    // volunteer hanya bisa handle 1 food dalam suatu hari
+                    $maxFoodRescueInAday = 1;
+                    return RescueSchedule::whereDate('rescue_date', $rescue_date)->where('user_id', $volunteer->id)->count() < $maxFoodRescueInAday;
+                });
+
                 $vaults = Vault::all();
             }
             return view('manager.rescues.show', ['rescue' => $rescue, 'volunteers' => $volunteers, 'vaults' => $vaults]);
@@ -207,13 +221,16 @@ class RescueController extends Controller
             $rescueSubmitted = $rescue->rescue_status_id === Rescue::SUBMITTED;
             $rescueRejected = $rescue->rescue_status_id === Rescue::REJECTED;
             $rescueProcessed = $rescue->rescue_status_id === Rescue::PROCESSED;
+            $rescueAssigned = $rescue->rescue_status_id === Rescue::ASSIGNED;
 
             if ($rescueSubmitted) {
-                $this->updateFoodsStatus($user, $rescue, Food::SUBMITTED);
+                $this->updateFoodsStatus($user, $rescue, Food::SUBMITTED, null);
             } else if ($rescueRejected) {
-                $this->updateFoodsStatus($user, $rescue, Food::REJECTED);
+                $this->updateFoodsStatus($user, $rescue, Food::REJECTED, null);
             } else if ($rescueProcessed) {
-                $this->updateFoodsStatus($user, $rescue, Food::PROCESSED);
+                $this->updateFoodsStatus($user, $rescue, Food::PROCESSED, null);
+            } else if ($rescueAssigned) {
+                $this->updateFoodsStatus($user, $rescue, Food::ASSIGNED, null);
             }
 
             DB::commit();
@@ -239,14 +256,23 @@ class RescueController extends Controller
         dd($food);
     }
 
-    private function updateFoodsStatus($user, $rescue, $status)
+    private function updateFoodsStatus($user, $rescue, $status, $vault)
     {
         foreach ($rescue->foods as $food) {
             $foodIsNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [Food::REJECTED, Food::CANCELED]);
             if ($foodIsNotRejectedNorCanceled) {
                 $food->food_rescue_status_id = $status;
                 $food->save();
-                FoodRescueLog::Create($user, $rescue, $food);
+                $foodRescueLog = FoodRescueLog::Create($user, $rescue, $food, $vault);
+
+                // assignment dan schedule disini
+                if ($rescue->rescue_status_id === Rescue::ASSIGNED) {
+                    $vaultID = $this->getVaultID(request(), $food->id);
+                    $volunteerID = $this->getVolunteerID(request(), $food->id);
+
+                    RescueAssignment::Create($food, $rescue, $user, $volunteerID, $vaultID);
+                    RescueSchedule::Create($rescue, $food, $volunteerID);
+                }
             }
         }
     }

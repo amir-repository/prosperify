@@ -195,33 +195,43 @@
 
                                                 {{-- rescue state on assigned --}}
                                             @elseif($rescue->rescue_status_id > 3)
-                                                <section class="flex justify-between">
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Volunteer
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-volunteer_id"
-                                                                id="volunteer">
-                                                                <option value="{{ $food->pivot->volunteer->id }}">
-                                                                    {{ $food->pivot->volunteer->name }}
-                                                                </option>
-                                                            </select>
+                                                @php
+                                                    $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
+                                                @endphp
+                                                {{-- food is not rejected nor canceled --}}
+                                                @if ($foodNotRejectedNorCanceled)
+                                                    <section class="flex justify-between">
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Volunteer
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-volunteer_id"
+                                                                    id="volunteer">
+                                                                    <option
+                                                                        value="{{ $food->foodAssignments->last()->volunteer->id }}">
+                                                                        {{ $food->foodAssignments->last()->volunteer->name }}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div>
-                                                        <p class="mt-4 text-sm font-medium">Vaults
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-vault_id" id="vault">
-                                                                <option value="{{ $food->pivot->vault->id }}">
-                                                                    {{ $food->pivot->vault->name }}
-                                                                </option>
-                                                            </select>
+                                                        <div>
+                                                            <p class="mt-4 text-sm font-medium">Vaults
+                                                            </p>
+                                                            <div class="mt-2">
+                                                                <select class="rounded-md border border-slate-300"
+                                                                    name="food-{{ $food->id }}-vault_id"
+                                                                    id="vault">
+                                                                    <option
+                                                                        value="{{ $food->foodAssignments->last()->vault->id }}">
+                                                                        {{ $food->foodAssignments->last()->vault->name }}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </section>
+                                                    </section>
+                                                @endif
+                                                {{-- food is not rejected nor canceled --}}
                                             @endif
                                             {{-- rescue state on assigned --}}
                                         @endif

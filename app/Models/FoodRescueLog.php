@@ -25,7 +25,7 @@ class FoodRescueLog extends Model
         return $this->belongsTo(Food::class);
     }
 
-    public static function Create($user, $rescue, $food)
+    public static function Create($user, $rescue, $food, $vault)
     {
         $foodRescueLog = new FoodRescueLog();
         $foodRescueLog->rescue_id = $rescue->id;
@@ -39,6 +39,13 @@ class FoodRescueLog extends Model
         $foodRescueLog->unit_id = $food->unit_id;
         $foodRescueLog->unit_name = $food->unit->name;
         $foodRescueLog->photo = $food->photo;
+
+        if ($vault !== null) {
+            $foodRescueLog->vault_id = $vault->id;
+            $foodRescueLog->vault_name = $vault->name;
+        }
         $foodRescueLog->save();
+
+        return $foodRescueLog;
     }
 }
