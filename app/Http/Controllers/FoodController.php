@@ -107,12 +107,19 @@ class FoodController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($food->food_rescue_status_id === Food::PLANNED) {
+            $foodPlanned = $food->food_rescue_status_id === Food::PLANNED;
+            $foodSubmitted = $food->food_rescue_status_id === Food::SUBMITTED;
+            $foodProcessed = $food->food_rescue_status_id === Food::PROCESSED;
+            $foodAssigned = $food->food_rescue_status_id === Food::ASSIGNED;
+
+            if ($foodPlanned) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PLANNED;
-            } else if ($food->food_rescue_status_id === Food::SUBMITTED) {
+            } else if ($foodSubmitted) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_SUBMITTED;
-            } else if ($food->food_rescue_status_id === Food::PROCESSED) {
+            } else if ($foodProcessed) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PROCESSED;
+            } else if ($foodAssigned) {
+                $food->food_rescue_status_id = Food::ADJUSTED_AFTER_ASSIGNED;
             }
 
             $food->name = $request->name;
@@ -148,9 +155,10 @@ class FoodController extends Controller
         $foodStatusID = $food->food_rescue_status_id;
         try {
             DB::beginTransaction();
-            $foodPlanned = $foodStatusID === Food::PLANNED || $foodStatusID === Food::ADJUSTED_AFTER_PLANNED;
-            $foodSubmitted = $foodStatusID === Food::SUBMITTED || $foodStatusID === Food::ADJUSTED_AFTER_SUBMITTED;
-            $foodProcessed = $foodStatusID === Food::PROCESSED || $foodStatusID === Food::ADJUSTED_AFTER_PROCESSED;
+            $foodPlanned = in_array($foodStatusID, [Food::PLANNED, Food::ADJUSTED_AFTER_PLANNED]);
+            $foodSubmitted = in_array($foodStatusID, [Food::SUBMITTED, Food::ADJUSTED_AFTER_SUBMITTED]);
+            $foodProcessed = in_array($foodStatusID, [Food::PROCESSED, Food::ADJUSTED_AFTER_PROCESSED]);
+            $foodAssigned = in_array($foodStatusID, [Food::ASSIGNED, Food::ADJUSTED_AFTER_ASSIGNED]);
 
             if ($foodPlanned) {
                 $food->delete();
@@ -160,6 +168,19 @@ class FoodController extends Controller
             } else if ($foodProcessed) {
                 $this->rejectOrCancelFood($user, $food, $rescue);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
+            } else if ($foodAssigned) {
+                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
+
+                $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
+                $rescueSchedule->delete();
+
+                $rescueAssignments = RescueAssignment::where('food_id', $food->id)->get();
+                foreach ($rescueAssignments as $rescueAssignment) {
+                    $rescueAssignment->delete();
+                }
+                // delete rescue schedule untuk food yang di destroy
+                // delete rescue assignment untuk food yang di destroy
             }
             DB::commit();
         } catch (\Exception $e) {
