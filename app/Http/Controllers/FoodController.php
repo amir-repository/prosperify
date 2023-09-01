@@ -171,16 +171,7 @@ class FoodController extends Controller
             } else if ($foodAssigned) {
                 $this->rejectOrCancelFood($user, $food, $rescue);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
-
-                $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
-                $rescueSchedule->delete();
-
-                $rescueAssignments = RescueAssignment::where('food_id', $food->id)->get();
-                foreach ($rescueAssignments as $rescueAssignment) {
-                    $rescueAssignment->delete();
-                }
-                // delete rescue schedule untuk food yang di destroy
-                // delete rescue assignment untuk food yang di destroy
+                $this->cleanupFoodAssignmentSchedule($food);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -272,6 +263,17 @@ class FoodController extends Controller
             $rescue->rescue_status_id = Rescue::REJECTED;
             $rescue->save();
             RescueLog::Create($user, $rescue);
+        }
+    }
+
+    private function cleanupFoodAssignmentSchedule($food)
+    {
+        $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
+        $rescueSchedule->delete();
+
+        $rescueAssignments = RescueAssignment::where('food_id', $food->id)->get();
+        foreach ($rescueAssignments as $rescueAssignment) {
+            $rescueAssignment->delete();
         }
     }
 
