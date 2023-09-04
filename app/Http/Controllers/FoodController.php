@@ -178,10 +178,7 @@ class FoodController extends Controller
             DB::rollBack();
             throw $e;
         }
-        return to_route("rescues.index");
-        // below it doesn't work why ?
-        // return redirect()->route("rescues.index");
-        // return redirect()->route('rescues.show', compact('rescue'));
+        return redirect()->route('rescues.show', ["rescue" => $rescue]);
     }
 
     public function assignment(Request $request, Rescue $rescue, Food $food)
