@@ -111,161 +111,179 @@
                             @foreach ($rescue->foods as $food)
                                 @php
                                     $foodLog = $food->foodRescueLogs->last();
+                                    $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
                                 @endphp
-                                <a href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
-                                    <section class="p-6 border border-slate-200 rounded-md mb-4 ">
-                                        {{-- food info --}}
-                                        <div class="flex items-center gap-4">
-                                            <div>
-                                                <img class="w-[72px] h-[72px] rounded-md object-cover"
-                                                    src="{{ asset("storage/$food->photo") }}" alt="">
-                                            </div>
-                                            <div>
-                                                <h3 class="text-2xl font-bold">
-                                                    {{ $food->amount }}.<span
-                                                        class="text-base">{{ $food->unit->name }}</span>
-                                                </h3>
-                                                <p class="text-slate-500">{{ $food->name }}</p>
-                                                <p class="text-xs text-slate-500">Exp.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {{-- food info --}}
-                                        {{-- food status --}}
-                                        <section class="flex items-center gap-2 mt-4">
-                                            <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
-                                                @include('foods.partials.food-status')
-                                            </div>
-                                            <div>
-                                                <p>
-                                                    <span class="capitalize">{{ $foodLog->food_rescue_status_name }}</span>
-                                                    by
-                                                    {{ $foodLog->actor_name }}
+                                @if ($foodNotRejectedNorCanceled)
+                                    @php
+                                        $showFoodForSpecificVolunteer = $food->foodAssignments->count() > 0 && $food->foodAssignments->last()->volunteer_id === auth()->user()->id;
+                                        $isAdmin = auth()
+                                            ->user()
+                                            ->hasRole('admin');
+                                    @endphp
 
-                                                </p>
-                                                <p class="text-xs text-slate-500 capitalize">
-                                                    At {{ $foodLog->created_at }}
-                                                </p>
-                                            </div>
-                                        </section>
-                                        {{-- food status --}}
-                                        @php
-                                            $rescueNotRejected = $rescue->rescue_status_id !== 7;
-                                        @endphp
-                                        @if ($rescueNotRejected)
-                                            {{-- rescue state on processed --}}
-                                            @php
-                                                $foodIsNotRejectedAndNotCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
-                                                $foodProcessed = $rescue->rescue_status_id === 3;
-                                            @endphp
-                                            @if ($foodProcessed && $foodIsNotRejectedAndNotCanceled)
-                                                <section class="flex justify-between">
+                                    @if ($showFoodForSpecificVolunteer || $isAdmin)
+                                        <a
+                                            href="{{ route('rescues.foods.show', ['rescue' => $rescue, 'food' => $food]) }}">
+                                            <section class="p-6 border border-slate-200 rounded-md mb-4 ">
+                                                {{-- food info --}}
+                                                <div class="flex items-center gap-4">
                                                     <div>
-                                                        <p class="mt-4 text-sm font-medium">Volunteer
-                                                        </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer"
-                                                                required>
-                                                                @foreach ($volunteers as $volunteer)
-                                                                    <option value="{{ $volunteer->id }}">
-                                                                        {{ $volunteer->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                        <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                                            src="{{ asset("storage/$food->photo") }}" alt="">
                                                     </div>
                                                     <div>
-                                                        <p class="mt-4 text-sm font-medium">Vaults
+                                                        <h3 class="text-2xl font-bold">
+                                                            {{ $food->amount }}.<span
+                                                                class="text-base">{{ $food->unit->name }}</span>
+                                                        </h3>
+                                                        <p class="text-slate-500">{{ $food->name }}</p>
+                                                        <p class="text-xs text-slate-500">Exp.
                                                         </p>
-                                                        <div class="mt-2">
-                                                            <select class="rounded-md border border-slate-300"
-                                                                name="food-{{ $food->id }}-vault_id" id="vault"
-                                                                required>
-                                                                @foreach ($vaults as $vault)
-                                                                    <option value="{{ $vault->id }}">
-                                                                        {{ $vault->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {{-- food info --}}
+                                                {{-- food status --}}
+                                                <section class="flex items-center gap-2 mt-4">
+                                                    <div
+                                                        class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                                                        @include('foods.partials.food-status')
+                                                    </div>
+                                                    <div>
+                                                        <p>
+                                                            <span
+                                                                class="capitalize">{{ $foodLog->food_rescue_status_name }}</span>
+                                                            by
+                                                            {{ $foodLog->actor_name }}
+
+                                                        </p>
+                                                        <p class="text-xs text-slate-500 capitalize">
+                                                            At {{ $foodLog->created_at }}
+                                                        </p>
                                                     </div>
                                                 </section>
-                                                {{-- rescue state on processed --}}
-
-                                                {{-- rescue state on assigned --}}
-                                            @elseif($rescue->rescue_status_id > 3)
+                                                {{-- food status --}}
                                                 @php
-                                                    $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
+                                                    $rescueNotRejected = $rescue->rescue_status_id !== 7;
                                                 @endphp
-                                                {{-- food is not rejected nor canceled --}}
-                                                @if ($foodNotRejectedNorCanceled)
-                                                    <section class="flex justify-between">
-                                                        <div>
-                                                            <p class="mt-4 text-sm font-medium">Volunteer
-                                                            </p>
-                                                            <div class="mt-2">
-                                                                <select class="rounded-md border border-slate-300"
-                                                                    name="food-{{ $food->id }}-volunteer_id"
-                                                                    id="volunteer">
-                                                                    <option
-                                                                        value="{{ $food->foodAssignments->last()->volunteer->id }}">
-                                                                        {{ $food->foodAssignments->last()->volunteer->name }}
-                                                                    </option>
-                                                                </select>
+                                                @if ($rescueNotRejected)
+                                                    {{-- rescue state on processed --}}
+                                                    @php
+                                                        $foodIsNotRejectedAndNotCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
+                                                        $foodProcessed = $rescue->rescue_status_id === 3;
+                                                    @endphp
+                                                    @if ($foodProcessed && $foodIsNotRejectedAndNotCanceled)
+                                                        <section class="flex justify-between">
+                                                            <div>
+                                                                <p class="mt-4 text-sm font-medium">Volunteer
+                                                                </p>
+                                                                <div class="mt-2">
+                                                                    <select class="rounded-md border border-slate-300"
+                                                                        name="food-{{ $food->id }}-volunteer_id"
+                                                                        id="volunteer" required>
+                                                                        @foreach ($volunteers as $volunteer)
+                                                                            <option value="{{ $volunteer->id }}">
+                                                                                {{ $volunteer->name }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div>
-                                                            <p class="mt-4 text-sm font-medium">Vaults
-                                                            </p>
-                                                            <div class="mt-2">
-                                                                <select class="rounded-md border border-slate-300"
-                                                                    name="food-{{ $food->id }}-vault_id"
-                                                                    id="vault">
-                                                                    <option
-                                                                        value="{{ $food->foodAssignments->last()->vault->id }}">
-                                                                        {{ $food->foodAssignments->last()->vault->name }}
-                                                                    </option>
-                                                                </select>
+                                                            <div>
+                                                                <p class="mt-4 text-sm font-medium">Vaults
+                                                                </p>
+                                                                <div class="mt-2">
+                                                                    <select class="rounded-md border border-slate-300"
+                                                                        name="food-{{ $food->id }}-vault_id"
+                                                                        id="vault" required>
+                                                                        @foreach ($vaults as $vault)
+                                                                            <option value="{{ $vault->id }}">
+                                                                                {{ $vault->name }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </section>
-                                                @endif
-                                                {{-- food is not rejected nor canceled --}}
-                                            @endif
-                                            {{-- rescue state on assigned --}}
-                                        @endif
+                                                        </section>
+                                                        {{-- rescue state on processed --}}
 
-                                        @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id < 6)
-                                            @role('volunteer')
-                                                @php
-                                                    $foodRescueStatus = $food->pivot->foodRescueStatus;
-                                                @endphp
-                                                @if ($foodRescueStatus->id < 6)
-                                                    <p class="mt-4 text-sm font-medium">Photo when it's
-                                                        @if ($foodRescueStatus->id === 4)
-                                                            taken
-                                                        @elseif($foodRescueStatus->id === 5)
-                                                            stored
+                                                        {{-- rescue state on assigned --}}
+                                                    @elseif($rescue->rescue_status_id > 3)
+                                                        @php
+                                                            $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [13, 14]);
+                                                        @endphp
+                                                        {{-- food is not rejected nor canceled --}}
+                                                        @if ($foodNotRejectedNorCanceled)
+                                                            <section class="flex justify-between">
+                                                                <div>
+                                                                    <p class="mt-4 text-sm font-medium">Volunteer
+                                                                    </p>
+                                                                    <div class="mt-2">
+                                                                        <select class="rounded-md border border-slate-300"
+                                                                            name="food-{{ $food->id }}-volunteer_id"
+                                                                            id="volunteer">
+                                                                            <option
+                                                                                value="{{ $food->foodAssignments->last()->volunteer->id }}">
+                                                                                {{ $food->foodAssignments->last()->volunteer->name }}
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="mt-4 text-sm font-medium">Vaults
+                                                                    </p>
+                                                                    <div class="mt-2">
+                                                                        <select class="rounded-md border border-slate-300"
+                                                                            name="food-{{ $food->id }}-vault_id"
+                                                                            id="vault">
+                                                                            <option
+                                                                                value="{{ $food->foodAssignments->last()->vault->id }}">
+                                                                                {{ $food->foodAssignments->last()->vault->name }}
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </section>
                                                         @endif
-                                                    </p>
-                                                    <div class="border mt-2 rounded-md">
-                                                        <input class="p-2" type="file" name="{{ $food->id }}-photo"
-                                                            {{ in_array($rescue->rescue_status_id, [4, 5]) ? '' : 'required' }}>
-                                                    </div>
-                                                    <button
-                                                        class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
-                                                        @if ($foodRescueStatus->id === 4)
-                                                            Take
-                                                        @elseif($foodRescueStatus->id === 5)
-                                                            Store
-                                                        @endif
-                                                    </button>
+                                                        {{-- food is not rejected nor canceled --}}
+                                                    @endif
+                                                    {{-- rescue state on assigned --}}
                                                 @endif
-                                            @endrole
-                                        @endif
-                                    </section>
-                                </a>
+
+                                                @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id < 6)
+                                                    @role('volunteer')
+                                                        @php
+                                                            $foodRescueStatus = $food->food_rescue_status_id;
+                                                            $foodAssigned = in_array($foodRescueStatus, [7, 8]);
+                                                            $foodTaken = $foodRescueStatus === 9;
+                                                        @endphp
+                                                        @if (true)
+                                                            <p class="mt-4 text-sm font-medium">Photo when it's
+                                                                @if ($foodAssigned)
+                                                                    taken
+                                                                @elseif($foodTaken)
+                                                                    stored
+                                                                @endif
+                                                            </p>
+                                                            <div class="border mt-2 rounded-md">
+                                                                <input class="p-2" type="file"
+                                                                    name="{{ $food->id }}-photo"
+                                                                    {{ in_array($rescue->rescue_status_id, [4, 5]) ? '' : 'required' }}>
+                                                            </div>
+                                                            <button
+                                                                class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
+                                                                @if ($foodAssigned)
+                                                                    Take
+                                                                @elseif($foodTaken)
+                                                                    Store
+                                                                @endif
+                                                            </button>
+                                                        @endif
+                                                    @endrole
+                                                @endif
+                                            </section>
+                                        </a>
+                                    @endif
+                                @endif
                             @endforeach
                         </div>
                     @endif

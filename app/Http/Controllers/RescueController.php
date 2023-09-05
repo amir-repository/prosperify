@@ -77,7 +77,10 @@ class RescueController extends Controller
 
             foreach ($filtered as $rescue) {
                 foreach ($rescue->foods as $food) {
-                    if ($food->pivot->volunteer->id === $user->id) {
+                    $foodHasAssignment = $food->foodAssignments->count() > 0;
+                    $foodIsAssignedToLogedVolunteer = $foodHasAssignment && $food->foodAssignments->last()->volunteer_id === $user->id;
+
+                    if ($foodIsAssignedToLogedVolunteer) {
                         $rescues->push($rescue);
                         break;
                     }
@@ -210,8 +213,8 @@ class RescueController extends Controller
     {
         $user = auth()->user();
         $isPhotoInRequest = count($request->file());
-
         try {
+
             DB::beginTransaction();
 
             $rescue->rescue_status_id = (int)$request->status;
@@ -222,6 +225,7 @@ class RescueController extends Controller
             $rescueRejected = $rescue->rescue_status_id === Rescue::REJECTED;
             $rescueProcessed = $rescue->rescue_status_id === Rescue::PROCESSED;
             $rescueAssigned = $rescue->rescue_status_id === Rescue::ASSIGNED;
+            $rescueIncompleted = $rescue->rescue_status_id === Rescue::INCOMPLETED;
 
             if ($rescueSubmitted) {
                 $this->updateFoodsStatus($user, $rescue, Food::SUBMITTED, null);
@@ -231,6 +235,13 @@ class RescueController extends Controller
                 $this->updateFoodsStatus($user, $rescue, Food::PROCESSED, null);
             } else if ($rescueAssigned) {
                 $this->updateFoodsStatus($user, $rescue, Food::ASSIGNED, null);
+            } else if ($rescueIncompleted) {
+                if ($isPhotoInRequest) {
+                    // update food status dengan foto
+                    // buat log food
+                    // buat log food receipt
+                    $this->updateFoodsStatus($user, $rescue, Food::TAKEN, null);
+                }
             }
 
             DB::commit();
@@ -275,6 +286,10 @@ class RescueController extends Controller
                 }
             }
         }
+    }
+
+    private function updateFoodStatus()
+    {
     }
 
     private function filterRescueByStatus($rescues, $arrRescueStatusID)
