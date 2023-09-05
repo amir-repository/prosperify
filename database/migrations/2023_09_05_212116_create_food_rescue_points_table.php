@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('food_rescue_point', function (Blueprint $table) {
             $table->id();
-            $table->integer('point');
             $table->foreignId('point_id')->constrained();
-            $table->foreignId('rescue_id')->constrained();
-            $table->foreignId('food_id')->constrained();
+            $table->foreignId('food_rescue_stored_receipt_id')->constrained();
+            $table->integer('point');
             $table->timestamps();
         });
     }

@@ -68,5 +68,9 @@ class FoodRescueStatusSeeder extends Seeder
         DB::table('food_rescue_statuses')->insert([
             'name' => 'canceled',
         ]);
+
+        DB::table('food_rescue_statuses')->insert([
+            'name' => 'discarded',
+        ]);
     }
 }

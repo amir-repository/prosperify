@@ -26,6 +26,7 @@ class Food extends Model
     public const ADJUSTED_AFTER_STORED = 12;
     public const REJECTED = 13;
     public const CANCELED = 14;
+    public const DISCARDED = 15;
 
     protected $fillable = ['rescue_id', 'vault_id', 'name', 'detail', 'expired_date', 'amount', 'stored_amount', 'stored_at', 'photo', 'category_id', 'sub_category_id', 'unit_id', 'food_rescue_status_id'];
 

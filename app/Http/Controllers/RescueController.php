@@ -7,6 +7,8 @@ use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueLog;
 use App\Models\FoodRescuePoint;
+use App\Models\FoodRescueStoredReceipt;
+use App\Models\FoodRescueTakenReceipt;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Point;
@@ -237,10 +239,14 @@ class RescueController extends Controller
                 $this->updateFoodsStatus($user, $rescue, Food::ASSIGNED, null);
             } else if ($rescueIncompleted) {
                 if ($isPhotoInRequest) {
-                    // update food status dengan foto
-                    // buat log food
-                    // buat log food receipt
-                    $this->updateFoodsStatus($user, $rescue, Food::TAKEN, null);
+
+                    $foodId = $this->getFoodId($request);
+                    $vaultId = $this->getVaultID($request, $foodId);
+                    $food = Food::find($foodId);
+                    $vault = Vault::find($vaultId);
+                    $photo = $this->storePhoto($request, $foodId);
+
+                    $this->updateFoodStatus($rescue, $food, $user, $vault, $photo);
                 }
             }
 
@@ -267,6 +273,17 @@ class RescueController extends Controller
         dd($food);
     }
 
+    private function getFoodId(Request $request)
+    {
+        $foodKey = null;
+        foreach ($request->file() as $key => $value) {
+            $foodKey = $key;
+        }
+        $foodId = ((int)explode("-", $foodKey)[0]);
+        return $foodId;
+    }
+
+    // batch update for food before assigned
     private function updateFoodsStatus($user, $rescue, $status, $vault)
     {
         foreach ($rescue->foods as $food) {
@@ -288,8 +305,64 @@ class RescueController extends Controller
         }
     }
 
-    private function updateFoodStatus()
+    // individual update for food after assigned
+    private function updateFoodStatus($rescue, $food, $user, $vault, $photo,)
     {
+        $foodAssigned = $food->food_rescue_status_id === Food::ASSIGNED;
+        $foodTaken = $food->food_rescue_status_id === Food::TAKEN;
+
+        if ($foodAssigned) {
+            $food->food_rescue_status_id = Food::TAKEN;
+            $food->photo = $photo;
+            $food->save();
+
+            FoodRescueLog::Create($user, $rescue, $food, $vault);
+            $rescueAssignment = RescueAssignment::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get()->last();
+            FoodRescueTakenReceipt::Create($food, $rescueAssignment);
+        } else if ($foodTaken) {
+            $food->food_rescue_status_id = Food::STORED;
+            $food->photo = $photo;
+            $food->save();
+
+            FoodRescueLog::Create($user, $rescue, $food, $vault);
+            $rescueAssignment = RescueAssignment::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get()->last();
+            $foodRescueStoredReceipt =  FoodRescueStoredReceipt::Create($food, $rescueAssignment);
+
+            // update user point
+            $userPoint = Point::where('user_id', $rescue->user_id)->first();
+            $userPoint->point = (int)$userPoint->point + (int)$food->amount;
+            $userPoint->save();
+
+            // save log
+            $foodRescuePoint = new FoodRescuePoint();
+            $foodRescuePoint->point_id = $userPoint->id;
+            $foodRescuePoint->food_rescue_stored_receipt_id = $foodRescueStoredReceipt->id;
+            $foodRescuePoint->point = $food->amount;
+            $foodRescuePoint->save();
+
+            $this->changeRescueToComplete($rescue, $user);
+        }
+    }
+
+    private function changeRescueToComplete($rescue, $user)
+    {
+        // check apakah semua food yang tidak reject dan tidak canceled sudah stored, if yes maka ubah rescue status ke complete
+
+        $allfoodStored = true;
+
+        foreach ($rescue->foods as $food) {
+            $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [Food::REJECTED, Food::CANCELED]);
+            $foodHasNotBeenStored = !in_array($food->food_rescue_status_id, [Food::STORED, Food::ADJUSTED_AFTER_STORED]);
+            if ($foodNotRejectedNorCanceled && $food->foodHasNotBeenStored) {
+                $allfoodStored = false;
+            }
+        }
+
+        if ($allfoodStored) {
+            $rescue->rescue_status_id = Rescue::COMPLETED;
+            $rescue->save();
+            RescueLog::Create($user, $rescue);
+        }
     }
 
     private function filterRescueByStatus($rescues, $arrRescueStatusID)

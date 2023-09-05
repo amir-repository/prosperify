@@ -11,5 +11,5 @@ class FoodRescuePoint extends Model
 
     protected $table = 'food_rescue_point';
 
-    protected $fillable = ['point', 'point_id', 'rescue_id', 'food_id'];
+    protected $fillable = ['point_id', 'food_rescue_stored_receipt_id', 'point'];
 }

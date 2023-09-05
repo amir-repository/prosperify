@@ -41,4 +41,14 @@ class RescueAssignment extends Model
         $rescueAssignment->vault_id = $vaultID;
         $rescueAssignment->save();
     }
+
+    public function foodRescueTakenReceipt()
+    {
+        return $this->hasOne(FoodRescueTakenReceipt::class);
+    }
+
+    public function foodRescueStoredReceipt()
+    {
+        return $this->hasOne(FoodRescueStoredReceipt::class);
+    }
 }

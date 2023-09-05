@@ -111,6 +111,8 @@ class FoodController extends Controller
             $foodSubmitted = $food->food_rescue_status_id === Food::SUBMITTED;
             $foodProcessed = $food->food_rescue_status_id === Food::PROCESSED;
             $foodAssigned = $food->food_rescue_status_id === Food::ASSIGNED;
+            $foodTaken = $food->food_rescue_status_id === Food::TAKEN;
+            $foodStored = $food->food_rescue_status_id === Food::STORED;
 
             if ($foodPlanned) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PLANNED;
@@ -120,6 +122,10 @@ class FoodController extends Controller
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_PROCESSED;
             } else if ($foodAssigned) {
                 $food->food_rescue_status_id = Food::ADJUSTED_AFTER_ASSIGNED;
+            } else if ($foodTaken) {
+                $food->food_rescue_status_id = Food::ADJUSTED_BEFORE_STORED;
+            } else if ($foodStored) {
+                $food->food_rescue_status_id = Food::ADJUSTED_AFTER_STORED;
             }
 
             $food->name = $request->name;
@@ -159,6 +165,8 @@ class FoodController extends Controller
             $foodSubmitted = in_array($foodStatusID, [Food::SUBMITTED, Food::ADJUSTED_AFTER_SUBMITTED]);
             $foodProcessed = in_array($foodStatusID, [Food::PROCESSED, Food::ADJUSTED_AFTER_PROCESSED]);
             $foodAssigned = in_array($foodStatusID, [Food::ASSIGNED, Food::ADJUSTED_AFTER_ASSIGNED]);
+            $foodTaken = in_array($foodStatusID, [Food::TAKEN, Food::ADJUSTED_BEFORE_STORED]);
+            $foodStored = in_array($foodStatusID, [Food::STORED, Food::ADJUSTED_AFTER_STORED]);
 
             if ($foodPlanned) {
                 $food->delete();
@@ -172,6 +180,12 @@ class FoodController extends Controller
                 $this->rejectOrCancelFood($user, $food, $rescue);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
                 $this->cleanupFoodAssignmentSchedule($food);
+            } else if ($foodTaken) {
+                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
+                $this->cleanupFoodAssignmentSchedule($food);
+            } else if ($foodStored) {
+                $this->discardFood($user, $food, $rescue);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -185,7 +199,7 @@ class FoodController extends Controller
     {
         $volunteers = [];
         $vaults = [];
-        $rescueAssigned = $rescue->rescue_status_id === Rescue::ASSIGNED;
+        $rescueAssigned = in_array($rescue->rescue_status_id, [Rescue::ASSIGNED, Rescue::INCOMPLETED]);
         if ($rescueAssigned) {
             $volunteers = User::role(User::VOLUNTEER)->get();
             $volunteers = $volunteers->filter(function ($volunteer) use ($rescue) {
@@ -245,6 +259,18 @@ class FoodController extends Controller
         }
     }
 
+    private function discardFood($user, $food, $rescue)
+    {
+        $isAdmin = $user->hasRole('admin');
+        if ($isAdmin) {
+            $food->food_rescue_status_id = Food::DISCARDED;
+            $food->save();
+            $vaultId = $food->rescueAssignment->last()->vault_id;
+            $vault = Vault::find($vaultId);
+            FoodRescueLog::Create($user, $rescue, $food, $vault);
+        }
+    }
+
     private function rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue)
     {
         // kalau ternyata di rescue, semua food nya rejected atau pun canceled, maka set otomatis  rescuenya ke rejected
@@ -268,10 +294,11 @@ class FoodController extends Controller
         $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
         $rescueSchedule->delete();
 
-        $rescueAssignments = RescueAssignment::where('food_id', $food->id)->get();
-        foreach ($rescueAssignments as $rescueAssignment) {
-            $rescueAssignment->delete();
-        }
+        // jangan delete assignment nya, untuk sekarang di comment aja dulu
+        // $rescueAssignments = RescueAssignment::where('food_id', $food->id)->get();
+        // foreach ($rescueAssignments as $rescueAssignment) {
+        //     $rescueAssignment->delete();
+        // }
     }
 
     private function getVolunteerID($request, $foodID)

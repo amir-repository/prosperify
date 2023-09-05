@@ -10,9 +10,9 @@
     <x-heroicon-o-cog class="w-6 h-6" />
 @elseif (in_array($foodStatus, [7, 8]))
     <x-heroicon-o-user-group class="w-6 h-6" />
-@elseif ($foodStatus == 5)
+@elseif (in_array($foodStatus, [9, 11]))
     <x-heroicon-o-truck class="w-6 h-6" />
-@elseif ($foodStatus == 6)
+@elseif (in_array($foodStatus, [10, 12]))
     <x-heroicon-o-archive-box-arrow-down class="w-6 h-6" />
 @else
     <x-heroicon-o-trash class="w-6 h-6" />

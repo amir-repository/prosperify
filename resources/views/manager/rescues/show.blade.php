@@ -39,9 +39,7 @@
         </div>
         <div class="mt-3 flex items-center gap-1 text-slate-500">
             @include('rescues.partials.status-icon')
-            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }} @if ($rescue->rescue_status_id > 4 && $rescue->rescue_status_id !== 7 && $rescue->rescue_status_id !== 8)
-                    <span>({{ $rescue->food_rescue_result }}/{{ $rescue->food_rescue_plan }})</span>
-                @endif
+            <p class="text-sm capitalize"> {{ $rescue->rescueStatus->name }}
             </p>
         </div>
         <form onsubmit="return confirm('Are you sure');"
@@ -249,12 +247,12 @@
                                                     {{-- rescue state on assigned --}}
                                                 @endif
 
-                                                @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id < 6)
+                                                @if ($rescue->rescue_status_id > 3 && $rescue->rescue_status_id < 6 && !in_array($food->food_rescue_status_id, [10]))
                                                     @role('volunteer')
                                                         @php
                                                             $foodRescueStatus = $food->food_rescue_status_id;
                                                             $foodAssigned = in_array($foodRescueStatus, [7, 8]);
-                                                            $foodTaken = $foodRescueStatus === 9;
+                                                            $foodTaken = in_array($foodRescueStatus, [9, 11]);
                                                         @endphp
                                                         @if (true)
                                                             <p class="mt-4 text-sm font-medium">Photo when it's
