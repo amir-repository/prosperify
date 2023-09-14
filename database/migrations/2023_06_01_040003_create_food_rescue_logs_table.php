@@ -15,10 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('rescue_id')->constrained()->cascadeOnDelete();
             $table->foreignId('food_id')->constrained()->cascadeOnDelete();
-            $table->unsignedInteger('assigner_id')->nullable();
-            $table->string('assigner_name')->nullable();
-            $table->unsignedInteger('volunteer_id')->nullable();
-            $table->string('volunteer_name')->nullable();
             $table->unsignedInteger('actor_id');
             $table->string('actor_name');
             $table->unsignedBigInteger('food_rescue_status_id');
@@ -29,8 +25,6 @@ return new class extends Migration
             $table->unsignedInteger('unit_id');
             $table->string('unit_name');
             $table->string('photo');
-            $table->unsignedBigInteger('vault_id')->nullable();
-            $table->string('vault_name')->nullable();
             $table->timestamps();
         });
     }
