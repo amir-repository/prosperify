@@ -269,7 +269,8 @@ class RescueController extends Controller
 
     public function history(Rescue $rescue, Food $food)
     {
-        dd($food);
+        $foodRescueLogs = FoodRescueLog::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get();
+        return view('history.index', ['foodRescueLogs' => $foodRescueLogs]);
     }
 
     private function getFoodId(Request $request)

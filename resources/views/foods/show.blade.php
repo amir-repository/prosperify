@@ -40,6 +40,10 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
+            <div class="mt-6">
+                <a href="{{ route('foods.rescues.history', ['rescue' => $rescue, 'food' => $food]) }}"
+                    class="px-4 py-2 border border-slate-300 rounded-md">Timeline</a>
+            </div>
             @php
                 $foodHasBeenAssigned = in_array($food->food_rescue_status_id, [7, 8, 9]);
             @endphp
