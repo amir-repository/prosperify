@@ -6,6 +6,8 @@ use App\Http\Requests\StoreFoodRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueLog;
+use App\Models\FoodRescueStoredReceipt;
+use App\Models\FoodRescueTakenReceipt;
 use App\Models\FoodRescueUser;
 use App\Models\FoodVault;
 use App\Models\Rescue;
@@ -81,8 +83,10 @@ class FoodController extends Controller
      */
     public function show(Rescue $rescue, Food $food)
     {
+        $rescueAssignment = RescueAssignment::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->get()->last() ?? null;
+
         $foodRescueLogs = FoodRescueLog::where(['rescue_id' => $rescue->id, 'food_id' => $food->id])->get();
-        return view('foods.show', compact('rescue', 'food', 'foodRescueLogs'));
+        return view('foods.show', compact('rescue', 'food', 'foodRescueLogs', 'rescueAssignment'));
     }
 
     /**
@@ -193,6 +197,18 @@ class FoodController extends Controller
             throw $e;
         }
         return redirect()->route('rescues.show', ["rescue" => $rescue]);
+    }
+
+    public function takenReceipt(Request $request, Rescue $rescue, Food $food, $id)
+    {
+        $takenReceipt = FoodRescueTakenReceipt::find($id);
+        dd($takenReceipt, $takenReceipt->rescueAssignment);
+    }
+
+    public function storedReceipt(Request $request, Rescue $rescue, Food $food, $id)
+    {
+        $storedReceipt = FoodRescueStoredReceipt::find($id);
+        dd($storedReceipt, $storedReceipt->rescueAssignment);
     }
 
     public function assignment(Request $request, Rescue $rescue, Food $food)

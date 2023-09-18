@@ -51,6 +51,18 @@
                 @endif
             @endrole
         </div>
+        @if ($rescueAssignment)
+            <div class="mt-6 flex gap-4">
+                @if ($rescueAssignment && $rescueAssignment->foodRescueTakenReceipt !== null)
+                    <a href="{{ route('rescues.foods.takenreceipt', ['rescue' => $rescue, 'food' => $food, 'id' => $rescueAssignment->foodRescueTakenReceipt->id]) }}"
+                        class="px-4 py-2 border border-slate-300 rounded-md">Taken Receipt</a>
+                @endif
+                @if ($rescueAssignment && $rescueAssignment->foodRescueStoredReceipt !== null)
+                    <a href="{{ route('rescues.foods.storedreceipt', ['rescue' => $rescue, 'food' => $food, 'id' => $rescueAssignment->foodRescueStoredReceipt->id]) }}"
+                        class="px-4 py-2 border border-slate-300 rounded-md">Stored Receipt</a>
+                @endif
+            </div>
+        @endif
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">History</h2>
             @foreach ($foodRescueLogs as $food)

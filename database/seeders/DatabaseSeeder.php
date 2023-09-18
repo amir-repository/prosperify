@@ -34,8 +34,6 @@ class DatabaseSeeder extends Seeder
                 VaultSeeder::class,
                 RecipientStatusSeeder::class,
                 RecipientSeeder::class,
-                DonationStatusSeeder::class,
-                DonationFoodSeeder::class
             ]
         );
     }

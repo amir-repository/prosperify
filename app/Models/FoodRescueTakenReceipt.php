@@ -13,7 +13,7 @@ class FoodRescueTakenReceipt extends Model
 
     public function rescueAssignment()
     {
-        return $this->hasOne(RescueAssignment::class);
+        return $this->belongsTo(RescueAssignment::class);
     }
 
     public static function Create($food, $rescueAssignment)

@@ -239,7 +239,6 @@ class RescueController extends Controller
                 $this->updateFoodsStatus($user, $rescue, Food::ASSIGNED, null);
             } else if ($rescueIncompleted) {
                 if ($isPhotoInRequest) {
-
                     $foodId = $this->getFoodId($request);
                     $vaultId = $this->getVaultID($request, $foodId);
                     $food = Food::find($foodId);
@@ -353,7 +352,7 @@ class RescueController extends Controller
         foreach ($rescue->foods as $food) {
             $foodNotRejectedNorCanceled = !in_array($food->food_rescue_status_id, [Food::REJECTED, Food::CANCELED]);
             $foodHasNotBeenStored = !in_array($food->food_rescue_status_id, [Food::STORED, Food::ADJUSTED_AFTER_STORED]);
-            if ($foodNotRejectedNorCanceled && $food->foodHasNotBeenStored) {
+            if ($foodNotRejectedNorCanceled && $foodHasNotBeenStored) {
                 $allfoodStored = false;
             }
         }
