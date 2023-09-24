@@ -68,4 +68,19 @@ class Food extends Model
     {
         return $this->hasMany(RescueAssignment::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class);
+    }
+
+    public function vault()
+    {
+        return $this->belongsTo(Vault::class);
+    }
 }

@@ -322,6 +322,8 @@ class RescueController extends Controller
         } else if ($foodTaken) {
             $food->food_rescue_status_id = Food::STORED;
             $food->photo = $photo;
+            $food->stored_at = Carbon::now();
+            $food->vault_id = $vault->id;
             $food->save();
 
             FoodRescueLog::Create($user, $rescue, $food, $vault);
