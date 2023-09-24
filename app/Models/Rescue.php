@@ -11,7 +11,7 @@ class Rescue extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['donor_name', 'pickup_address', 'phone', 'email', 'title', 'description', 'rescue_date', 'score', 'food_rescue_plan', 'food_rescue_result'];
+    protected $fillable = ['donor_name', 'pickup_address', 'phone', 'email', 'title', 'description', 'rescue_date', 'user_id', 'rescue_status_id'];
 
     public const PLANNED = 1;
     public const SUBMITTED = 2;

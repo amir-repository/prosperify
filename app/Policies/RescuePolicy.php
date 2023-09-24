@@ -29,7 +29,7 @@ class RescuePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(User::DONOR);
+        return $user->hasRole([User::DONOR, User::ADMIN]);
     }
 
     /**
