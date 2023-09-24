@@ -111,4 +111,9 @@ class FoodResource extends Resource
             'edit' => Pages\EditFood::route('/{record}/edit'),
         ];
     }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 }
