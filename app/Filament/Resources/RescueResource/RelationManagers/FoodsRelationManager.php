@@ -44,6 +44,7 @@ class FoodsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->columns([
+                TextColumn::make('id')->label('ID'),
                 ImageColumn::make('photo')->square(),
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('amount')->searchable()->sortable(),

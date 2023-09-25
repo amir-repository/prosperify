@@ -56,6 +56,7 @@ class FoodResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->label('ID'),
                 ImageColumn::make('photo')->square(),
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('amount')->searchable()->sortable(),
