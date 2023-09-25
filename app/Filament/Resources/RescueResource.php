@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RescueResource\Pages;
 use App\Filament\Resources\RescueResource\RelationManagers;
+use App\Filament\Resources\RescueResource\RelationManagers\FoodsRelationManager;
 use App\Models\Rescue;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -24,6 +25,8 @@ class RescueResource extends Resource
 {
     protected static ?string $model = Rescue::class;
 
+    protected static ?string $navigationGroup = 'Rescue Management';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
@@ -31,14 +34,14 @@ class RescueResource extends Resource
         return $form
             ->schema([
                 TextInput::make('title')->required(),
-                TextInput::make('description')->required(),
+                DateTimePicker::make('rescue_date')->required(),
+                TextInput::make('description')->required()->columnSpan(2),
                 TextInput::make('pickup_address')->required(),
                 Select::make('rescue_status_id')->relationship(name: 'rescueStatus', titleAttribute: 'name')->preload(),
                 Select::make('user_id')->relationship(name: 'user', titleAttribute: 'name')->searchable()->required(),
                 TextInput::make('donor_name')->required(),
                 TextInput::make('phone')->required(),
                 TextInput::make('email')->required(),
-                DateTimePicker::make('rescue_date')->required(),
             ]);
     }
 
@@ -73,7 +76,7 @@ class RescueResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            FoodsRelationManager::class
         ];
     }
 
