@@ -37,17 +37,18 @@ class FoodResource extends Resource
             ->schema([
                 FileUpload::make('photo')
                     ->columnSpan(2)->required(),
-                Select::make('food_rescue_status_id')
-                    ->relationship(name: 'foodRescueStatus', titleAttribute: 'name')->columnSpan(2)->disabled(),
                 TextInput::make('name')->required(),
+                DateTimePicker::make('expired_date')->required(),
+                TextInput::make('detail')->required()->columnSpan(2),
                 TextInput::make('amount')->numeric()->required(),
-                Select::make('category_id')
-                    ->relationship(name: 'category', titleAttribute: 'name')->required(),
+                Select::make('unit_id')
+                    ->relationship(name: 'unit', titleAttribute: 'name')->required()->preload(),
                 Select::make('sub_category_id')
-                    ->relationship(name: 'subCategory', titleAttribute: 'name')->required(),
+                    ->relationship(name: 'subCategory', titleAttribute: 'name')->required()->label('Group of')->preload()->searchable(),
+                Select::make('food_rescue_status_id')
+                    ->relationship(name: 'foodRescueStatus', titleAttribute: 'name')->required(),
                 Select::make('vault_id')
-                    ->relationship(name: 'vault', titleAttribute: 'name')->required(),
-                DateTimePicker::make('expired_date')->required()
+                    ->relationship(name: 'vault', titleAttribute: 'name')->required()->columnSpan(2),
             ]);
     }
 

@@ -6,6 +6,7 @@ use App\Filament\Resources\FoodResource;
 use App\Models\Food;
 use App\Models\FoodRescueLog;
 use App\Models\Rescue;
+use App\Models\SubCategory;
 use App\Models\Vault;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -23,6 +24,8 @@ class EditFood extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $subCategory = SubCategory::find($data['sub_category_id']);
+        $data['category_id'] = $subCategory->category->id;
         $data['food_rescue_status_id'] = Food::ADJUSTED_AFTER_STORED;
 
         return $data;
