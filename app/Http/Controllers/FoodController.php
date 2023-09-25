@@ -212,7 +212,7 @@ class FoodController extends Controller
         $storedReceipt = FoodRescueStoredReceipt::find($id);
         $rescueAssignment = $storedReceipt->rescueAssignment;
 
-        return view('rescue.asdf', compact('storedReceipt', 'rescueAssignment'));
+        return view('receipt.stored.index', compact('storedReceipt', 'rescueAssignment'));
     }
 
     public function assignment(Request $request, Rescue $rescue, Food $food)
