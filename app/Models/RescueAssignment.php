@@ -31,6 +31,11 @@ class RescueAssignment extends Model
         return $this->belongsTo(Vault::class);
     }
 
+    public function assigner()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function Create($food, $rescue, $user, $volunteerID, $vaultID)
     {
         $rescueAssignment = new RescueAssignment();

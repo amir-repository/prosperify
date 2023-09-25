@@ -59,6 +59,7 @@ Route::post('/rescues/{rescue}/foods/{food}/assignment', [FoodController::class,
 Route::get('/rescues/{rescue}/foods/{food}/history', [RescueController::class, 'history'])->name('foods.rescues.history');
 
 Route::get('/rescues/{rescue}/foods/{food}/taken-receipt/{id}', [FoodController::class, 'takenReceipt'])->name('rescues.foods.takenreceipt');
+
 Route::get('/rescues/{rescue}/foods/{food}/stored-receipt/{id}', [FoodController::class, 'storedReceipt'])->name('rescues.foods.storedreceipt');
 
 Route::resource('rescues.foods', FoodController::class);

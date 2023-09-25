@@ -202,13 +202,17 @@ class FoodController extends Controller
     public function takenReceipt(Request $request, Rescue $rescue, Food $food, $id)
     {
         $takenReceipt = FoodRescueTakenReceipt::find($id);
-        dd($takenReceipt, $takenReceipt->rescueAssignment);
+        $rescueAssignment = $takenReceipt->rescueAssignment;
+
+        return view('receipt.taken.index', compact('takenReceipt', 'rescueAssignment'));
     }
 
     public function storedReceipt(Request $request, Rescue $rescue, Food $food, $id)
     {
         $storedReceipt = FoodRescueStoredReceipt::find($id);
-        dd($storedReceipt, $storedReceipt->rescueAssignment);
+        $rescueAssignment = $storedReceipt->rescueAssignment;
+
+        return view('rescue.asdf', compact('storedReceipt', 'rescueAssignment'));
     }
 
     public function assignment(Request $request, Rescue $rescue, Food $food)
