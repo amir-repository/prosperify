@@ -83,4 +83,9 @@ class Food extends Model
     {
         return $this->belongsTo(Vault::class);
     }
+
+    public function rescueSchedule()
+    {
+        return $this->hasOne(RescueSchedule::class);
+    }
 }

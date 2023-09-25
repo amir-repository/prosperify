@@ -19,7 +19,7 @@ class RescueSchedule extends Model
 
     public function food()
     {
-        return $this->hasOne(Food::class);
+        return $this->belongsTo(Food::class);
     }
 
     public static function Create($rescue, $food, $volunteerID)
