@@ -330,6 +330,10 @@ class RescueController extends Controller
             $rescueAssignment = RescueAssignment::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get()->last();
             $foodRescueStoredReceipt =  FoodRescueStoredReceipt::Create($food, $rescueAssignment);
 
+            // delete rescue schedule
+            $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
+            $rescueSchedule->delete();
+
             // update user point
             $userPoint = Point::where('user_id', $rescue->user_id)->first();
             $userPoint->point = (int)$userPoint->point + (int)$food->amount;
