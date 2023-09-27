@@ -70,9 +70,9 @@ class FoodResource extends Resource
             ->filters([
                 Filter::make('Is Stored')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('stored_at'))->toggle()->default(),
-                Filter::make('Expired this weeks')
+                Filter::make('Expired in 7 days')
                     ->query(fn (Builder $query): Builder => $query->whereBetween('expired_date', [Carbon::now(), Carbon::now()->addDays(6)]))->toggle(),
-                Filter::make('Expired this months')
+                Filter::make('Expired in 30 days')
                     ->query(fn (Builder $query): Builder => $query->whereBetween('expired_date', [Carbon::now(), Carbon::now()->addDays(29)]))->toggle(),
                 SelectFilter::make('Category')
                     ->relationship('category', 'name')

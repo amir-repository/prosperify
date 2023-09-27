@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources\RescueResource\RelationManagers;
 
+use App\Models\Food;
 use App\Models\FoodRescueLog;
+use App\Models\Rescue;
 use App\Models\SubCategory;
+use App\Models\Vault;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
@@ -65,9 +68,12 @@ class FoodsRelationManager extends RelationManager
                     $data['stored_at'] = Carbon::now();
 
                     return $data;
-                })->after(function () {
+                })->after(function (Food $food) {
+                    $user = auth()->user();
+                    $rescue = Rescue::find($food->rescue_id);
+                    $vault = Vault::find($food->vault_id);
                     // we need to save the food log
-                    dd($this);
+                    FoodRescueLog::Create($user, $rescue, $food, $vault);
                 })
             ])
             ->actions([
