@@ -253,8 +253,11 @@
                                                             $foodRescueStatus = $food->food_rescue_status_id;
                                                             $foodAssigned = in_array($foodRescueStatus, [7, 8]);
                                                             $foodTaken = in_array($foodRescueStatus, [9, 11]);
+                                                            $isTimeToRescue = Carbon\Carbon::parse($rescue->rescue_date)
+                                                                ->startOfDay()
+                                                                ->isSameDay();
                                                         @endphp
-                                                        @if (true)
+                                                        @if ($isTimeToRescue)
                                                             <p class="mt-4 text-sm font-medium">Photo when it's
                                                                 @if ($foodAssigned)
                                                                     taken
