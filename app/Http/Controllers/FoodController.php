@@ -6,6 +6,7 @@ use App\Http\Requests\StoreFoodRequest;
 use App\Models\Food;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueLog;
+use App\Models\FoodRescueLogNote;
 use App\Models\FoodRescueStoredReceipt;
 use App\Models\FoodRescueTakenReceipt;
 use App\Models\FoodRescueUser;
@@ -162,6 +163,8 @@ class FoodController extends Controller
         $user = auth()->user();
         $rescue = $food->rescue;
 
+        $note = $request->note;
+
         $foodStatusID = $food->food_rescue_status_id;
         try {
             DB::beginTransaction();
@@ -175,17 +178,17 @@ class FoodController extends Controller
             if ($foodPlanned) {
                 $food->delete();
             } else if ($foodSubmitted) {
-                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectOrCancelFood($user, $food, $rescue, $note);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
             } else if ($foodProcessed) {
-                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectOrCancelFood($user, $food, $rescue, $note);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
             } else if ($foodAssigned) {
-                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectOrCancelFood($user, $food, $rescue, $note);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
                 $this->cleanupFoodAssignmentSchedule($food);
             } else if ($foodTaken) {
-                $this->rejectOrCancelFood($user, $food, $rescue);
+                $this->rejectOrCancelFood($user, $food, $rescue, $note);
                 $this->rejectRescueWhenAllFoodAreRejectedCanceled($user, $rescue);
                 $this->cleanupFoodAssignmentSchedule($food);
             } else if ($foodStored) {
@@ -265,17 +268,23 @@ class FoodController extends Controller
         return redirect()->route('rescues.show', ['rescue' => $rescue]);
     }
 
-    private function rejectOrCancelFood($user, $food, $rescue)
+    private function rejectOrCancelFood($user, $food, $rescue, $note)
     {
         $isAdmin = $user->hasRole('admin');
         if ($isAdmin) {
             $food->food_rescue_status_id = Food::REJECTED;
             $food->save();
-            FoodRescueLog::Create($user, $rescue, $food, null);
+            $log = FoodRescueLog::Create($user, $rescue, $food, null);
+            if ($note) {
+                $logNote = FoodRescueLogNote::Create($log, $note);
+            }
         } else {
             $food->food_rescue_status_id = Food::CANCELED;
             $food->save();
-            FoodRescueLog::Create($user, $rescue, $food, null);
+            $log = FoodRescueLog::Create($user, $rescue, $food, null);
+            if ($note) {
+                $logNote = FoodRescueLogNote::Create($log, $note);
+            }
         }
     }
 

@@ -78,12 +78,20 @@
                 <Button class="mt-8 py-2 w-full bg-slate-900 text-white rounded-md text-sm font-medium">Update</Button>
             </section>
         </form>
-        <form onsubmit="return confirm('Are you sure');"
-            action="{{ route('foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
-            @csrf
-            @method('delete')
-            <Button
-                class="mt-6 py-2 w-full border border-slate-900 text-slate-900 rounded-md text-sm font-medium">Delete</Button>
-        </form>
+        <div class="p-4 border border-red-600 rounded-md mt-8">
+            <form onsubmit="return confirm('Are you sure');"
+                action="{{ route('foods.destroy', ['rescue' => $rescue, 'food' => $food]) }}" method="post">
+                @csrf
+                @method('delete')
+                <h1 class="font-bold text-red-600 mb-4">Danger !!!</h1>
+                @if ($food->food_rescue_status_id !== 1)
+                    <label for="note" class="text-sm font-medium block mb-[6px]">Note</label>
+                    <input id="note" type="text" name="note" class="border border-slate-200 rounded-md w-full"
+                        placeholder="Note" required>
+                @endif
+                <Button
+                    class="mt-6 py-2 w-full border border-red-600 text-slate-900 rounded-md text-sm font-medium">Delete</Button>
+            </form>
+        </div>
     </main>
 @endsection

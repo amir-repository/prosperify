@@ -27,7 +27,7 @@
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </a>
-                @elseif($foodNotRejected && $foodNotCanceled && $foodHasNotBeenTaken && $foodIsNotStored && $isTimeToRescue)
+                @elseif($foodNotRejected && $foodNotCanceled && $foodHasNotBeenTaken && $foodIsNotStored)
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </a>
@@ -91,6 +91,8 @@
                                 at
                                 {{ $food->created_at }}
                             </p>
+                            <p class="text-xs text-slate-500 font-bold">
+                                {{ $food->foodRescueLogNote ? $food->foodRescueLogNote->note : '' }}</p>
                         </div>
                     </section>
                 </a>

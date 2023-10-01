@@ -15,4 +15,12 @@ class FoodRescueLogNote extends Model
     {
         return $this->belongsTo(FoodRescueLog::class);
     }
+
+    public static function Create($foodRescueLog, $note)
+    {
+        $foodRescueLogNote = new FoodRescueLogNote();
+        $foodRescueLogNote->food_rescue_log_id = $foodRescueLog->id;
+        $foodRescueLogNote->note = $note;
+        $foodRescueLogNote->save();
+    }
 }
