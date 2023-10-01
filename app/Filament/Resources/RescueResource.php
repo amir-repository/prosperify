@@ -8,6 +8,7 @@ use App\Filament\Resources\RescueResource\RelationManagers\FoodsRelationManager;
 use App\Models\Rescue;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +21,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Set;
 
 class RescueResource extends Resource
 {
@@ -33,6 +35,14 @@ class RescueResource extends Resource
     {
         return $form
             ->schema([
+                Checkbox::make('rescue_in_office')->columnSpan(2)
+                    ->live()
+                    ->afterStateUpdated(
+                        function (Set $set, ?string $state) {
+                            $set('pickup_address', 'Kantor Food Bank');
+                            $set('rescue_status_id', 6);
+                        }
+                    ),
                 TextInput::make('title')->required(),
                 DateTimePicker::make('rescue_date')->required(),
                 TextInput::make('description')->required()->columnSpan(2),
