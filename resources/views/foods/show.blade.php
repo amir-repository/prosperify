@@ -9,6 +9,9 @@
     $foodNotCanceled = $food->food_rescue_status_id !== 14;
     $foodHasNotBeenTaken = !in_array($food->food_rescue_status_id, [9, 11]);
     $foodIsNotStored = !in_array($food->food_rescue_status_id, [10, 12]);
+    $isTimeToRescue = Carbon\Carbon::parse($rescue->rescue_date)
+        ->startOfDay()
+        ->isSameDay();
 @endphp
 
 @section('main')
@@ -24,7 +27,7 @@
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </a>
-                @elseif($foodNotRejected && $foodNotCanceled && $foodHasNotBeenTaken && $foodIsNotStored)
+                @elseif($foodNotRejected && $foodNotCanceled && $foodHasNotBeenTaken && $foodIsNotStored && $isTimeToRescue)
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </a>
