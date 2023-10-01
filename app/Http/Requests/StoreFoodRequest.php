@@ -29,7 +29,7 @@ class StoreFoodRequest extends FormRequest
             'detail' => 'required|max:255',
             'amount' => 'required|max:10',
             'unit_id' => 'required|max:5',
-            'expired_date' => 'required|after_or_equal:' . $this->allowedExpiredDate($this->rescue->rescue_date),
+            'expired_date' => 'required|after_or_equal:' . $this->allowedExpiredDate($this->rescue->rescue_date) . '|before:' . $this->maxAllowedExpiredDate($this->rescue->rescue_date, 3),
             'sub_category_id' => 'required|max:5',
         ];
     }
@@ -37,5 +37,10 @@ class StoreFoodRequest extends FormRequest
     private function allowedExpiredDate($rescueDate)
     {
         return Carbon::createFromFormat('d M Y H:i', $rescueDate)->format('m/d/y');
+    }
+
+    private function maxAllowedExpiredDate($rescueDate, int $incementor)
+    {
+        return Carbon::createFromFormat('d M Y H:i', $rescueDate)->addDays($incementor)->format('m/d/y');
     }
 }

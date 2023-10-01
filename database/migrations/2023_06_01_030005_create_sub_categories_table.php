@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sub_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('expiration_day_limit')->nullable();
             $table->foreignId('category_id')->constrained();
             $table->timestamps();
         });
