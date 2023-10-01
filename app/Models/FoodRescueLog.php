@@ -25,6 +25,11 @@ class FoodRescueLog extends Model
         return $this->belongsTo(Food::class);
     }
 
+    public function foodRescueLogNote()
+    {
+        return $this->hasOne(FoodRescueLogNote::class);
+    }
+
     public static function Create($user, $rescue, $food, $vault)
     {
         $foodRescueLog = new FoodRescueLog();
