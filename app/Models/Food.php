@@ -44,6 +44,22 @@ class Food extends Model
         );
     }
 
+    protected function storedAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (int $value) => $value / 1000,
+            set: fn (int $value) => $value * 1000
+        );
+    }
+
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (int $value) => $value / 1000,
+            set: fn (int $value) => $value * 1000
+        );
+    }
+
     public function rescue()
     {
         return $this->belongsTo(Rescue::class);
