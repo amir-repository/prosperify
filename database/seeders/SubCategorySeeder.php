@@ -27,7 +27,7 @@ class SubCategorySeeder extends Seeder
             [
                 'name' => 'karbo/nasi',
                 'category_id' => 1,
-                'expiration_day_limit' => 7
+                'expiration_day_limit' => 1
             ],
             [
                 'name' => 'sayur',
