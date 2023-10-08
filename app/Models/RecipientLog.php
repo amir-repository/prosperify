@@ -12,12 +12,22 @@ class RecipientLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['recipient_id', 'user_id', 'actor_id', 'actor_name', 'recipient_status_id', 'recipient_status_name'];
+    protected $fillable = ['recipient_id', 'recipient_status_id', 'recipient_status_name', 'actor_id', 'actor_name'];
 
     protected function createdAt(): Attribute
     {
         return Attribute::make(
             get: fn (string $value) => Carbon::parse($value)->format('d M Y H:i')
         );
+    }
+
+    public function recipient()
+    {
+        return $this->belongsTo(Recipient::class);
+    }
+
+    public function recipientLogNote()
+    {
+        return $this->hasOne(RecipientLogNote::class);
     }
 }

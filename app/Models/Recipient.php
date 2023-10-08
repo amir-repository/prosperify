@@ -30,4 +30,9 @@ class Recipient extends Model
     {
         return $this->belongsTo(RecipientStatus::class);
     }
+
+    public function recipientLogs()
+    {
+        return $this->hasMany(RecipientLog::class);
+    }
 }
