@@ -19,23 +19,6 @@
                     @endif
                 </h1>
             </a>
-            @if (!$recipientCanceled && !$recipientRejected)
-                @unless ($recipientProspered || $recipientAccepted)
-                    <form onsubmit="return confirm('Are you sure');"
-                        action="{{ route('recipients.update', compact('recipient')) }}" method="post">
-                        @csrf
-                        @method('put')
-                        @role('admin')
-                            <input type="text" name="recipient_status_id" value="3" hidden>
-                        @else
-                            <input type="text" name="recipient_status_id" value="5" hidden>
-                        @endrole
-                        <button>
-                            <x-heroicon-o-trash class="w-[18px] h-[18px]" />
-                        </button>
-                    </form>
-                @endunless
-            @endif
         </div>
         <div class="mt-3 flex gap-4">
             <p class="capitalize flex items-center gap-1"><x-heroicon-o-bell
@@ -95,6 +78,8 @@
                     <p class="text-xs"><span class="capitalize">{{ $recipientLog->recipient_status_name }}</span> at
                         {{ $recipientLog->created_at }}
                     </p>
+                    <p class="text-xs mt-2">
+                        {{ $recipientLog->recipientLogNote ? $recipientLog->recipientLogNote->note : '' }}</p>
                 </div>
             @endforeach
         </div>

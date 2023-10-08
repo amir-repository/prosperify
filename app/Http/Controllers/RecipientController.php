@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRecipientRequest;
 use App\Models\Recipient;
 use App\Models\RecipientLog;
+use App\Models\RecipientLogNote;
 use App\Models\RecipientUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,8 @@ class RecipientController extends Controller
      */
     public function store(StoreRecipientRequest $request)
     {
+        $validated = $request->validated();
+
         $user = auth()->user();
         $attr = $request->only(['name', 'nik', 'address', 'phone', 'family_members']);
         $photo = $this->storePhoto($request);
@@ -46,20 +49,7 @@ class RecipientController extends Controller
             $recipient->photo = $photo;
             $recipient->save();
 
-            $recipientUser = new RecipientUser();
-            $recipientUser->recipient_id = $recipient->id;
-            $recipientUser->user_id = $user->id;
-            $recipientUser->recipient_status_id = $recipient->recipient_status_id;
-            $recipientUser->save();
-
-            $recipientLog = new RecipientLog();
-            $recipientLog->recipient_id =  $recipientUser->recipient_id;
-            $recipientLog->user_id = $recipientUser->user_id;
-            $recipientLog->actor_id = $user->id;
-            $recipientLog->actor_name = $user->name;
-            $recipientLog->recipient_status_id = $recipientUser->recipient_status_id;
-            $recipientLog->recipient_status_name = $recipientUser->recipientStatus->name;
-            $recipientLog->save();
+            RecipientLog::Create($recipient, $user);
 
             DB::commit();
         } catch (\Exception $th) {
@@ -93,10 +83,14 @@ class RecipientController extends Controller
      */
     public function update(Request $request, Recipient $recipient)
     {
+        $recipientStatus = (int)$request->recipient_status_id;
         $user = auth()->user();
+
+        $recipientCanceledOrRejected = in_array($recipientStatus, [Recipient::CANCELED, Recipient::REJECTED]);
+
         try {
             DB::beginTransaction();
-            if ((int)$request->recipient_status_id ===  $recipient->recipient_status_id) {
+            if ($recipientStatus ===  $recipient->recipient_status_id) {
                 $recipient->name = $request->name;
                 $recipient->address = $request->address;
                 $recipient->phone = $request->phone;
@@ -106,18 +100,14 @@ class RecipientController extends Controller
             $recipient->recipient_status_id = $request->recipient_status_id;
             $recipient->save();
 
-            $recipientUser = RecipientUser::where('recipient_id', $recipient->id)->first();
-            $recipientUser->recipient_status_id = $recipient->recipient_status_id;
-            $recipientUser->save();
+            $recipientLog = RecipientLog::Create($recipient, $user);
 
-            $recipientLog = new RecipientLog();
-            $recipientLog->recipient_id =  $recipientUser->recipient_id;
-            $recipientLog->user_id = $recipientUser->user_id;
-            $recipientLog->actor_id = $user->id;
-            $recipientLog->actor_name = $user->name;
-            $recipientLog->recipient_status_id = $recipientUser->recipient_status_id;
-            $recipientLog->recipient_status_name = $recipientUser->recipientStatus->name;
-            $recipientLog->save();
+            if ($recipientCanceledOrRejected) {
+                $recipientLogNote = new RecipientLogNote();
+                $recipientLogNote->recipient_log_id = $recipientLog->id;
+                $recipientLogNote->note = $request->note;
+                $recipientLogNote->save();
+            }
 
             DB::commit();
         } catch (\Exception $th) {

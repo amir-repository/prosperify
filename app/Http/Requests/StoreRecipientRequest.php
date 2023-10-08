@@ -11,7 +11,9 @@ class StoreRecipientRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->hasAnyRole(['admin', 'donor']);
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        return $user->hasAnyRole(['admin', 'donor']);
     }
 
     /**
@@ -23,7 +25,7 @@ class StoreRecipientRequest extends FormRequest
     {
         return [
             'nik' => 'required',
-            'name' => 'required|min:1|max:100',
+            'name' => 'required|min:2|max:100',
             'address' => 'required|min:10|max:255',
             'phone' => 'required|min:8|max:16',
             'family_members' => 'required|min:1',

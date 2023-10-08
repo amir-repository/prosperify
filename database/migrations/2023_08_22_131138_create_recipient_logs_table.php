@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('recipient_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('recipient_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('actor_id');
             $table->string('actor_name');
             $table->unsignedBigInteger('recipient_status_id');

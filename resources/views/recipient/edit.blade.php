@@ -66,5 +66,28 @@
                 <Button class="mt-6 py-2 w-full bg-slate-900 text-white rounded-md text-sm font-medium">Update</Button>
             </section>
         </form>
+        <div class="p-4 border border-red-600 rounded-md mt-8">
+            <form onsubmit="return confirm('Are you sure');"
+                action="{{ route('recipients.update', compact('recipient')) }}" method="post">
+                @csrf
+                @method('put')
+                <h1 class="font-bold text-red-600 mb-4">Danger !!!</h1>
+                <label for="note" class="text-sm font-medium block mb-[6px]">Note</label>
+                <input id="note" type="text" name="note" class="border border-slate-200 rounded-md w-full"
+                    placeholder="Note" required>
+                @role('admin')
+                    <input hidden id="recipient_status_id" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="3" name="recipient_status_id" required>
+                    <Button
+                        class="mt-6 py-2 w-full border border-red-600 text-slate-900 rounded-md text-sm font-medium">Reject</Button>
+                @endrole
+                @role('donor')
+                    <input hidden id="recipient_status_id" type="text" class="border border-slate-200 rounded-md w-full"
+                        value="5" name="recipient_status_id" required>
+                    <Button
+                        class="mt-6 py-2 w-full border border-red-600 text-slate-900 rounded-md text-sm font-medium">Cancel</Button>
+                @endrole
+            </form>
+        </div>
     </main>
 @endsection
