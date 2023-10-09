@@ -12,6 +12,7 @@ class StoreRescueRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        /** @var \App\Models\User */
         $user = auth()->user();
         return $user->hasAnyRole(['donor', 'admin']);
     }

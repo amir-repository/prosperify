@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Donation extends Model
 {
@@ -18,9 +20,29 @@ class Donation extends Model
     public const COMPLETED = 5;
     public const CANCELED = 6;
 
+
+    protected function donationDateHumanize(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, array $attributes) =>  Carbon::parse($attributes['donation_date'])->format('d M Y H:i'),
+        );
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) =>  Carbon::parse($value)->format('d M Y H:i'),
+        );
+    }
+
     public function donationStatus()
     {
         return $this->belongsTo(DonationStatus::class);
+    }
+
+    public function recipient()
+    {
+        return $this->belongsTo(Recipient::class);
     }
 
     public function donationLogs()

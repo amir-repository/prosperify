@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Volunteer;
 use App\Http\Requests\StoreDonationRequest;
+use App\Http\Requests\UpdateDonationRequest;
 use App\Models\Donation;
 use App\Models\DonationLog;
 use App\Models\Recipient;
@@ -63,17 +65,8 @@ class DonationController extends Controller
             $donation->user_id = $user->id;
             $donation->save();
 
-            $donationLog = new DonationLog();
-            $donationLog->donation_id = $donation->id;
-            $donationLog->donation_status_id = $donation->donation_status_id;
-            $donationLog->donation_status_name = $donation->donationStatus->name;
-            $donationLog->actor_id = $user->id;
-            $donationLog->actor_name = $user->name;
-            $donationLog->title = $donation->title;
-            $donationLog->description = $donation->description;
-            $donationLog->donation_date = $donation->donation_date;
-            $donationLog->user_id = $donation->user_id;
-            $donationLog->save();
+            DonationLog::Create($donation, $user);
+
             DB::commit();
         } catch (\Exception $th) {
             DB::rollBack();
@@ -81,9 +74,6 @@ class DonationController extends Controller
         }
 
         return redirect()->route('donations.index');
-
-        // create donation
-        // create donation logs
     }
 
     /**
@@ -91,7 +81,9 @@ class DonationController extends Controller
      */
     public function show(Donation $donation)
     {
-        return view('donations.show', compact('donation'));
+        $volunteers = User::role(User::VOLUNTEER)->get();
+
+        return view('donation.show', compact('donation', 'volunteers'));
     }
 
     /**
@@ -99,15 +91,36 @@ class DonationController extends Controller
      */
     public function edit(Donation $donation)
     {
-        //
+        $recipients = Recipient::where('recipient_status_id', Recipient::ACCEPTED)->get();
+        return view('donation.edit', compact('donation', 'recipients'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Donation $donation)
+    public function update(UpdateDonationRequest $request, Donation $donation)
     {
-        //
+        $validated = $request->validated();
+        $user = auth()->user();
+
+        try {
+            DB::beginTransaction();
+            $donation->title = $request->title;
+            $donation->description = $request->description;
+            $donation->donation_date = $request->donation_date;
+            $donation->recipient_id = $request->recipient_id;
+            $donation->donation_status_id = Donation::PLANNED;
+            $donation->user_id = $user->id;
+            $donation->save();
+
+            DonationLog::Create($donation, $user);
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
+        }
+
+        return redirect()->route('donations.index');
     }
 
     /**

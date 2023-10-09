@@ -70,7 +70,7 @@
                             </p>
                             <p class="text-xs text-slate-500">
 
-                                {{ $donation->donation_date }}</p>
+                                {{ $donation->donation_date_humanize }}</p>
                         </div>
                     </div>
                 </section>

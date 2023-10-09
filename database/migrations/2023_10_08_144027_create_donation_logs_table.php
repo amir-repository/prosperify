@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('description');
             $table->dateTime('donation_date');
             $table->unsignedBigInteger('user_Id');
+            $table->unsignedBigInteger('recipient_id');
+            $table->string('recipient_name');
             $table->timestamps();
         });
     }
