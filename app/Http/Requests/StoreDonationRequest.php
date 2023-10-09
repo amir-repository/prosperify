@@ -26,6 +26,7 @@ class StoreDonationRequest extends FormRequest
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:3|max:255',
             'donation_date' => 'required|after_or_equal:' . $this->today(),
+            'recipient_id' => 'required'
         ];
     }
 

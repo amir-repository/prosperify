@@ -13,24 +13,36 @@ class DonationStatusSeeder extends Seeder
      */
     public function run(): void
     {
+
+        // public const PLANNED = 1;
+        // public const ASSIGNED = 2;
+        // public const LAUNCHED = 3;
+        // public const INCOMPLETED = 4;
+        // public const COMPLETED = 5;
+        // public const CANCELED = 6;
+
         DB::table('donation_statuses')->insert([
-            'name' => 'PLANNED',
+            'name' => 'planned',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'LAUNCHED',
+            'name' => 'assigned',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'INCOMPLETE',
+            'name' => 'launched',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'COMPLETE',
+            'name' => 'incompleted',
         ]);
 
         DB::table('donation_statuses')->insert([
-            'name' => 'FAILED',
+            'name' => 'completed',
+        ]);
+
+        DB::table('donation_statuses')->insert([
+            'name' => 'canceled',
         ]);
     }
 }

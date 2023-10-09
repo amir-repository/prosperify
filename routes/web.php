@@ -68,6 +68,8 @@ Route::resource('foods', FoodController::class);
 Route::resource('recipients', RecipientController::class);
 Route::resource('users', UserController::class)->only('show');
 
+Route::resource('donations', DonationController::class);
+
 Route::resource('categories', CategoryController::class)->middleware(['auth']);
 Route::resource('subcategory', SubCategoryController::class)->middleware(['auth']);
 Route::resource('vaults', VaultController::class)->middleware(['auth']);
