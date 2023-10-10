@@ -151,6 +151,12 @@ class FoodDonationController extends Controller
         return redirect()->route('donations.show', compact('donation'));
     }
 
+    public function history(Donation $donation, Food $food)
+    {
+        $foodDonationLogs = FoodDonationLog::where(['donation_id' => $donation->id, 'food_id' => $food->id])->get();
+        return view('donation.food.history', compact('foodDonationLogs'));
+    }
+
     private function returnFood($food, $donationFood)
     {
         $food->amount = $food->amount + $donationFood->amount;

@@ -26,7 +26,8 @@
                 </p>
             </div>
             <div class="mt-6">
-                <a href="" class="px-4 py-2 border border-slate-300 rounded-md">Timeline</a>
+                <a href="{{ route('donations.foods.history', compact('donation', 'food')) }}"
+                    class="px-4 py-2 border border-slate-300 rounded-md">Timeline</a>
             </div>
         </div>
         <div class="mt-8">
