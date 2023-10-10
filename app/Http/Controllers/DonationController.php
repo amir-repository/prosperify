@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\Volunteer;
 use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationRequest;
 use App\Models\Donation;
+use App\Models\DonationAssignment;
+use App\Models\DonationFood;
 use App\Models\DonationLog;
+use App\Models\DonationSchedule;
 use App\Models\Food;
+use App\Models\FoodDonationLog;
 use App\Models\Recipient;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -82,8 +86,16 @@ class DonationController extends Controller
      */
     public function show(Donation $donation)
     {
-        $volunteers = User::role(User::VOLUNTEER)->get();
+        $donationPlanned = $donation->donation_status_id === Donation::PLANNED;
+        $volunteers = [];
+
+        if ($donationPlanned) {
+            $allVolunteers = User::role(User::VOLUNTEER)->get();
+            $volunteers = $this->idleVolunteers($allVolunteers, $donation, 1);
+        }
+
         $donationFoods = $donation->donationFoods;
+
         return view('donation.show', compact('donation', 'volunteers', 'donationFoods'));
     }
 
@@ -124,6 +136,57 @@ class DonationController extends Controller
         return redirect()->route('donations.show', compact('donation'));
     }
 
+    public function updateStatus(Request $request, Donation $donation)
+    {
+        $user = auth()->user();
+        $isPhotoInRequest = count($request->file());
+        try {
+            DB::beginTransaction();
+            $donation->donation_status_id = (int)$request->status;
+            $donation->save();
+            DonationLog::Create($donation, $user);
+
+            $donationAssigned = $donation->donation_status_id === Donation::ASSIGNED;
+            $donationIncomplete = $donation->donation_status_id === Donation::INCOMPLETED;
+
+            if ($donationAssigned) {
+                $this->updateDonationFoodsStatus($request, $user, $donation, DonationFood::ASSIGNED);
+            } else if ($donationIncomplete) {
+
+                if ($isPhotoInRequest) {
+                    $donationFood = DonationFood::find($request->donation_food_id);
+                    $photo = $this->storePhoto($request, $donationFood->food_id);
+
+
+                    $donationFoodAssigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
+
+                    $donationFoodTaken = in_array($donationFood->food_donation_status_id, [DonationFood::TAKEN, DonationFood::ADJUSTED_AFTER_TAKEN]);
+
+                    if ($donationFoodAssigned) {
+                        $donationFood->food_donation_status_id = DonationFood::TAKEN;
+                        $donationFood->save();
+                        FoodDonationLog::Create($donationFood, $user, $photo);
+                    } else if ($donationFoodTaken) {
+                        $donationFood->food_donation_status_id = DonationFood::GIVEN;
+                        $donationFood->save();
+                        FoodDonationLog::Create($donationFood, $user, $photo);
+
+                        $donationSchedule = DonationSchedule::where(['donation_food_id' => $donationFood->id]);
+                        $donationSchedule->delete();
+
+                        $this->changeDonationToComplete($donation, $user);
+                    }
+                }
+            }
+            DB::commit();
+
+            return redirect()->route('donations.show', compact('donation'));
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -152,6 +215,21 @@ class DonationController extends Controller
         }
     }
 
+    private function updateDonationFoodsStatus($request, $user, $donation, $status)
+    {
+        foreach ($donation->donationFoods as $donationFood) {
+            $donationFood->food_donation_status_id = $status;
+            $donationFood->save();
+
+            $volunteerID = $this->getVolunteerID($request, $donationFood->food_id);
+            $vaultID = $this->getVaultID($request, $donationFood->food_id);
+
+            FoodDonationLog::Create($donationFood, $user, $donationFood->food->photo);
+            DonationAssignment::Create($volunteerID, $vaultID, $user, $donationFood);
+            DonationSchedule::Create($volunteerID, $donationFood);
+        }
+    }
+
     private function filterDonationByStatus($donation, $arrDonationStatusID)
     {
         $filtered = $donation->filter(function ($donation) use ($arrDonationStatusID) {
@@ -159,7 +237,7 @@ class DonationController extends Controller
             if ($status === null) {
                 return in_array($donation->donation_status_id, $arrDonationStatusID);
             }
-            return $donation->rescue_status_id === (int) request()->query('status');
+            return $donation->donation_status_id === (int) request()->query('status');
         });
 
         return $filtered;
@@ -172,5 +250,52 @@ class DonationController extends Controller
         });
 
         return $filtered;
+    }
+
+    private function idleVolunteers($volunteers, $donation, $maxFoodDonationInAday)
+    {
+        $filtered = $volunteers->filter(function ($volunteer) use ($donation, $maxFoodDonationInAday) {
+            // dateformat to 2023-12-23
+            $donation_date = Carbon::parse($donation->donation_date)->format('Y-m-d');
+
+            // volunteer hanya bisa handle 1 food dalam suatu hari
+            return DonationSchedule::whereDate('donation_date', $donation_date)->where('user_id', $volunteer->id)->count() < $maxFoodDonationInAday;
+        });
+
+        return $filtered;
+    }
+
+    private function getVolunteerID($request, $foodID)
+    {
+        return $request["food-$foodID-volunteer_id"];
+    }
+
+    private function getVaultID($request, $foodID)
+    {
+        return $request["food-$foodID-vault_id"];
+    }
+
+    private function changeDonationToComplete($donation, $user)
+    {
+        $allfoodStored = true;
+
+        foreach ($donation->donationFoods as $donationFood) {
+            $foodHasNotBeenStored = !in_array($donationFood->food_donation_status_id, [DonationFood::GIVEN]);
+            if ($foodHasNotBeenStored) {
+                $allfoodStored = false;
+            }
+        }
+
+        if ($allfoodStored) {
+            $donation->donation_status_id = Donation::COMPLETED;
+            $donation->save();
+            DonationLog::Create($donation, $user);
+        }
+    }
+
+    private function storePhoto($request, $foodID)
+    {
+        $photoURL = $request->file("$foodID-photo")->store('donation-documentations');
+        return $photoURL;
     }
 }

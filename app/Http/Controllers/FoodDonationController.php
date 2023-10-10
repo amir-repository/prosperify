@@ -68,7 +68,7 @@ class FoodDonationController extends Controller
                 $food->save();
             }
 
-            FoodDonationLog::Create($donationFood, $user);
+            FoodDonationLog::Create($donationFood, $user, $food->photo);
 
             DB::commit();
         } catch (\Exception $th) {
@@ -123,7 +123,7 @@ class FoodDonationController extends Controller
                 $food->save();
             }
 
-            FoodDonationLog::Create($donationFood, $user);
+            FoodDonationLog::Create($donationFood, $user, $food->photo);
 
             DB::commit();
         } catch (\Exception $th) {

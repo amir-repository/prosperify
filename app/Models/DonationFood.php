@@ -17,10 +17,9 @@ class DonationFood extends Model
     public const ADJUSTED_AFTER_PLANNED = 2;
     public const ASSIGNED = 3;
     public const ADJUSTED_AFTER_ASSIGNED = 4;
-    public const LAUNCHED = 5;
-    public const ADJUSTED_AFTER_LAUNCHED = 6;
-    public const DELIVERED = 7;
-    public const ADJUSTED_AFTER_DELIVERED = 8;
+    public const TAKEN = 5;
+    public const ADJUSTED_AFTER_TAKEN = 6;
+    public const GIVEN = 7;
 
     protected $fillable = ['donation_id', 'food_id', 'amount', 'food_donation_status_id'];
 

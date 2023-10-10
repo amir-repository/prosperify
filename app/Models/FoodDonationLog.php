@@ -21,7 +21,7 @@ class FoodDonationLog extends Model
         );
     }
 
-    public static function Create($donationFood, $user)
+    public static function Create($donationFood, $user, $photo)
     {
         $foodDonationLog = new FoodDonationLog();
         $foodDonationLog->donation_food_id = $donationFood->id;
@@ -34,7 +34,7 @@ class FoodDonationLog extends Model
         $foodDonationLog->amount = $donationFood->amount;
         $foodDonationLog->unit_id = $donationFood->food->unit_id;
         $foodDonationLog->unit_name = $donationFood->food->unit->name;
-        $foodDonationLog->photo = $donationFood->food->photo;
+        $foodDonationLog->photo = $photo;
         $foodDonationLog->save();
     }
 }

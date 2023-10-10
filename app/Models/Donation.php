@@ -15,11 +15,9 @@ class Donation extends Model
 
     public const PLANNED = 1;
     public const ASSIGNED = 2;
-    public const LAUNCHED = 3;
-    public const INCOMPLETED = 4;
-    public const COMPLETED = 5;
-    public const CANCELED = 6;
-
+    public const INCOMPLETED = 3;
+    public const COMPLETED = 4;
+    public const FAILED = 5;
 
     protected function donationDateHumanize(): Attribute
     {

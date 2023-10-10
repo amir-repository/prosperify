@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('donation_id')->constrained();
             $table->foreignId('food_id')->constrained();
             $table->foreignId('user_id')->constrained();
+            $table->dateTime('donation_date');
             $table->timestamps();
         });
     }

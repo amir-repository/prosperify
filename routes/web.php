@@ -69,6 +69,9 @@ Route::resource('recipients', RecipientController::class);
 Route::resource('users', UserController::class)->only('show');
 
 Route::resource('donations', DonationController::class);
+
+Route::put('/donations/{donation}/status', [DonationController::class, 'updateStatus'])->name('donations.update.status');
+
 Route::resource('donations.foods', FoodDonationController::class);
 
 Route::resource('categories', CategoryController::class)->middleware(['auth']);

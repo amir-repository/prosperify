@@ -19,7 +19,7 @@ class FoodDonationStatusSeeder extends Seeder
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'adjusted after planned',
+            'name' => 'adjusted_after_planned',
         ]);
 
         DB::table('food_donation_statuses')->insert([
@@ -27,22 +27,25 @@ class FoodDonationStatusSeeder extends Seeder
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'adjusted after assigned',
+            'name' => 'adjusted_after_assigned',
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'launched',
+            'name' => 'taken',
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'adjusted after launched',
+            'name' => 'adjusted_after_taken',
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'delivered',
+            'name' => 'given',
         ]);
 
-        // untuk makanan yang rusak di jalan akan dibuang
+        DB::table('food_donation_statuses')->insert([
+            'name' => 'canceled',
+        ]);
+
         DB::table('food_donation_statuses')->insert([
             'name' => 'trashed',
         ]);
