@@ -28,7 +28,7 @@ class Food extends Model
     public const CANCELED = 14;
     public const DISCARDED = 15;
 
-    protected $fillable = ['rescue_id', 'vault_id', 'name', 'detail', 'expired_date', 'amount', 'stored_amount', 'stored_at', 'photo', 'category_id', 'sub_category_id', 'unit_id', 'food_rescue_status_id'];
+    protected $fillable = ['rescue_id', 'vault_id', 'name', 'detail', 'expired_date', 'amount', 'stored_at', 'photo', 'category_id', 'sub_category_id', 'unit_id', 'food_rescue_status_id'];
 
     protected function expiredDate(): Attribute
     {
@@ -41,14 +41,6 @@ class Food extends Model
     {
         return Attribute::make(
             get: fn (string $value) => Carbon::parse($value)->format('d M Y')
-        );
-    }
-
-    protected function storedAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (int $value) => $value / 1000,
-            set: fn (int $value) => $value * 1000
         );
     }
 
@@ -103,5 +95,10 @@ class Food extends Model
     public function rescueSchedule()
     {
         return $this->hasOne(RescueSchedule::class);
+    }
+
+    public function donations()
+    {
+        return $this->belongsToMany(Donation::class);
     }
 }

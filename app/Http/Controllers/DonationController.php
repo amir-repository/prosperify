@@ -7,6 +7,7 @@ use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationRequest;
 use App\Models\Donation;
 use App\Models\DonationLog;
+use App\Models\Food;
 use App\Models\Recipient;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -73,7 +74,7 @@ class DonationController extends Controller
             throw $th;
         }
 
-        return redirect()->route('donations.index');
+        return redirect()->route('donations.show', compact('donation'));
     }
 
     /**
@@ -82,8 +83,8 @@ class DonationController extends Controller
     public function show(Donation $donation)
     {
         $volunteers = User::role(User::VOLUNTEER)->get();
-
-        return view('donation.show', compact('donation', 'volunteers'));
+        $donationFoods = $donation->donationFoods;
+        return view('donation.show', compact('donation', 'volunteers', 'donationFoods'));
     }
 
     /**
@@ -120,7 +121,7 @@ class DonationController extends Controller
             throw $th;
         }
 
-        return redirect()->route('donations.index');
+        return redirect()->route('donations.show', compact('donation'));
     }
 
     /**
@@ -128,7 +129,27 @@ class DonationController extends Controller
      */
     public function destroy(Donation $donation)
     {
-        //
+        $planned = $donation->donation_status_id === Donation::PLANNED;
+
+        try {
+            if ($planned) {
+                $this->returnFoods($donation);
+                $donation->delete();
+            }
+        } catch (\Exception $th) {
+            throw $th;
+        }
+
+        return redirect()->route('donations.index');
+    }
+
+    private function returnFoods($donation)
+    {
+        foreach ($donation->donationFoods as $donationFood) {
+            $food = Food::find($donationFood->food_id);
+            $food->amount = $food->amount + $donationFood->amount;
+            $food->save();
+        }
     }
 
     private function filterDonationByStatus($donation, $arrDonationStatusID)

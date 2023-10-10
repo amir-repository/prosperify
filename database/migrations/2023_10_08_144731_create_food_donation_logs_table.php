@@ -21,9 +21,11 @@ return new class extends Migration
             $table->unsignedBigInteger('unit_id');
             $table->string('unit_name');
             $table->string('photo');
-            $table->foreignId('donation_foods_id');
-            $table->foreignId('donation_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('food_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('donation_food_id')->constrained(
+                table: 'donation_food',
+            )->cascadeOnDelete();
+            $table->foreignId('donation_id');
+            $table->foreignId('food_id');
             $table->timestamps();
         });
     }

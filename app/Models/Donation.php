@@ -11,7 +11,7 @@ class Donation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'donation_date', 'user_id', 'donation_status', 'recipient_id'];
+    protected $fillable = ['title', 'description', 'donation_date', 'user_id', 'donation_status_id', 'recipient_id'];
 
     public const PLANNED = 1;
     public const ASSIGNED = 2;
@@ -35,6 +35,11 @@ class Donation extends Model
         );
     }
 
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class)->withPivot('amount');
+    }
+
     public function donationStatus()
     {
         return $this->belongsTo(DonationStatus::class);
@@ -48,5 +53,10 @@ class Donation extends Model
     public function donationLogs()
     {
         return $this->hasMany(DonationLog::class);
+    }
+
+    public function donationFoods()
+    {
+        return $this->hasMany(DonationFood::class);
     }
 }
