@@ -43,4 +43,14 @@ class DonationFood extends Model
     {
         return $this->hasMany(FoodDonationLog::class);
     }
+
+    public function donationAssignments()
+    {
+        return $this->hasMany(DonationAssignment::class);
+    }
+
+    public function donationSchedules()
+    {
+        return $this->hasMany(DonationSchedule::class);
+    }
 }
