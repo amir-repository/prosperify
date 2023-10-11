@@ -21,6 +21,11 @@ class FoodDonationLog extends Model
         );
     }
 
+    public function foodDonationLogNote()
+    {
+        return $this->hasOne(FoodDonationLogNote::class);
+    }
+
     public static function Create($donationFood, $user, $photo)
     {
         $foodDonationLog = new FoodDonationLog();
@@ -36,5 +41,7 @@ class FoodDonationLog extends Model
         $foodDonationLog->unit_name = $donationFood->food->unit->name;
         $foodDonationLog->photo = $photo;
         $foodDonationLog->save();
+
+        return $foodDonationLog;
     }
 }

@@ -35,7 +35,7 @@ class FoodDonationStatusSeeder extends Seeder
         ]);
 
         DB::table('food_donation_statuses')->insert([
-            'name' => 'adjusted_after_taken',
+            'name' => 'adjusted after taken',
         ]);
 
         DB::table('food_donation_statuses')->insert([

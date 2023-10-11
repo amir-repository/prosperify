@@ -11,9 +11,11 @@
             <div class="mt-3 flex items-center gap-2">
                 <h1 class="text-2xl font-bold ">{{ $food->name }}</h1>
                 @role('admin')
-                    <a href="{{ route('donations.foods.edit', compact('food', 'donation', 'donationFood')) }}">
-                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                    </a>
+                    @if (!in_array($donationFood->food_donation_status_id, [7, 8]))
+                        <a href="{{ route('donations.foods.edit', compact('food', 'donation', 'donationFood')) }}">
+                            <x-heroicon-o-pencil-square class="w-5 h-5" />
+                        </a>
+                    @endif
                 @endrole
             </div>
             <p>{{ $food->detail }}</p>
@@ -46,7 +48,7 @@
 
         <section>
             @php
-                $donationIsAssigned = $donation->donation_status_id > 1;
+                $donationIsAssigned = in_array($donation->donation_status_id, [1, 2]);
             @endphp
             @role('admin')
                 @if ($donationIsAssigned)
@@ -77,6 +79,9 @@
                                 </span>
                                 at
                                 {{ $food->created_at }}
+                            </p>
+                            <p class="text-xs text-slate-500 mt-1">
+                                {{ $food->foodDonationLogNote->note ?? '' }}
                             </p>
                         </div>
                     </section>

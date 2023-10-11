@@ -20,6 +20,7 @@ class DonationFood extends Model
     public const TAKEN = 5;
     public const ADJUSTED_AFTER_TAKEN = 6;
     public const GIVEN = 7;
+    public const CANCELED = 8;
 
     protected $fillable = ['donation_id', 'food_id', 'amount', 'food_donation_status_id'];
 

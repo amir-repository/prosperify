@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDonationFoodRequest;
+use App\Http\Requests\UpdateDonationFoodRequest;
 use App\Models\Donation;
 use App\Models\DonationAssignment;
 use App\Models\DonationFood;
@@ -10,6 +11,7 @@ use App\Models\DonationSchedule;
 use App\Models\Food;
 use App\Models\FoodDonationGivenReceipt;
 use App\Models\FoodDonationLog;
+use App\Models\FoodDonationLogNote;
 use App\Models\FoodDonationTakenReceipt;
 use App\Models\User;
 use Carbon\Carbon;
@@ -108,8 +110,9 @@ class FoodDonationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Donation $donation, Food $food)
+    public function update(UpdateDonationFoodRequest $request, Donation $donation, Food $food)
     {
+        $validated = $request->validated();
         $user = auth()->user();
         try {
             DB::beginTransaction();
@@ -129,19 +132,31 @@ class FoodDonationController extends Controller
 
                 $donationFoodAssigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
 
+                $donationFoodTaken = in_array($donationFood->food_donation_status_id, [DonationFood::TAKEN, DonationFood::ADJUSTED_AFTER_TAKEN]);
+
                 if ($donationFoodPlanned) {
                     $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_PLANNED;
+
+                    $donationFood->save();
+
+                    $food->amount = $food->amount + $diffAmount;
+                    $food->save();
                 } else if ($donationFoodAssigned) {
                     $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_ASSIGNED;
+
+                    $donationFood->save();
+
+                    $food->amount = $food->amount + $diffAmount;
+                    $food->save();
+                } else if ($donationFoodTaken) {
+                    $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_TAKEN;
+
+                    $donationFood->save();
                 }
-
-                $donationFood->save();
-
-                $food->amount = $food->amount + $diffAmount;
-                $food->save();
             }
 
-            FoodDonationLog::Create($donationFood, $user, $food->photo);
+            $foodDonationLog = FoodDonationLog::Create($donationFood, $user, $food->photo);
+            FoodDonationLogNote::Create($foodDonationLog, $request->note);
 
             DB::commit();
         } catch (\Exception $th) {
@@ -157,25 +172,47 @@ class FoodDonationController extends Controller
      */
     public function destroy(Request $request, Donation $donation, Food $food)
     {
+        $user = auth()->user();
+
         $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
 
         $planned = in_array($donationFood->food_donation_status_id, [DonationFood::PLANNED, DonationFood::ADJUSTED_AFTER_PLANNED]);
 
         $assigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
 
-        if ($planned) {
-            $this->returnFood($food, $donationFood);
-            $donationFood->delete();
-        } else if ($assigned) {
-            $this->returnFood($food, $donationFood);
-            $donationFood->delete();
+        $taken = in_array($donationFood->food_donation_status_id, [DonationFood::TAKEN, DonationFood::ADJUSTED_AFTER_TAKEN]);
 
-            $donationHasNoFood = $donation->donationFoods->count() === 0;
-            if ($donationHasNoFood) {
-                $donation->delete();
-                return redirect()->route('donations.index');
+        try {
+            DB::beginTransaction();
+            if ($planned) {
+                $this->returnFood($food, $donationFood);
+                $donationFood->delete();
+            } else if ($assigned) {
+                $this->returnFood($food, $donationFood);
+                $donationFood->delete();
+
+                $donationHasNoFood = $donation->donationFoods->count() === 0;
+                if ($donationHasNoFood) {
+                    $donation->delete();
+                    return redirect()->route('donations.index');
+                }
+            } else if ($taken) {
+                $donationFood->food_donation_status_id = DonationFood::CANCELED;
+                $donationFood->save();
+
+                $foodDonationLog = FoodDonationLog::Create($donationFood, $user, $food->photo);
+                FoodDonationLogNote::Create($foodDonationLog, $request->note);
+
+                $donationHasNoFood = $donation->donationFoods->filter(fn ($donationFood) => $donationFood->food_donation_status_id !== DonationFood::CANCELED)->count() === 0;
+                if ($donationHasNoFood) {
+                    $donation->donation_status_id = Donation::FAILED;
+                    $donation->save();
+                }
             }
-            // kalau kosong semua food nya maka auto di hapus donation nya
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
         }
 
         return redirect()->route('donations.show', compact('donation'));
