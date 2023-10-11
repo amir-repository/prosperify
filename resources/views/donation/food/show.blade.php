@@ -10,9 +10,11 @@
             </div>
             <div class="mt-3 flex items-center gap-2">
                 <h1 class="text-2xl font-bold ">{{ $food->name }}</h1>
-                <a href="{{ route('donations.foods.edit', compact('food', 'donation', 'donationFood')) }}">
-                    <x-heroicon-o-pencil-square class="w-5 h-5" />
-                </a>
+                @role('admin')
+                    <a href="{{ route('donations.foods.edit', compact('food', 'donation', 'donationFood')) }}">
+                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                    </a>
+                @endrole
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
@@ -25,9 +27,20 @@
                     {{ $food->expired_date }}
                 </p>
             </div>
-            <div class="mt-6">
+            <div class="mt-6 flex gap-4">
                 <a href="{{ route('donations.foods.history', compact('donation', 'food')) }}"
                     class="px-4 py-2 border border-slate-300 rounded-md">Timeline</a>
+
+                @if ($donationAssignment && $donationAssignment->foodDonationTakenReceipt !== null)
+                    <a href="{{ route('donations.foods.takenreceipt', ['donation' => $donation->id, 'food' => $food->id, 'id' => $donationAssignment->foodDonationTakenReceipt->id]) }}"
+                        class="px-4 py-2 border border-slate-300 rounded-md">Taken Receipt</a>
+                @endif
+
+                @if ($donationAssignment && $donationAssignment->foodDonationGivenReceipt !== null)
+                    <a href="{{ route('donations.foods.givenreceipt', ['donation' => $donation->id, 'food' => $food->id, 'id' => $donationAssignment->foodDonationGivenReceipt->id]) }}"
+                        class="px-4 py-2 border border-slate-300 rounded-md">Given Receipt</a>
+                @endif
+
             </div>
         </div>
 
@@ -35,11 +48,13 @@
             @php
                 $donationIsAssigned = $donation->donation_status_id > 1;
             @endphp
-            @if ($donationIsAssigned)
-                <a href="{{ route('donations.foods.assignment', compact('donation', 'food')) }}"
-                    class="block py-2 w-full rounded-md bg-slate-900 mt-8 text-sm font-medium text-white text-center">Change
-                    Assignment</a>
-            @endif
+            @role('admin')
+                @if ($donationIsAssigned)
+                    <a href="{{ route('donations.foods.assignment', compact('donation', 'food')) }}"
+                        class="block py-2 w-full rounded-md bg-slate-900 mt-8 text-sm font-medium text-white text-center">Change
+                        Assignment</a>
+                @endif
+            @endrole
         </section>
 
         <div class="mt-8">

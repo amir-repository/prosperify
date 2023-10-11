@@ -78,6 +78,12 @@ Route::get('/donations/{donation}/foods/{food}/assignment', [FoodDonationControl
 
 Route::put('/donations/{donation}/foods/{food}/assignment', [FoodDonationController::class, 'updateAssignment'])->name('donations.foods.updateAssignment');
 
+// donation taken receipt
+Route::get('/donations/{donation}/foods/{food}/taken-receipt/{id}', [FoodDonationController::class, 'takenReceipt'])->name('donations.foods.takenreceipt');
+
+// donation given receipt
+Route::get('/donations/{donation}/foods/{food}/given-receipt/{id}', [FoodDonationController::class, 'givenReceipt'])->name('donations.foods.givenreceipt');
+
 Route::resource('donations.foods', FoodDonationController::class);
 
 Route::resource('categories', CategoryController::class)->middleware(['auth']);

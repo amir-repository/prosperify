@@ -8,7 +8,9 @@ use App\Models\DonationAssignment;
 use App\Models\DonationFood;
 use App\Models\DonationSchedule;
 use App\Models\Food;
+use App\Models\FoodDonationGivenReceipt;
 use App\Models\FoodDonationLog;
+use App\Models\FoodDonationTakenReceipt;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -88,7 +90,10 @@ class FoodDonationController extends Controller
     public function show(Donation $donation, Food $food, Request $request)
     {
         $donationFood = DonationFood::find($request->donationFood);
-        return view('donation.food.show', compact('donation', 'food', 'donationFood'));
+
+        $donationAssignment = DonationAssignment::where(['donation_id' => $donation->id, 'food_id' => $food->id])->get()->last() ?? null;
+
+        return view('donation.food.show', compact('donation', 'food', 'donationFood', 'donationAssignment'));
     }
 
     /**
@@ -119,7 +124,17 @@ class FoodDonationController extends Controller
                     return redirect()->route('donations.show', compact('donation'));
                 }
                 $donationFood->amount = $finalAmount;
-                $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_PLANNED;
+
+                $donationFoodPlanned = in_array($donationFood->food_donation_status_id, [DonationFood::PLANNED, DonationFood::ADJUSTED_AFTER_PLANNED]);
+
+                $donationFoodAssigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
+
+                if ($donationFoodPlanned) {
+                    $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_PLANNED;
+                } else if ($donationFoodAssigned) {
+                    $donationFood->food_donation_status_id = DonationFood::ADJUSTED_AFTER_ASSIGNED;
+                }
+
                 $donationFood->save();
 
                 $food->amount = $food->amount + $diffAmount;
@@ -146,12 +161,40 @@ class FoodDonationController extends Controller
 
         $planned = in_array($donationFood->food_donation_status_id, [DonationFood::PLANNED, DonationFood::ADJUSTED_AFTER_PLANNED]);
 
+        $assigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
+
         if ($planned) {
             $this->returnFood($food, $donationFood);
             $donationFood->delete();
+        } else if ($assigned) {
+            $this->returnFood($food, $donationFood);
+            $donationFood->delete();
+
+            $donationHasNoFood = $donation->donationFoods->count() === 0;
+            if ($donationHasNoFood) {
+                $donation->delete();
+                return redirect()->route('donations.index');
+            }
+            // kalau kosong semua food nya maka auto di hapus donation nya
         }
 
         return redirect()->route('donations.show', compact('donation'));
+    }
+
+    public function takenReceipt(Request $request, Donation $donation, Food $food, $id)
+    {
+        $takenReceipt = FoodDonationTakenReceipt::find($id);
+        $donationAssignment = $takenReceipt->donationAssignment;
+
+        return view('donation.food.receipt.taken', compact('donation', 'food', 'takenReceipt', 'donationAssignment'));
+    }
+
+    public function givenReceipt(Request $request, Donation $donation, Food $food, $id)
+    {
+        $givenReceipt = FoodDonationGivenReceipt::find($id);
+        $donationAssignment = $givenReceipt->donationAssignment;
+
+        return view('donation.food.receipt.given', compact('donation', 'food', 'givenReceipt', 'donationAssignment'));
     }
 
     public function history(Donation $donation, Food $food)

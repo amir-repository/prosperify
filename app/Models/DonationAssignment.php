@@ -21,6 +21,26 @@ class DonationAssignment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function foodDonationTakenReceipt()
+    {
+        return $this->hasOne(FoodDonationTakenReceipt::class);
+    }
+
+    public function foodDonationGivenReceipt()
+    {
+        return $this->hasOne(FoodDonationGivenReceipt::class);
+    }
+
+    public function assigner()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function vault()
+    {
+        return $this->belongsTo(Vault::class);
+    }
+
     public static function Create($volunteerID, $vaultID, $user, $donationFood)
     {
         $donationAssignment = new DonationAssignment();

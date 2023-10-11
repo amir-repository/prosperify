@@ -10,7 +10,10 @@ use App\Models\DonationFood;
 use App\Models\DonationLog;
 use App\Models\DonationSchedule;
 use App\Models\Food;
+use App\Models\FoodDonationGivenReceipt;
 use App\Models\FoodDonationLog;
+use App\Models\FoodDonationTakenReceipt;
+use App\Models\FoodRescueTakenReceipt;
 use App\Models\Recipient;
 use App\Models\User;
 use Carbon\Carbon;
@@ -166,6 +169,11 @@ class DonationController extends Controller
                         $donationFood->food_donation_status_id = DonationFood::TAKEN;
                         $donationFood->save();
                         FoodDonationLog::Create($donationFood, $user, $photo);
+
+                        $foodDonationTakenReceipt = new FoodDonationTakenReceipt();
+                        $foodDonationTakenReceipt->donation_assignment_id = $donationFood->donationAssignments->last()->id;
+                        $foodDonationTakenReceipt->taken_amount = $donationFood->amount;
+                        $foodDonationTakenReceipt->save();
                     } else if ($donationFoodTaken) {
                         $donationFood->food_donation_status_id = DonationFood::GIVEN;
                         $donationFood->save();
@@ -173,6 +181,11 @@ class DonationController extends Controller
 
                         $donationSchedule = DonationSchedule::where(['donation_food_id' => $donationFood->id]);
                         $donationSchedule->delete();
+
+                        $foodDonationGivenReceipt = new FoodDonationGivenReceipt();
+                        $foodDonationGivenReceipt->donation_assignment_id = $donationFood->donationAssignments->last()->id;
+                        $foodDonationGivenReceipt->given_amount = $donationFood->amount;
+                        $foodDonationGivenReceipt->save();
 
                         $this->changeDonationToComplete($donation, $user);
                     }
@@ -193,9 +206,15 @@ class DonationController extends Controller
     public function destroy(Donation $donation)
     {
         $planned = $donation->donation_status_id === Donation::PLANNED;
+        $assigned = $donation->donation_status_id === Donation::ASSIGNED;
+        $incompleted = $donation->donation_status_id === Donation::INCOMPLETED;
+
 
         try {
             if ($planned) {
+                $this->returnFoods($donation);
+                $donation->delete();
+            } else if ($assigned) {
                 $this->returnFoods($donation);
                 $donation->delete();
             }
@@ -212,6 +231,8 @@ class DonationController extends Controller
             $food = Food::find($donationFood->food_id);
             $food->amount = $food->amount + $donationFood->amount;
             $food->save();
+
+            $donationFood->delete();
         }
     }
 

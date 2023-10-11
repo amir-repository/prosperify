@@ -4,11 +4,13 @@
     <main class="p-6 text-slate-900">
         <div>
             <div>
-                <div class="flex items-center justify-between">
-                    <a href="{{ route('donations.edit', compact('donation')) }}" class="flex items-center gap-2">
-                        <h1 class="text-2xl font-bold">{{ $donation->title }}</h1>
-                        <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
-                    </a>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-bold">{{ $donation->title }}</h1>
+                    @role('admin')
+                        <a href="{{ route('donations.edit', compact('donation')) }}" class="flex items-center gap-2">
+                            <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                        </a>
+                    @endrole
                 </div>
                 <div class="mt-3 flex items-center gap-1 text-slate-500">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />
@@ -73,7 +75,7 @@
                     @php
                         $food = $donationFood->food;
                         $foodDonationLog = $donationFood->foodDonationLogs->last();
-                        
+
                         $showFoodForSpecificVolunteer = $donationFood->donationAssignments->count() > 0 && $donationFood->donationAssignments->last()->volunteer_id === auth()->user()->id;
                         $isAdmin = auth()
                             ->user()
@@ -169,7 +171,7 @@
                                 @php
                                     $foodAssigned = in_array($donationFood->food_donation_status_id, [3, 4]);
                                     $foodTaken = in_array($donationFood->food_donation_status_id, [5, 6]);
-                                    
+
                                 @endphp
                                 @if ($foodAssigned || $foodTaken)
                                     @role('volunteer')
