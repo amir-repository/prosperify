@@ -7,9 +7,11 @@
                 <div class="flex items-center gap-3">
                     <h1 class="text-2xl font-bold">{{ $donation->title }}</h1>
                     @role('admin')
-                        <a href="{{ route('donations.edit', compact('donation')) }}" class="flex items-center gap-2">
-                            <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
-                        </a>
+                        @if (in_array($donation->donation_status_id, [1, 2, 3]))
+                            <a href="{{ route('donations.edit', compact('donation')) }}" class="flex items-center gap-2">
+                                <x-heroicon-o-pencil-square class="w-[18px] h-[18px]" />
+                            </a>
+                        @endif
                     @endrole
                 </div>
                 <div class="mt-3 flex items-center gap-1 text-slate-500">

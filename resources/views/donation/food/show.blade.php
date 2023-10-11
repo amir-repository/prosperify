@@ -48,10 +48,10 @@
 
         <section>
             @php
-                $donationIsAssigned = in_array($donation->donation_status_id, [1, 2]);
+                $foodIsAssigned = in_array($donationFood->food_donation_status_id, [3, 4]);
             @endphp
             @role('admin')
-                @if ($donationIsAssigned)
+                @if ($foodIsAssigned)
                     <a href="{{ route('donations.foods.assignment', compact('donation', 'food')) }}"
                         class="block py-2 w-full rounded-md bg-slate-900 mt-8 text-sm font-medium text-white text-center">Change
                         Assignment</a>

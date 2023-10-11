@@ -190,18 +190,16 @@ class FoodDonationController extends Controller
             } else if ($assigned) {
                 $this->returnFood($food, $donationFood);
                 $donationFood->delete();
-
-                $donationHasNoFood = $donation->donationFoods->count() === 0;
-                if ($donationHasNoFood) {
-                    $donation->delete();
-                    return redirect()->route('donations.index');
-                }
             } else if ($taken) {
                 $donationFood->food_donation_status_id = DonationFood::CANCELED;
                 $donationFood->save();
 
                 $foodDonationLog = FoodDonationLog::Create($donationFood, $user, $food->photo);
                 FoodDonationLogNote::Create($foodDonationLog, $request->note);
+
+                // delete schedule nya mir
+                $donationSchedule = DonationSchedule::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
+                $donationSchedule->delete();
 
                 $donationHasNoFood = $donation->donationFoods->filter(fn ($donationFood) => $donationFood->food_donation_status_id !== DonationFood::CANCELED)->count() === 0;
                 if ($donationHasNoFood) {

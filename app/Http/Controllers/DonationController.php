@@ -301,8 +301,11 @@ class DonationController extends Controller
         $allfoodStored = true;
 
         foreach ($donation->donationFoods as $donationFood) {
+            $foodNotRejectedNorCanceled = !in_array($donationFood->food_donation_status_id, [DonationFood::CANCELED]);
+
             $foodHasNotBeenStored = !in_array($donationFood->food_donation_status_id, [DonationFood::GIVEN]);
-            if ($foodHasNotBeenStored) {
+
+            if ($foodNotRejectedNorCanceled && $foodHasNotBeenStored) {
                 $allfoodStored = false;
             }
         }
