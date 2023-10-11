@@ -30,14 +30,26 @@
                     class="px-4 py-2 border border-slate-300 rounded-md">Timeline</a>
             </div>
         </div>
+
+        <section>
+            @php
+                $donationIsAssigned = $donation->donation_status_id > 1;
+            @endphp
+            @if ($donationIsAssigned)
+                <a href="{{ route('donations.foods.assignment', compact('donation', 'food')) }}"
+                    class="block py-2 w-full rounded-md bg-slate-900 mt-8 text-sm font-medium text-white text-center">Change
+                    Assignment</a>
+            @endif
+        </section>
+
         <div class="mt-8">
             <h2 class="text-lg font-bold mb-3">History</h2>
             @foreach ($donationFood->foodDonationLogs as $food)
                 <a href="{{ asset("storage/$food->photo") }}" target="_blank" rel="noopener noreferrer">
                     <section class="p-6 border border-slate-200 rounded-md mb-4 flex items-center gap-4">
                         <div>
-                            <img class="w-[72px] h-[72px] rounded-md object-cover" src="{{ asset("storage/$food->photo") }}"
-                                alt="">
+                            <img class="w-[72px] h-[72px] rounded-md object-cover"
+                                src="{{ asset("storage/$food->photo") }}" alt="">
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold">

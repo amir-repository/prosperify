@@ -74,6 +74,10 @@ Route::put('/donations/{donation}/status', [DonationController::class, 'updateSt
 
 Route::get('/donations/{donation}/foods/{food}/history', [FoodDonationController::class, 'history'])->name('donations.foods.history');
 
+Route::get('/donations/{donation}/foods/{food}/assignment', [FoodDonationController::class, 'assignment'])->name('donations.foods.assignment');
+
+Route::put('/donations/{donation}/foods/{food}/assignment', [FoodDonationController::class, 'updateAssignment'])->name('donations.foods.updateAssignment');
+
 Route::resource('donations.foods', FoodDonationController::class);
 
 Route::resource('categories', CategoryController::class)->middleware(['auth']);

@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDonationFoodRequest;
 use App\Models\Donation;
+use App\Models\DonationAssignment;
 use App\Models\DonationFood;
+use App\Models\DonationSchedule;
 use App\Models\Food;
 use App\Models\FoodDonationLog;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -157,9 +160,73 @@ class FoodDonationController extends Controller
         return view('donation.food.history', compact('foodDonationLogs'));
     }
 
+    public function assignment(Request $request, Donation $donation, Food $food)
+    {
+        $donationAssignment = DonationAssignment::where(['donation_id' => $donation->id, 'food_id' => $food->id])->get();
+
+        $volunteers = [];
+        $donationAssigned = in_array($donation->donation_status_id, [Donation::ASSIGNED, Donation::INCOMPLETED]);
+
+        if ($donationAssigned) {
+            $allVolunteers = User::role(User::VOLUNTEER)->get();
+            $volunteers = $this->idleVolunteers($allVolunteers, $donation);
+        }
+        return view('donation.food.assignment', compact('donationAssignment', 'volunteers', 'donation', 'food'));
+    }
+
+    public function updateAssignment(Request $request, Donation $donation, Food $food)
+    {
+        $volunteerID = $this->getVolunteerID($request, $food->id);
+        $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first();
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+
+            // clear rescue schedule nya
+            DonationSchedule::where(['donation_id' => $donation->id, 'food_id' => $food->id])->first()->delete();
+
+            // buat assignment baru
+            DonationAssignment::Create($volunteerID, $food->vault_id, $user, $donationFood);
+
+            // buat schedule baru
+            DonationSchedule::Create($volunteerID, $donationFood);
+
+            // buat donation food log baru
+            FoodDonationLog::Create($donationFood, $user, $food->photo);
+
+            DB::commit();
+        } catch (\Exception $th) {
+            DB::rollBack();
+            throw $th;
+        }
+
+        return redirect()->route('donations.show', ['donation' => $donation]);
+    }
+
     private function returnFood($food, $donationFood)
     {
         $food->amount = $food->amount + $donationFood->amount;
         $food->save();
+    }
+
+    private function idleVolunteers($volunteers, $donation)
+    {
+        $volunteers = $volunteers->filter(function ($volunteer) use ($donation) {
+
+            // dateformat to 2023-12-23
+            $donation_date = Carbon::parse($donation->donation_date)->format('Y-m-d');
+
+            $maxFoodDonationInAday = 1;
+
+            // volunteer hanya bisa handle 1 donation food dalam suatu hari
+            return DonationSchedule::whereDate('donation_date', $donation_date)->where('user_id', $volunteer->id)->count() < $maxFoodDonationInAday;
+        });
+
+        return $volunteers;
+    }
+
+    private function getVolunteerID($request, $foodID)
+    {
+        return $request["food-$foodID-volunteer_id"];
     }
 }
