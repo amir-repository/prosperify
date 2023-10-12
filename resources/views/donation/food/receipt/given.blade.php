@@ -44,4 +44,8 @@
             </div>
         </section>
     </main>
+
+    <section class="p-6 flex items-center justify-center">
+        <img class="block bg-black-400 p-1" src="{{ asset("storage/$givenReceipt->receipt_photo") }}" alt="">
+    </section>
 @endsection

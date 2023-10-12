@@ -180,9 +180,12 @@ class DonationController extends Controller
                         $donationSchedule = DonationSchedule::where(['donation_food_id' => $donationFood->id]);
                         $donationSchedule->delete();
 
+                        $receiptPhoto = $this->storeReceiptPhoto($request, $donationFood->food_id);
+
                         $foodDonationGivenReceipt = new FoodDonationGivenReceipt();
                         $foodDonationGivenReceipt->donation_assignment_id = $donationFood->donationAssignments->last()->id;
                         $foodDonationGivenReceipt->given_amount = $donationFood->amount;
+                        $foodDonationGivenReceipt->receipt_photo = $receiptPhoto;
                         $foodDonationGivenReceipt->save();
 
                         $this->changeDonationToComplete($donation, $user);
@@ -318,6 +321,12 @@ class DonationController extends Controller
     private function storePhoto($request, $foodID)
     {
         $photoURL = $request->file("$foodID-photo")->store('donation-documentations');
+        return $photoURL;
+    }
+
+    private function storeReceiptPhoto($request, $foodID)
+    {
+        $photoURL = $request->file("receipt-$foodID-photo")->store('receipt-documentations');
         return $photoURL;
     }
 }

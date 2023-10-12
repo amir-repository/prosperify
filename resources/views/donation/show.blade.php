@@ -188,6 +188,13 @@
                                         <div class="border mt-2 rounded-md">
                                             <input class="p-2" type="file" name="{{ $food->id }}-photo">
                                         </div>
+                                        @if ($foodTaken)
+                                            <p class="mt-4 text-sm font-medium">Recipient Receipt Photo
+                                            </p>
+                                            <div class="border mt-2 rounded-md">
+                                                <input class="p-2" type="file" name="receipt-{{ $food->id }}-photo">
+                                            </div>
+                                        @endif
                                         <input type="text" name="donation_food_id" value="{{ $donationFood->id }}" hidden>
                                         <button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
                                             @if ($foodAssigned)
