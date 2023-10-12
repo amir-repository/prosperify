@@ -30,10 +30,8 @@ class DonationController extends Controller
         /** @var \App\Models\User */
         $user = auth()->user();
         $admin = $user->hasRole(User::ADMIN);
-        $volunteer = $user->hasRole(User::VOLUNTEER);
 
         if ($admin) {
-            $userID = auth()->user()->id;
             $donation = Donation::all();
             $filtered = $this->filterDonationByStatus($donation, [Donation::PLANNED]);
 
@@ -41,7 +39,7 @@ class DonationController extends Controller
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            return view('donation.index', ['donations' => $filtered]);
+            return view('donation.index', ['donations' => $filtered->sortBy('donation_date')]);
         }
     }
 
