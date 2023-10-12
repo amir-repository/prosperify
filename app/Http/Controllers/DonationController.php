@@ -30,6 +30,7 @@ class DonationController extends Controller
         /** @var \App\Models\User */
         $user = auth()->user();
         $admin = $user->hasRole(User::ADMIN);
+        $volunteer = $user->hasRole(User::VOLUNTEER);
 
         if ($admin) {
             $donation = Donation::all();
@@ -40,6 +41,30 @@ class DonationController extends Controller
             }
 
             return view('donation.index', ['donations' => $filtered->sortBy('donation_date')]);
+        } else if ($volunteer) {
+
+            $donations = Donation::all();
+            $filtered = $this->filterDonationByStatus($donations, [Donation::ASSIGNED]);
+
+            if ($request->query('q')) {
+                $filtered = $this->filterSearch($filtered, $request->query('q'));
+            }
+
+            $donations = collect([]);
+
+            foreach ($filtered as $donation) {
+                foreach ($donation->donationFoods as $donationFood) {
+                    $foodHasAssignment = $donationFood->donationAssignments->count() > 0;
+                    $foodIsAssignedToLogedVolunteer = $foodHasAssignment && $donationFood->donationAssignments->last()->volunteer_id === $user->id;
+
+                    if ($foodIsAssignedToLogedVolunteer) {
+                        $donations->push($donation);
+                        break;
+                    }
+                }
+            }
+
+            return view('donation.index', ['donations' => $donations->sortBy('donation_date')]);
         }
     }
 

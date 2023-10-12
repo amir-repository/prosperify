@@ -30,10 +30,12 @@
         @if ($donations->isEmpty())
             <p class="font-medium text-center mt-16">There's no food donation campaign yet
             </p>
-            <div class="flex justify-center">
-                <a href="{{ route('donations.create') }}" class="py-2 px-4 bg-slate-900 text-white rounded-md">Create
-                    new</a>
-            </div>
+            @role('admin')
+                <div class="flex justify-center">
+                    <a href="{{ route('donations.create') }}" class="py-2 px-4 bg-slate-900 text-white rounded-md">Create
+                        new</a>
+                </div>
+            @endrole
         @endif
         @foreach ($donations as $donation)
             <a href="{{ route('donations.show', ['donation' => $donation]) }}">

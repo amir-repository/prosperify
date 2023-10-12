@@ -13,7 +13,7 @@ class DonationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -21,7 +21,7 @@ class DonationPolicy
      */
     public function view(User $user, Donation $donation): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -29,7 +29,7 @@ class DonationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -37,7 +37,7 @@ class DonationPolicy
      */
     public function update(User $user, Donation $donation): bool
     {
-        return $user->hasAnyRole(['admin', 'volunteer']);
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -45,7 +45,7 @@ class DonationPolicy
      */
     public function delete(User $user, Donation $donation): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -53,7 +53,7 @@ class DonationPolicy
      */
     public function restore(User $user, Donation $donation): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 
     /**
@@ -61,6 +61,6 @@ class DonationPolicy
      */
     public function forceDelete(User $user, Donation $donation): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole('admin|volunteer');
     }
 }
