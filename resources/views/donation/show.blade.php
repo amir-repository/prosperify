@@ -195,7 +195,8 @@
                                                 <input class="p-2" type="file" name="receipt-{{ $food->id }}-photo">
                                             </div>
                                         @endif
-                                        <input type="text" name="donation_food_id" value="{{ $donationFood->id }}" hidden>
+                                        <input type="text" name="food-{{ $food->id }}-donation_food_id"
+                                            value="{{ $donationFood->id }}" hidden>
                                         <button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
                                             @if ($foodAssigned)
                                                 Take

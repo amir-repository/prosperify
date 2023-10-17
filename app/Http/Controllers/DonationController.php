@@ -116,8 +116,7 @@ class DonationController extends Controller
         $volunteers = [];
 
         if ($donationPlanned) {
-            $allVolunteers = User::role(User::VOLUNTEER)->get();
-            $volunteers = $this->idleVolunteers($allVolunteers, $donation, 1);
+            $volunteers = User::role(User::VOLUNTEER)->get();
         }
 
         $donationFoods = $donation->donationFoods;
@@ -180,9 +179,10 @@ class DonationController extends Controller
             } else if ($donationIncomplete) {
 
                 if ($isPhotoInRequest) {
-                    $donationFood = DonationFood::find($request->donation_food_id);
+                    $foodID = explode("-", array_keys($request->file())[0])[0];
+                    $donationFoodID = $this->getDonationFoodID($request, $foodID);
+                    $donationFood = DonationFood::find($donationFoodID);
                     $photo = $this->storePhoto($request, $donationFood->food_id);
-
 
                     $donationFoodAssigned = in_array($donationFood->food_donation_status_id, [DonationFood::ASSIGNED, DonationFood::ADJUSTED_AFTER_ASSIGNED]);
 
@@ -310,6 +310,11 @@ class DonationController extends Controller
         });
 
         return $filtered;
+    }
+
+    private function getDonationFoodID($request, $foodID)
+    {
+        return $request["food-$foodID-donation_food_id"];
     }
 
     private function getVolunteerID($request, $foodID)
