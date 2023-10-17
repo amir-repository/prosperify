@@ -39,6 +39,7 @@ class DonationFood extends Model
         return $this->belongsTo(Donation::class);
     }
 
+
     public function foodDonationLogs()
     {
         return $this->hasMany(FoodDonationLog::class);

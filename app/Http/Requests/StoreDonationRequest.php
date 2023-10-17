@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Donation;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,7 +13,9 @@ class StoreDonationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->hasRole('admin');
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        return $user->hasRole('admin');
     }
 
     /**
@@ -22,6 +25,23 @@ class StoreDonationRequest extends FormRequest
      */
     public function rules(): array
     {
+        // validate if there's an active donation
+        $donations = Donation::where('donation_status_id', Donation::PLANNED)->orWhere('donation_status_id', Donation::ASSIGNED)->orWhere('donation_status_id', Donation::INCOMPLETED)->get();
+
+        foreach ($donations as $donation) {
+            $dbDonationDate = Carbon::parse($donation->donation_date);
+            // rescue time is 4 hour
+            $dbEndDonationDate = Carbon::parse($donation->donation_date)->addHours(4);
+            $reqDonationDate = Carbon::parse($this->donation_date);
+
+            $conflictDonation = $reqDonationDate->between($dbDonationDate, $dbEndDonationDate);
+
+            if ($conflictDonation) {
+                dd($conflictDonation, "Conflicting with $donation->title, start: $dbDonationDate, finish: $dbEndDonationDate");
+            }
+        }
+
+
         return [
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:3|max:255',
