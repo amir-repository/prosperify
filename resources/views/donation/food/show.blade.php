@@ -11,7 +11,7 @@
             <div class="mt-3 flex items-center gap-2">
                 <h1 class="text-2xl font-bold ">{{ $food->name }}</h1>
                 @role('admin')
-                    @if (!in_array($donationFood->food_donation_status_id, [7, 8]))
+                    @if (!in_array($donationFood->food_donation_status_id, [5, 6, 7, 8]))
                         <a href="{{ route('donations.foods.edit', compact('food', 'donation', 'donationFood')) }}">
                             <x-heroicon-o-pencil-square class="w-5 h-5" />
                         </a>

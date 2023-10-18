@@ -16,6 +16,11 @@ class DonationSchedule extends Model
         return $this->belongsTo(DonationFood::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function Create($volunteerID, $donationFood)
     {
         $donationSchedule = new DonationSchedule();

@@ -29,7 +29,7 @@ class FoodResource extends Resource
 
     protected static ?string $navigationGroup = 'Food Management';
 
-    protected static ?string $navigationIcon = 'heroicon-o-gift';
+    protected static ?string $navigationIcon = 'heroicon-o-cake';
 
     public static function form(Form $form): Form
     {
