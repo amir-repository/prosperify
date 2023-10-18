@@ -84,8 +84,8 @@
                             ->hasRole('admin');
                     @endphp
                     @if ($showFoodForSpecificVolunteer || $isAdmin)
-                        <a href="{{ route('donations.foods.show', compact('donation', 'food', 'donationFood')) }}">
-                            <section class="p-6 border border-slate-200 rounded-md mb-4">
+                        <section class="p-6 border border-slate-200 rounded-md mb-4">
+                            <a href="{{ route('donations.foods.show', compact('donation', 'food', 'donationFood')) }}">
                                 <div class="flex items-center gap-4">
                                     <div>
                                         <img class="w-[72px] h-[72px] rounded-md object-cover"
@@ -102,115 +102,119 @@
                                         </p>
                                     </div>
                                 </div>
-                                <section class="flex items-center gap-2 mt-4">
-                                    <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
-                                        @include('donation.partials.food-status')
-                                    </div>
-                                    <div>
-                                        <p>
-                                            <span class="capitalize">
-                                                {{ $foodDonationLog->food_donation_status_name }}
-                                                By
-                                                {{ $foodDonationLog->actor_name }}
-                                            </span>
-                                        </p>
-                                        <p class="text-xs text-slate-500 capitalize">
-                                            At
-                                            2023
-                                        </p>
-                                    </div>
-                                </section>
-                                {{-- assignment --}}
-                                <section class="flex justify-between">
-                                    <div>
-                                        <p class="mt-4 text-sm font-medium">Volunteer
-                                        </p>
-                                        @php
-                                            $donationPlanned = $donation->donation_status_id === 1;
-                                        @endphp
-                                        @if ($donationPlanned)
-                                            {{-- when planned --}}
-                                            <div class="mt-2">
-                                                <select class="rounded-md border border-slate-300"
-                                                    name="food-{{ $food->id }}-volunteer_id" id="volunteer" required>
-                                                    @foreach ($volunteers as $volunteer)
-                                                        <option value="{{ $volunteer->id }}">
-                                                            {{ $volunteer->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            {{-- when planned --}}
-                                        @else
-                                            {{-- when assigned --}}
-                                            <div class="mt-2">
-                                                <select class="rounded-md border border-slate-300"
-                                                    name="food-{{ $food->id }}-volunteer_id" id="volunteer" required>
-                                                    @php
-                                                        $volunteer = $donationFood->donationAssignments->last()->volunteer;
-                                                    @endphp
+                            </a>
+                            <section class="flex items-center gap-2 mt-4">
+                                <div class="w-11 h-11 bg-[#F4F6FA] rounded-md flex items-center justify-center">
+                                    @include('donation.partials.food-status')
+                                </div>
+                                <div>
+                                    <p>
+                                        <span class="capitalize">
+                                            {{ $foodDonationLog->food_donation_status_name }}
+                                            By
+                                            {{ $foodDonationLog->actor_name }}
+                                        </span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 capitalize">
+                                        At
+                                        2023
+                                    </p>
+                                </div>
+                            </section>
+                            {{-- assignment --}}
+                            <section class="flex justify-between">
+                                <div>
+                                    <p class="mt-4 text-sm font-medium">Volunteer
+                                    </p>
+                                    @php
+                                        $donationPlanned = $donation->donation_status_id === 1;
+                                    @endphp
+                                    @if ($donationPlanned)
+                                        {{-- when planned --}}
+                                        <div class="mt-2">
+                                            <select class="rounded-md border border-slate-400"
+                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer" required>
+                                                @foreach ($volunteers as $volunteer)
                                                     <option value="{{ $volunteer->id }}">
                                                         {{ $volunteer->name }}
                                                     </option>
-                                                </select>
-                                            </div>
-                                            {{-- when assigned --}}
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <p class="mt-4 text-sm font-medium">Vaults
-                                        </p>
-                                        <div class="mt-2">
-                                            <select class="rounded-md border border-slate-300"
-                                                name="food-{{ $food->id }}-vault_id" id="vault" required>
-                                                <option value="{{ $food->vault_id }}">{{ $food->vault->name }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
-                                    </div>
-                                </section>
-                                {{-- assignment --}}
-
-                                @php
-                                    $foodAssigned = in_array($donationFood->food_donation_status_id, [3, 4]);
-                                    $foodTaken = in_array($donationFood->food_donation_status_id, [5, 6]);
-
-                                @endphp
-                                @if ($foodAssigned || $foodTaken)
-                                    @role('volunteer')
-                                        {{-- image --}}
-                                        <p class="mt-4 text-sm font-medium">Photo when it's
-                                            @if ($foodAssigned)
-                                                taken
-                                            @elseif($foodTaken)
-                                                given
-                                            @endif
-                                        </p>
-                                        <div class="border mt-2 rounded-md">
-                                            <input class="p-2" type="file" name="{{ $food->id }}-photo">
+                                        {{-- when planned --}}
+                                    @else
+                                        {{-- when assigned --}}
+                                        <div class="mt-2">
+                                            <select class="rounded-md border border-slate-400"
+                                                name="food-{{ $food->id }}-volunteer_id" id="volunteer" required>
+                                                @php
+                                                    $volunteer = $donationFood->donationAssignments->last()->volunteer;
+                                                @endphp
+                                                <option value="{{ $volunteer->id }}">
+                                                    {{ $volunteer->name }}
+                                                </option>
+                                            </select>
                                         </div>
-                                        @if ($foodTaken)
-                                            <p class="mt-4 text-sm font-medium">Recipient Receipt Photo
-                                            </p>
-                                            <div class="border mt-2 rounded-md">
-                                                <input class="p-2" type="file" name="receipt-{{ $food->id }}-photo">
-                                            </div>
-                                        @endif
-                                        <input type="text" name="food-{{ $food->id }}-donation_food_id"
-                                            value="{{ $donationFood->id }}" hidden>
-                                        <button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
-                                            @if ($foodAssigned)
-                                                Take
-                                            @elseif($foodTaken)
-                                                Give
-                                            @endif
-                                        </button>
-                                        {{-- image --}}
-                                    @endrole
-                                @endif
-
-
+                                        {{-- when assigned --}}
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="mt-4 text-sm font-medium">Vaults
+                                    </p>
+                                    <div class="mt-2">
+                                        <select class="rounded-md border border-slate-400"
+                                            name="food-{{ $food->id }}-vault_id" id="vault" required>
+                                            <option value="{{ $food->vault_id }}">{{ $food->vault->name }}</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </section>
-                        </a>
+                            {{-- assignment --}}
+
+                            @php
+                                $foodAssigned = in_array($donationFood->food_donation_status_id, [3, 4]);
+                                $foodTaken = in_array($donationFood->food_donation_status_id, [5, 6]);
+
+                            @endphp
+                            @if ($foodAssigned || $foodTaken)
+                                @role('volunteer')
+                                    {{-- image --}}
+                                    <p class="mt-4 text-sm font-medium">Photo when food's
+                                        @if ($foodAssigned)
+                                            taken
+                                        @elseif($foodTaken)
+                                            given
+                                        @endif
+                                    </p>
+                                    <div class="border mt-2 rounded-md border-slate-400">
+                                        <input class="p-2" type="file" name="{{ $food->id }}-photo">
+                                    </div>
+                                    <p class="mt-4 text-sm font-medium">Amount when food's
+                                        @if ($foodAssigned)
+                                            taken
+                                        @elseif($foodTaken)
+                                            given
+                                        @endif
+                                    <div class="mt-2">
+                                        <input name="food-{{ $food->id }}-amount"
+                                            class="border rounded-md w-full border-slate-400" type="number"
+                                            max="{{ $donationFood->amount }}" value="{{ $donationFood->amount }}">
+                                    </div>
+                                    <input type="text" name="food-{{ $food->id }}-donation_food_id"
+                                        value="{{ $donationFood->id }}" hidden>
+                                    <button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
+                                        @if ($foodAssigned)
+                                            Take
+                                        @elseif($foodTaken)
+                                            Give
+                                        @endif
+                                    </button>
+                                    {{-- image --}}
+                                @endrole
+                            @endif
+
+
+                        </section>
                     @endif
                 @endforeach
                 {{-- food card --}}

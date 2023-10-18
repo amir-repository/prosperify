@@ -15,4 +15,12 @@ class FoodDonationTakenReceipt extends Model
     {
         return $this->belongsTo(DonationAssignment::class);
     }
+
+    public static function Create($donationFood)
+    {
+        $foodDonationTakenReceipt = new FoodDonationTakenReceipt();
+        $foodDonationTakenReceipt->donation_assignment_id = $donationFood->donationAssignments->last()->id;
+        $foodDonationTakenReceipt->taken_amount = $donationFood->amount;
+        $foodDonationTakenReceipt->save();
+    }
 }
