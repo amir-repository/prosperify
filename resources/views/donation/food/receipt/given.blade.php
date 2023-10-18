@@ -41,11 +41,8 @@
                 <h2>Recipient. #{{ $givenReceipt->donationAssignment->donationFood->donation->recipient_id }}</h2>
                 <p class="text-xl font-bold">
                     {{ $givenReceipt->donationAssignment->donationFood->donation->recipient->name }}</p>
+                <img class="w-64" src="{{ $givenReceipt->recipient_signature }}" alt="" srcset="">
             </div>
         </section>
     </main>
-
-    <section class="p-6 flex items-center justify-center">
-        <img class="block bg-black-400 p-1" src="{{ asset("storage/$givenReceipt->receipt_photo") }}" alt="">
-    </section>
 @endsection

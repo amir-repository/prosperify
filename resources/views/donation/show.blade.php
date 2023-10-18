@@ -84,6 +84,7 @@
                             ->hasRole('admin');
                     @endphp
                     @if ($showFoodForSpecificVolunteer || $isAdmin)
+                        <h1 class="foodID" hidden>{{ $donationFood->food_id }}</h1>
                         <section class="p-6 border border-slate-200 rounded-md mb-4">
                             <a href="{{ route('donations.foods.show', compact('donation', 'food', 'donationFood')) }}">
                                 <div class="flex items-center gap-4">
@@ -200,6 +201,40 @@
                                             class="border rounded-md w-full border-slate-400" type="number"
                                             max="{{ $donationFood->amount }}" value="{{ $donationFood->amount }}">
                                     </div>
+
+                                    {{-- signature --}}
+                                    <div class="mt-5">
+                                        <p class="text-sm font-medium mb-1">
+
+                                            @if ($donation->donation_status_id === 2)
+                                                Admin Signature
+                                            @elseif($donation->donation_status_id === 3)
+                                                Recipient Signature
+                                            @endif
+
+                                        </p>
+                                        <div class="wrapper">
+                                            <canvas style="border: 1px solid black" id="food-{{ $food->id }}-signature-pad"
+                                                width="400" height="200"></canvas>
+                                        </div>
+                                        <div id="food-{{ $food->id }}-signature-action" class="flex gap-2">
+                                            <p class="py-2 px-4 bg-slate-900 text-white cursor-pointer"
+                                                id="food-{{ $food->id }}-clear">
+                                                <span> Clear
+                                                </span>
+                                            </p>
+                                            <p class="py-2 px-4 bg-slate-900 text-white cursor-pointer"
+                                                id="food-{{ $food->id }}-save">
+                                                <span> Save Signature
+                                                </span>
+                                            </p>
+
+                                        </div>
+                                        <input type="text" id="food-{{ $food->id }}-signature"
+                                            name="food-{{ $food->id }}-signature" hidden>
+                                    </div>
+                                    {{-- signature --}}
+
                                     <input type="text" name="food-{{ $food->id }}-donation_food_id"
                                         value="{{ $donationFood->id }}" hidden>
                                     <button class="py-2 w-full rounded-md bg-slate-900 mt-4 text-sm font-medium text-white">
@@ -213,7 +248,6 @@
                                 @endrole
                             @endif
 
-
                         </section>
                     @endif
                 @endforeach
@@ -221,4 +255,52 @@
             </section>
         </form>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+    <script>
+        const queryFoodIDs = Array.from(document.getElementsByClassName("foodID"));
+
+        const foodIDs = queryFoodIDs.map(function(query) {
+            return parseInt(query.innerHTML);
+        })
+
+        foodIDs.forEach(function(foodID) {
+            try {
+                const canvasID = `food-${foodID}-signature-pad`;
+                const canvas = document.getElementById(canvasID);
+
+                const signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: "rgb(250,250,250)",
+                });
+
+                const clearButtonID = `food-${foodID}-clear`;
+                document
+                    .getElementById(clearButtonID)
+                    .addEventListener("click", function() {
+                        signaturePad.clear();
+                    });
+
+                const saveButtonID = `food-${foodID}-save`;
+                document
+                    .getElementById(saveButtonID)
+                    .addEventListener("click", function() {
+                        let data = signaturePad.toDataURL("image/jpeg");
+
+                        const signatureInputID = `food-${foodID}-signature`;
+                        let signatureInput = document.getElementById(signatureInputID);
+                        signatureInput.value = data;
+
+                        const signatureActionID = `food-${foodID}-signature-action`;
+                        const signatureAction = document.getElementById(signatureActionID);
+                        signatureAction.remove();
+
+                        signaturePad.off()
+                    });
+
+            } catch (error) {
+                console.log(error);
+            }
+        });
+    </script>
 @endsection

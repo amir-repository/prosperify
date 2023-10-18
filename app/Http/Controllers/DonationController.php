@@ -201,8 +201,9 @@ class DonationController extends Controller
                         $donationFood->amount = $amount;
                         $donationFood->save();
 
+                        $signature = $this->getfoodSignature($request, $foodID);
                         FoodDonationLog::Create($donationFood, $user, $photo);
-                        FoodDonationTakenReceipt::Create($donationFood);
+                        FoodDonationTakenReceipt::Create($donationFood, $signature);
                     } else if ($donationFoodTaken) {
                         $donationFood->food_donation_status_id = DonationFood::GIVEN;
 
@@ -216,15 +217,13 @@ class DonationController extends Controller
                         $donationFood->amount = $amount;
                         $donationFood->save();
 
+                        $signature = $this->getfoodSignature($request, $foodID);
                         FoodDonationLog::Create($donationFood, $user, $photo);
 
                         $donationSchedule = DonationSchedule::where(['donation_food_id' => $donationFood->id]);
                         $donationSchedule->delete();
 
-                        $foodDonationGivenReceipt = new FoodDonationGivenReceipt();
-                        $foodDonationGivenReceipt->donation_assignment_id = $donationFood->donationAssignments->last()->id;
-                        $foodDonationGivenReceipt->given_amount = $donationFood->amount;
-                        $foodDonationGivenReceipt->save();
+                        FoodDonationGivenReceipt::Create($donationFood, $signature);
 
                         $this->changeDonationToComplete($donation, $user);
                     }
@@ -315,6 +314,11 @@ class DonationController extends Controller
     private function getDonationFoodID($request, $foodID)
     {
         return $request["food-$foodID-donation_food_id"];
+    }
+
+    private function getfoodSignature($request, $foodID)
+    {
+        return $request["food-$foodID-signature"];
     }
 
     private function getVolunteerID($request, $foodID)

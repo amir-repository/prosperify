@@ -22,6 +22,7 @@
             <div>
                 <h2>Assigner. #{{ $takenReceipt->donationAssignment->assigner_id }}</h2>
                 <p class="text-xl font-bold">{{ $takenReceipt->donationAssignment->assigner->name }}</p>
+                <img class="w-64" src="{{ $takenReceipt->admin_signature }}">
             </div>
             <div class="mt-6">
                 <h2>Volunteer. #{{ $takenReceipt->donationAssignment->volunteer->id }}</h2>

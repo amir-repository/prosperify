@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('donation_assignment_id')->constrained();
             $table->integer('taken_amount');
-            // $table->text('admin_signature');
-            // $table->text('volunteer_signature');
+            $table->text('admin_signature');
             $table->timestamps();
         });
     }
