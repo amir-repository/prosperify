@@ -17,6 +17,16 @@ class DonationFoodDiff extends Model
         return $this->belongsTo(DonationFood::class);
     }
 
+    public function onFoodDonationStatus()
+    {
+        return $this->belongsTo(FoodDonationStatus::class);
+    }
+
+    public function foodDonationStatus()
+    {
+        return $this->belongsTo(FoodDonationStatus::class);
+    }
+
     public static function Create($donationFood, $diffAmount)
     {
         $donationFoodDiff = new DonationFoodDiff();
