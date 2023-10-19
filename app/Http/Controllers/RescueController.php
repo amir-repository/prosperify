@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRescueRequest;
 use App\Models\Food;
+use App\Models\FoodDiff;
 use App\Models\FoodRescue;
 use App\Models\FoodRescueLog;
 use App\Models\FoodRescuePoint;
@@ -235,7 +236,7 @@ class RescueController extends Controller
                     $vault = Vault::find($vaultId);
                     $photo = $this->storePhoto($request, $foodId);
 
-                    $this->updateFoodStatus($rescue, $food, $user, $vault, $photo);
+                    $this->updateFoodStatus($request, $rescue, $food, $user, $vault, $photo);
                 }
             }
 
@@ -296,7 +297,7 @@ class RescueController extends Controller
     }
 
     // individual update for food after assigned
-    private function updateFoodStatus($rescue, $food, $user, $vault, $photo,)
+    private function updateFoodStatus($request, $rescue, $food, $user, $vault, $photo,)
     {
         $foodAssigned = $food->food_rescue_status_id === Food::ASSIGNED;
         $foodTaken = $food->food_rescue_status_id === Food::TAKEN;
@@ -304,6 +305,15 @@ class RescueController extends Controller
         if ($foodAssigned) {
             $food->food_rescue_status_id = Food::TAKEN;
             $food->photo = $photo;
+            // jika size nya lebih kecil dari seharusnya simpan ke rescue diff logs
+            $amount = (int)$this->getAmount($request, $food->id);
+
+            if ($amount !== $food->amount) {
+                $diffAmount = $food->amount - $amount;
+                FoodDiff::Create($food, $diffAmount, $user);
+            }
+
+            $food->amount = $amount;
             $food->save();
 
             FoodRescueLog::Create($user, $rescue, $food, $vault);
@@ -314,6 +324,16 @@ class RescueController extends Controller
             $food->photo = $photo;
             $food->stored_at = Carbon::now();
             $food->vault_id = $vault->id;
+
+            // jika size nya lebih kecil dari seharusnya simpan ke rescue diff logs
+            $amount = (int)$this->getAmount($request, $food->id);
+
+            if ($amount !== $food->amount) {
+                $diffAmount = $food->amount - $amount;
+                FoodDiff::Create($food, $diffAmount, $user);
+            }
+
+            $food->amount = $amount;
             $food->save();
 
             FoodRescueLog::Create($user, $rescue, $food, $vault);
@@ -388,6 +408,11 @@ class RescueController extends Controller
     private function getVaultID($request, $foodID)
     {
         return $request["food-$foodID-vault_id"];
+    }
+
+    private function getAmount($request, $foodID)
+    {
+        return $request["food-$foodID-amount"];
     }
 
     private function filterSearch($collections, $filterValue)

@@ -12,6 +12,8 @@
     $isTimeToRescue = Carbon\Carbon::parse($rescue->rescue_date)
         ->startOfDay()
         ->isSameDay();
+
+    $foodIsEditable = in_array($food->food_rescue_status_id, [9, 11, 10, 12]);
 @endphp
 
 @section('main')
@@ -23,15 +25,19 @@
             </div>
             <div class="mt-3 flex items-center gap-2">
                 <h1 class="text-2xl font-bold ">{{ $food->name }}</h1>
-                @if (auth()->user()->hasRole('admin'))
-                    <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
-                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                    </a>
+                @role('admin')
+                    @if (!$foodIsEditable)
+                        <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
+                            <x-heroicon-o-pencil-square class="w-5 h-5" />
+                        </a>
+                    @endif
+                @endrole
+                {{-- @if (auth()->user()->hasRole('admin'))
                 @elseif($foodNotRejected && $foodNotCanceled && $foodHasNotBeenTaken && $foodIsNotStored)
                     <a href="{{ route('rescues.foods.edit', ['rescue' => $rescue, 'food' => $food]) }}">
                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </a>
-                @endif
+                @endif --}}
             </div>
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
