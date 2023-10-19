@@ -153,16 +153,6 @@ class RescueController extends Controller
             $rescueProcessed = $rescue->rescue_status_id === Rescue::PROCESSED;
             if ($rescueProcessed) {
                 $volunteers = User::role(User::VOLUNTEER)->get();
-                $volunteers = $volunteers->filter(function ($volunteer) use ($rescue) {
-
-                    // dateformat to 2023-12-23
-                    $rescue_date = Carbon::parse($rescue->rescue_date)->format('Y-m-d');
-
-                    // volunteer hanya bisa handle 1 food dalam suatu hari
-                    $maxFoodRescueInAday = 1;
-                    return RescueSchedule::whereDate('rescue_date', $rescue_date)->where('user_id', $volunteer->id)->count() < $maxFoodRescueInAday;
-                });
-
                 $vaults = Vault::all();
             }
             return view('manager.rescues.show', ['rescue' => $rescue, 'volunteers' => $volunteers, 'vaults' => $vaults]);
