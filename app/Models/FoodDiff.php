@@ -16,6 +16,16 @@ class FoodDiff extends Model
         return $this->belongsTo(Food::class);
     }
 
+    public function onFoodRescueStatus()
+    {
+        return $this->belongsTo(FoodRescueStatus::class);
+    }
+
+    public function foodRescueStatus()
+    {
+        return $this->belongsTo(FoodRescueStatus::class);
+    }
+
     public static function Create($food, $diffAmount, $user)
     {
         $foodDiff = new FoodDiff();
