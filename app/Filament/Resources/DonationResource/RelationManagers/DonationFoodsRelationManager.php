@@ -39,7 +39,8 @@ class DonationFoodsRelationManager extends RelationManager
                         ->get()->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount." . $x->unit->name . ")"])
                 )->searchable()->required(),
                 TextInput::make('amount')->integer()->required(),
-                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required()->columnSpan(2),
+                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required(),
+                FileUpload::make('donation-recipient-signature')->image()->disk('public')->directory('donation-recipient-signature')->required(),
             ]);
     }
 
@@ -68,7 +69,7 @@ class DonationFoodsRelationManager extends RelationManager
                 })->after(function (DonationFood $donationFood) {
                     $user = auth()->user();
                     $foodDonationLogPhoto = reset($this->mountedTableActionsData[0]['photo']);
-                    $receiptGivenPhoto = reset($this->mountedTableActionsData[0]['receipt-photo']);
+                    $receiptGivenSignature = reset($this->mountedTableActionsData[0]['donation-recipient-signature']);
 
                     try {
                         DB::beginTransaction();
@@ -88,7 +89,7 @@ class DonationFoodsRelationManager extends RelationManager
                         $foodDonationGivenReceipt = new FoodDonationGivenReceipt();
                         $foodDonationGivenReceipt->donation_assignment_id = $donationAssignment->id;
                         $foodDonationGivenReceipt->given_amount = $donationFood->amount;
-                        $foodDonationGivenReceipt->receipt_photo = $receiptGivenPhoto;
+                        $foodDonationGivenReceipt->recipient_signature = $receiptGivenSignature;
                         $foodDonationGivenReceipt->save();
 
                         // kurangi food resourcenya
