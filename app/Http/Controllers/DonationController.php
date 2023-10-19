@@ -20,6 +20,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DonationController extends Controller
 {
@@ -201,9 +203,12 @@ class DonationController extends Controller
                         $donationFood->amount = $amount;
                         $donationFood->save();
 
+                        // generate signature photo and path
                         $signature = $this->getfoodSignature($request, $foodID);
+                        $signaturePhoto = $this->storeSignature($signature, 'donation-admin-signature');
+
                         FoodDonationLog::Create($donationFood, $user, $photo);
-                        FoodDonationTakenReceipt::Create($donationFood, $signature);
+                        FoodDonationTakenReceipt::Create($donationFood, $signaturePhoto);
                     } else if ($donationFoodTaken) {
                         $donationFood->food_donation_status_id = DonationFood::GIVEN;
 
@@ -218,12 +223,14 @@ class DonationController extends Controller
                         $donationFood->save();
 
                         $signature = $this->getfoodSignature($request, $foodID);
+                        $signaturePhoto = $this->storeSignature($signature, 'donation-recipient-signature');
+
                         FoodDonationLog::Create($donationFood, $user, $photo);
 
                         $donationSchedule = DonationSchedule::where(['donation_food_id' => $donationFood->id]);
                         $donationSchedule->delete();
 
-                        FoodDonationGivenReceipt::Create($donationFood, $signature);
+                        FoodDonationGivenReceipt::Create($donationFood, $signaturePhoto);
 
                         $this->changeDonationToComplete($donation, $user);
                     }
@@ -361,5 +368,19 @@ class DonationController extends Controller
     {
         $photoURL = $request->file("$foodID-photo")->store('donation-documentations');
         return $photoURL;
+    }
+
+    private function storeSignature($signature, $dir)
+    {
+        $data_uri = $signature;
+        $encoded_image = explode(",", $data_uri)[1];
+        $decoded_image = base64_decode($encoded_image);
+
+        $extension = "jpeg";
+        $imageName = $dir . '/' . Str::random(10) . '.' . $extension;
+
+        Storage::disk('public')->put($imageName, $decoded_image);
+
+        return $imageName;
     }
 }
