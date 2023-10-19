@@ -47,6 +47,7 @@ class DonationFoodDiffResource extends Resource
                 TextColumn::make('donationFood.food.unit.name'),
                 TextColumn::make('onFoodDonationStatus.name')->label('When food is'),
                 TextColumn::make('created_at')->dateTime()->label('Date'),
+                TextColumn::make('actor_name')->label('Actor'),
                 TextColumn::make('foodDonationStatus.name')->label('Status'),
             ])
             ->filters([

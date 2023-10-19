@@ -197,7 +197,7 @@ class DonationController extends Controller
 
                         if ($amount !== $donationFood->amount) {
                             $diffAmount = $donationFood->amount - $amount;
-                            DonationFoodDiff::Create($donationFood, $diffAmount);
+                            DonationFoodDiff::Create($donationFood, $diffAmount, $user);
                         }
 
                         $donationFood->amount = $amount;
@@ -216,7 +216,7 @@ class DonationController extends Controller
 
                         if ($amount !== $donationFood->amount) {
                             $diffAmount = $donationFood->amount - $amount;
-                            DonationFoodDiff::Create($donationFood, $diffAmount);
+                            DonationFoodDiff::Create($donationFood, $diffAmount, $user);
                         }
 
                         $donationFood->amount = $amount;

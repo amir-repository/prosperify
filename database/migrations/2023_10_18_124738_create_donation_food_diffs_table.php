@@ -21,6 +21,8 @@ return new class extends Migration
             $table->integer('amount');
             $table->unsignedBigInteger('on_food_donation_status_id');
             $table->foreignId('food_donation_status_id')->constrained();
+            $table->unsignedBigInteger('actor_id');
+            $table->string('actor_name');
             $table->timestamps();
         });
     }
