@@ -39,8 +39,7 @@ class DonationFoodsRelationManager extends RelationManager
                         ->get()->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount." . $x->unit->name . ")"])
                 )->searchable()->required(),
                 TextInput::make('amount')->integer()->required(),
-                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required(),
-                FileUpload::make('receipt-photo')->image()->disk('public')->directory('receipt-documentations')->required(),
+                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required()->columnSpan(2),
             ]);
     }
 
