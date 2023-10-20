@@ -48,7 +48,7 @@ class RescueResource extends Resource
                 TextInput::make('description')->required()->columnSpan(2),
                 TextInput::make('pickup_address')->required(),
                 Select::make('rescue_status_id')->relationship(name: 'rescueStatus', titleAttribute: 'name')->preload(),
-                Select::make('user_id')->relationship(name: 'user', titleAttribute: 'name')->searchable()->required(),
+                Select::make('user_id')->relationship(name: 'user', titleAttribute: 'name')->searchable()->required()->preload(),
                 TextInput::make('donor_name')->required(),
                 TextInput::make('phone')->required(),
                 TextInput::make('email')->required(),

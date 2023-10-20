@@ -37,8 +37,8 @@ class FoodsRelationManager extends RelationManager
                 TextInput::make('amount')->numeric()->required(),
                 Select::make('unit_id')->relationship(name: 'unit', titleAttribute: 'name')->preload(),
                 Select::make('sub_category_id')->relationship(name: 'subCategory', titleAttribute: 'name')->label('Group of')->required()->preload()->searchable(),
-                Select::make('food_rescue_status_id')->relationship('foodRescueStatus', 'name')->required()->preload()->searchable(),
-                Select::make('vault_id')->relationship('vault', 'name')->preload()->columnSpan(2)
+                Select::make('food_rescue_status_id')->relationship('foodRescueStatus', 'name')->required()->preload()->searchable()->default(10),
+                Select::make('vault_id')->relationship('vault', 'name')->preload()->columnSpan(2),
             ]);
     }
 
@@ -56,7 +56,7 @@ class FoodsRelationManager extends RelationManager
                 TextColumn::make('subCategory.name')->label('Sub Category'),
                 TextColumn::make('stored_at')->date()->label('Stored At'),
                 TextColumn::make('vault.name'),
-                TextColumn::make('expired_date')->date()
+                TextColumn::make('expired_date')->date(),
             ])
             ->filters([
                 //
