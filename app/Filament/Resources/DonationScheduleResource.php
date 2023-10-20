@@ -49,8 +49,12 @@ class DonationScheduleResource extends Resource
             ->filters([
                 Filter::make('Today Donation')->query(fn (Builder $query): Builder => $query->whereDate('donation_date', Carbon::today()))->toggle(),
                 Filter::make('Tomorrow Donation')->query(fn (Builder $query): Builder => $query->whereDate('donation_date', Carbon::today()->addDays(1)))->toggle(),
-                Filter::make("Next-7 Day's Donation")->query(fn (Builder $query): Builder => $query->whereBetween('donation_date', [Carbon::today(), Carbon::today()->addDays(7)]))->toggle(),
-                Filter::make("Next-30 Day's Donation")->query(fn (Builder $query): Builder => $query->whereBetween('donation_date', [Carbon::today(), Carbon::today()->addDays(30)]))->toggle(),
+                Filter::make('Next-7 days Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now(), Carbon::now()->addDays(7)]))
+                    ->toggle(),
+                Filter::make('Next-30 days Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now(), Carbon::now()->addDays(30)]))
+                    ->toggle(),
                 SelectFilter::make('Volunteer')->relationship('user', 'name')->searchable()->preload(),
             ])
             ->actions([
