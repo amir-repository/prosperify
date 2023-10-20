@@ -41,6 +41,36 @@ class UserSeeder extends Seeder
                 'phone' => '081234567777',
                 'address' => 'Jalan Mulawarman, Kota Tarakan'
             ],
+            [
+                'name' => 'Volunteer bagas',
+                'email' => 'bagas@mail.com',
+                'phone' => '081234567717',
+                'address' => 'Jalan Mulawarman, Kota Tarakan'
+            ],
+            [
+                'name' => 'Volunteer Nisa',
+                'email' => 'nisa@mail.com',
+                'phone' => '081234560777',
+                'address' => 'Jalan Mulawarman, Kota Tarakan'
+            ],
+            [
+                'name' => 'Volunteer Alif',
+                'email' => 'alif@mail.com',
+                'phone' => '081234567767',
+                'address' => 'Jalan Mulawarman, Kota Tarakan'
+            ],
+            [
+                'name' => 'Volunteer Rudi',
+                'email' => 'rudi@mail.com',
+                'phone' => '081234567877',
+                'address' => 'Jalan Mulawarman, Kota Tarakan'
+            ],
+            [
+                'name' => 'Volunteer Halin',
+                'email' => 'halin@mail.com',
+                'phone' => '081232567777',
+                'address' => 'Jalan Mulawarman, Kota Tarakan'
+            ],
         ]);
 
         $volunteers->each(function ($volunteer) {
