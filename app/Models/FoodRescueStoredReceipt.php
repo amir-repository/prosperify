@@ -11,7 +11,7 @@ class FoodRescueStoredReceipt extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['rescue_assignment_id', 'stored_amount'];
+    protected $fillable = ['rescue_assignment_id', 'stored_amount', 'admin_signature'];
 
     protected function createdAt(): Attribute
     {
@@ -25,11 +25,12 @@ class FoodRescueStoredReceipt extends Model
         return $this->belongsTo(RescueAssignment::class);
     }
 
-    public static function Create($food, $rescueAssignment)
+    public static function Create($food, $rescueAssignment, $signature)
     {
         $foodRescueStoredReceipt = new FoodRescueStoredReceipt();
         $foodRescueStoredReceipt->rescue_assignment_id = $rescueAssignment->id;
         $foodRescueStoredReceipt->stored_amount = $food->amount;
+        $foodRescueStoredReceipt->admin_signature = $signature;
         $foodRescueStoredReceipt->save();
 
         return $foodRescueStoredReceipt;

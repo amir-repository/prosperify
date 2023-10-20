@@ -33,6 +33,7 @@
         <div class="mt-6">
             <h2>Donor. #{{ $takenReceipt->rescueAssignment->rescue->user_id }}</h2>
             <p class="text-xl font-bold">{{ $takenReceipt->rescueAssignment->rescue->donor_name }}</p>
+            <img class="w-64" src="{{ asset('storage/' . $takenReceipt->donor_signature) }}">
         </div>
         <div class="mt-6">
             <h2>Vault. #{{ $takenReceipt->rescueAssignment->vault->id }}</h2>

@@ -27,6 +27,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use PhpParser\Node\Stmt\TryCatch;
 
 class RescueController extends Controller
@@ -316,9 +318,13 @@ class RescueController extends Controller
             $food->amount = $amount;
             $food->save();
 
+            // generate signature photo and path
+            $signature = $this->getfoodSignature($request, $food->id);
+            $signaturePhoto = $this->storeSignature($signature, 'rescue-donor-signature');
+
             FoodRescueLog::Create($user, $rescue, $food, $vault);
             $rescueAssignment = RescueAssignment::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get()->last();
-            FoodRescueTakenReceipt::Create($food, $rescueAssignment);
+            FoodRescueTakenReceipt::Create($food, $rescueAssignment, $signaturePhoto);
         } else if ($foodTaken) {
             $food->food_rescue_status_id = Food::STORED;
             $food->photo = $photo;
@@ -336,9 +342,13 @@ class RescueController extends Controller
             $food->amount = $amount;
             $food->save();
 
+            // generate signature photo and path
+            $signature = $this->getfoodSignature($request, $food->id);
+            $signaturePhoto = $this->storeSignature($signature, 'rescue-admin-signature');
+
             FoodRescueLog::Create($user, $rescue, $food, $vault);
             $rescueAssignment = RescueAssignment::where(['food_id' => $food->id, 'rescue_id' => $rescue->id])->get()->last();
-            $foodRescueStoredReceipt =  FoodRescueStoredReceipt::Create($food, $rescueAssignment);
+            $foodRescueStoredReceipt =  FoodRescueStoredReceipt::Create($food, $rescueAssignment, $signaturePhoto);
 
             // delete rescue schedule
             $rescueSchedule = RescueSchedule::where('food_id', $food->id)->first();
@@ -413,6 +423,25 @@ class RescueController extends Controller
     private function getAmount($request, $foodID)
     {
         return $request["food-$foodID-amount"];
+    }
+
+    private function getfoodSignature($request, $foodID)
+    {
+        return $request["food-$foodID-signature"];
+    }
+
+    private function storeSignature($signature, $dir)
+    {
+        $data_uri = $signature;
+        $encoded_image = explode(",", $data_uri)[1];
+        $decoded_image = base64_decode($encoded_image);
+
+        $extension = "jpeg";
+        $imageName = $dir . '/' . Str::random(10) . '.' . $extension;
+
+        Storage::disk('public')->put($imageName, $decoded_image);
+
+        return $imageName;
     }
 
     private function filterSearch($collections, $filterValue)

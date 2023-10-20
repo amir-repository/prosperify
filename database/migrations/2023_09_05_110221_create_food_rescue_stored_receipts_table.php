@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('food_rescue_stored_receipts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rescue_assignment_id')->constrained();
-            $table->string('stored_amount');
+            $table->integer('stored_amount');
+            $table->string('admin_signature');
             $table->timestamps();
         });
     }

@@ -25,6 +25,7 @@
         <div>
             <h2>Assigner. #{{ $storedReceipt->rescueAssignment->assigner_id }}</h2>
             <p class="text-xl font-bold">{{ $storedReceipt->rescueAssignment->assigner->name }}</p>
+            <img class="w-64" src="{{ asset('storage/' . $storedReceipt->admin_signature) }}">
         </div>
         <div class="mt-6">
             <h2>Volunteer. #{{ $storedReceipt->rescueAssignment->volunteer->id }}</h2>

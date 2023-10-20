@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -47,6 +48,7 @@ class FoodRescueTakenReceiptResource extends Resource
                 TextColumn::make('rescueAssignment.food.name'),
                 TextColumn::make('taken_amount')->label("Taken Amount"),
                 TextColumn::make('rescueAssignment.food.unit.name'),
+                ImageColumn::make('donor_signature'),
                 TextColumn::make('created_at')->label('Signed At')->dateTime(),
             ])
             ->filters([
