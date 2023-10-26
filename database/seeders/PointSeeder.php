@@ -15,12 +15,12 @@ class PointSeeder extends Seeder
     {
         DB::table('points')->insert([
             'point' => 0,
-            'user_id' => 4,
+            'user_id' => 9,
         ]);
 
         DB::table('points')->insert([
             'point' => 0,
-            'user_id' => 5,
+            'user_id' => 10,
         ]);
     }
 }

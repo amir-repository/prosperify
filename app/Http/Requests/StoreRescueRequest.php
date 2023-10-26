@@ -42,6 +42,7 @@ class StoreRescueRequest extends FormRequest
             $conflictDonation = $reqRescueDate->between($dbRescueDate, $dbEndRescueDate);
 
             if ($conflictDonation) {
+                // return 
                 dd($conflictDonation, "Conflicting with $rescue->title, start: $dbRescueDate, finish: $dbEndRescueDate. Try another date time");
             }
         }
