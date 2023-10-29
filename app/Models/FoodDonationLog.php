@@ -21,6 +21,14 @@ class FoodDonationLog extends Model
         );
     }
 
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
+        );
+    }
+
     public function foodDonationLogNote()
     {
         return $this->hasOne(FoodDonationLogNote::class);

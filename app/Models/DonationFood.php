@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class DonationFood extends Model
 {
@@ -24,6 +25,14 @@ class DonationFood extends Model
     public const TRASHED = 9;
 
     protected $fillable = ['donation_id', 'food_id', 'amount', 'food_donation_status_id'];
+
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
+        );
+    }
 
     public function foodDonationStatus()
     {

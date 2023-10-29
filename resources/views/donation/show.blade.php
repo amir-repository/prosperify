@@ -94,7 +94,7 @@
                                     </div>
                                     <div>
                                         <h3 class="text-2xl font-bold">
-                                            {{ $donationFood->amount }}.<span
+                                            {{ $donationFood->amount }} <span
                                                 class="text-base">{{ $food->unit->name }}</span>
                                         </h3>
                                         <p class="text-slate-500">{{ $food->name }}</p>
@@ -197,7 +197,7 @@
                                             given
                                         @endif
                                     <div class="mt-2">
-                                        <input name="food-{{ $food->id }}-amount"
+                                        <input step=".01" name="food-{{ $food->id }}-amount"
                                             class="border rounded-md w-full border-slate-400" type="number"
                                             max="{{ $donationFood->amount }}" value="{{ $donationFood->amount }}">
                                     </div>
@@ -207,9 +207,12 @@
                                         <p class="text-sm font-medium mb-1">
 
                                             @if ($donation->donation_status_id === 2)
-                                                Admin Signature
+                                                <span class="font-bold">Admin:</span>
+                                                {{ $donationFood->donationAssignments->last()->assigner->name }}
+                                                Signature
                                             @elseif($donation->donation_status_id === 3)
-                                                Recipient Signature
+                                                <span class="font-bold">Recipient:</span> {{ $donation->recipient->name }}
+                                                Signature
                                             @endif
 
                                         </p>

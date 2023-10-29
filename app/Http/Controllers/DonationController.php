@@ -193,7 +193,7 @@ class DonationController extends Controller
                     if ($donationFoodAssigned) {
                         $donationFood->food_donation_status_id = DonationFood::TAKEN;
 
-                        $amount = (int)$this->getAmount($request, $donationFood->food_id);
+                        $amount = (float)$this->getAmount($request, $donationFood->food_id);
 
                         if ($amount !== $donationFood->amount) {
                             $diffAmount = $donationFood->amount - $amount;
@@ -212,7 +212,7 @@ class DonationController extends Controller
                     } else if ($donationFoodTaken) {
                         $donationFood->food_donation_status_id = DonationFood::GIVEN;
 
-                        $amount = (int)$this->getAmount($request, $donationFood->food_id);
+                        $amount = (float)$this->getAmount($request, $donationFood->food_id);
 
                         if ($amount !== $donationFood->amount) {
                             $diffAmount = $donationFood->amount - $amount;

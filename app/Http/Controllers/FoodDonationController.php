@@ -54,8 +54,8 @@ class FoodDonationController extends Controller
             $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $request->food_id])->first();
 
             if ($donationFood) {
-                $existingAmount = (int)$donationFood->amount;
-                $additionalAmount = (int)$request->amount;
+                $existingAmount = (float)$donationFood->amount;
+                $additionalAmount = (float)$request->amount;
                 $donationFood->amount = $existingAmount + $additionalAmount;
                 $donationFood->save();
 
@@ -120,8 +120,8 @@ class FoodDonationController extends Controller
             $donationFood = DonationFood::where(['donation_id' => $donation->id, 'food_id' => $request->food_id])->first();
 
             if ($donationFood) {
-                $existingAmount = (int)$donationFood->amount;
-                $finalAmount = (int)$request->amount;
+                $existingAmount = (float)$donationFood->amount;
+                $finalAmount = (float)$request->amount;
                 $diffAmount = $existingAmount - $finalAmount;
                 if ($diffAmount === 0) {
                     return redirect()->route('donations.show', compact('donation'));

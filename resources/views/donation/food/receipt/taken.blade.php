@@ -12,7 +12,7 @@
             <div class="text-center">
                 <h1>Taken Amount</h1>
                 <p class="text-2xl font-bold">
-                    {{ $takenReceipt->taken_amount }}.<span
+                    {{ $takenReceipt->taken_amount }} <span
                         class="text-lg">{{ $takenReceipt->donationAssignment->donationFood->food->unit->name }}</span>
                 </p>
             </div>

@@ -26,7 +26,8 @@
                         value="{{ $food->amount }}" name="donation_food_max_amount" hidden required>
                     <div class="flex-1">
                         <label for="amount" class="text-sm font-medium block mb-[6px]">Amount</label>
-                        <input id="amount" type="number" class="border border-slate-200 rounded-md w-full"
+                        <input step=".01" id="amount" type="number"
+                            class="border border-slate-200 rounded-md w-full"
                             value="{{ old('amount') ? old('amount') : $donationFood->amount }}" placeholder="5"
                             name="amount" required>
                         @error('amount')

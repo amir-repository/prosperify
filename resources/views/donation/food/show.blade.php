@@ -21,8 +21,8 @@
             <p>{{ $food->detail }}</p>
             <div class="flex items-center gap-4 mt-3">
                 <p class="text-sm flex gap-1">
-                    <x-heroicon-o-archive-box
-                        class="w-[18px] h-[18px]" />{{ $donationFood->amount }}.{{ $food->unit->name }}
+                    <x-heroicon-o-archive-box class="w-[18px] h-[18px]" />{{ $donationFood->amount }}
+                    {{ $food->unit->name }}
                 </p>
                 <p class="text-sm flex gap-1">
                     <x-heroicon-o-calendar class="w-[18px] h-[18px]" />Exp.
@@ -70,7 +70,7 @@
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold">
-                                {{ $food->amount }}.<span class="text-base">{{ $food->unit_name }}</span>
+                                {{ $food->amount }} <span class="text-base">{{ $food->unit_name }}</span>
                             </h3>
                             <p class="text-slate-500">{{ $food->actor_name }}</p>
                             <p class="text-xs text-slate-500">
