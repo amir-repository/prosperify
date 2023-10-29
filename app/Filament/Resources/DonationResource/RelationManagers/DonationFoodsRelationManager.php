@@ -36,9 +36,9 @@ class DonationFoodsRelationManager extends RelationManager
                         ->where('amount', '>', 0)
                         ->where('food_rescue_status_id', Food::STORED)
                         ->orWhere('food_rescue_status_id', Food::ADJUSTED_AFTER_STORED)
-                        ->get()->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount." . $x->unit->name . ")"])
+                        ->get()->sortBy('expired_date')->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount " . $x->unit->name . ") - $x->expired_date"])
                 )->searchable()->required(),
-                TextInput::make('amount')->integer()->required(),
+                TextInput::make('amount')->numeric()->inputMode('decimal')->required(),
                 FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required(),
                 FileUpload::make('donation-recipient-signature')->image()->disk('public')->directory('donation-recipient-signature')->required(),
             ]);
@@ -52,10 +52,12 @@ class DonationFoodsRelationManager extends RelationManager
                 TextColumn::make('food.name'),
                 TextColumn::make('amount'),
                 TextColumn::make('food.unit.name'),
-                TextColumn::make('foodDonationStatus.name')->label('Status'),
-                TextColumn::make('food.id')->label('Photo'),
-                TextColumn::make('food.vault_id')->label('Receipt')
-
+                TextColumn::make('foodDonationStatus.name')->label('Donation Status'),
+                TextColumn::make('food.category.name'),
+                TextColumn::make('food.subCategory.name'),
+                TextColumn::make('updated_at')->dateTime()->label("Given At"),
+                TextColumn::make('food.vault.name')->label('Vault'),
+                TextColumn::make('food.expired_date')->date()->label("Expired Date"),
             ])
             ->filters([
                 //
