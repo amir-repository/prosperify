@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('detail');
             $table->dateTime('expired_date');
             $table->integer('amount');
-            $table->integer('stored_amount')->nullable();
             $table->dateTime('stored_at')->nullable();
             $table->string('photo');
             $table->foreignId('category_id')->constrained();
