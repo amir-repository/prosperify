@@ -94,7 +94,7 @@
                                             </div>
                                             <div>
                                                 <h3 class="text-2xl font-bold">
-                                                    {{ $food->amount }}.<span
+                                                    {{ $food->amount }} <span
                                                         class="text-base">{{ $food->unit->name }}</span>
                                                 </h3>
                                                 <p class="text-slate-500">{{ $food->name }}</p>
@@ -119,6 +119,14 @@
                                                     At
                                                     {{ $foodLog->created_at }}
                                                 </p>
+                                                @if ($foodLog->foodRescueLogNote)
+                                                    <p>
+                                                        <span class="text-xs text-slate-500 capitalize">
+                                                            Note
+                                                            {{ $foodLog->foodRescueLogNote->note }}
+                                                        </span>
+                                                    </p>
+                                                @endif
                                             </div>
                                         </section>
                                     </section>

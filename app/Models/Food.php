@@ -47,8 +47,8 @@ class Food extends Model
     protected function amount(): Attribute
     {
         return Attribute::make(
-            get: fn (int $value) => $value / 1000,
-            set: fn (int $value) => $value * 1000
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
         );
     }
 

@@ -22,7 +22,7 @@ class SubCategorySeeder extends Seeder
             [
                 'name' => 'protein hewani',
                 'category_id' => 1,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 7
             ],
             [
                 'name' => 'karbo/nasi',
@@ -37,40 +37,40 @@ class SubCategorySeeder extends Seeder
             [
                 'name' => 'beras',
                 'category_id' => 2,
-                'expiration_day_limit' => 30,
+                'expiration_day_limit' => 365 * 5,
             ],
             [
                 'name' => 'mie',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 365 * 3
             ],
             [
                 'name' => 'protein hewani kalengan',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 365 * 5
             ],
             [
                 'name' => 'susu',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 180
             ],
             [
                 'name' => 'bumbu dapur',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 365 * 3
             ],
             [
                 'name' => 'kopi',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 365 * 4
             ],
             [
                 'name' => 'teh',
                 'category_id' => 2,
-                'expiration_day_limit' => 30
+                'expiration_day_limit' => 365 * 3
             ],
             [
-                'name' => 'minuman lainnya', 'category_id' => 2, 'expiration_day_limit' => 30
+                'name' => 'minuman lainnya', 'category_id' => 2, 'expiration_day_limit' => 365 * 3
             ]
         ]);
         $subCategories->each(function ($subCategory) {

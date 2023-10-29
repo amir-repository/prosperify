@@ -20,6 +20,14 @@ class FoodRescueStoredReceipt extends Model
         );
     }
 
+    protected function storedAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
+        );
+    }
+
     public function rescueAssignment()
     {
         return $this->belongsTo(RescueAssignment::class);

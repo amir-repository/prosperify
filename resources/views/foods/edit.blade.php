@@ -32,8 +32,9 @@
                 <div class="flex gap-4">
                     <div class="mb-4 flex-1">
                         <label for="amount" class="text-sm font-medium block mb-[6px]">Amount</label>
-                        <input id="amount" type="number" class="border border-slate-200 rounded-md w-full"
-                            value="{{ $food->amount }}" placeholder="5" name="amount" required>
+                        <input step=".01" id="amount" type="number"
+                            class="border border-slate-200 rounded-md w-full" value="{{ $food->amount }}" placeholder="5"
+                            name="amount" required>
                         @error('amount')
                             <p class="mt-1 text-red-600">{{ $message }}</p>
                         @enderror

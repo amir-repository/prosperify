@@ -56,6 +56,7 @@ class FoodController extends Controller
         $validated = $request->validated();
         $photo = $request->file('photo')->store('rescue-documentations');
 
+
         try {
             DB::beginTransaction();
             $attributes = $request->only(['name', 'detail', 'expired_date', 'amount', 'unit_id', 'sub_category_id']);
@@ -68,6 +69,16 @@ class FoodController extends Controller
             $food->save();
 
             FoodRescueLog::Create($user, $rescue, $food, null);
+
+            // update rescue priority
+            $foodExpiredDate = Carbon::parse($food->expired_date);
+            if ($rescue->priority_rescue_date === null) {
+                $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
+                $rescue->save();
+            } else if ($foodExpiredDate->lt($rescue->priority_rescue_date)) {
+                $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
+                $rescue->save();
+            }
 
             DB::commit();
         } catch (\Exception $e) {

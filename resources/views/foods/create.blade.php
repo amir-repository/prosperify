@@ -2,7 +2,7 @@
 
 @section('main')
     <main class="px-6">
-        <h1 class="text-lg font-bold">Add a new food</h1>
+        <h1 class="text-lg font-bold mt-4">Add a food</h1>
         <form onsubmit="return confirm('Are you sure');" action="{{ route('rescues.foods.store', ['rescue' => $rescue]) }}"
             method="post" enctype="multipart/form-data">
             @csrf
@@ -26,8 +26,9 @@
                 <div class="flex gap-4">
                     <div class="mb-4 flex-1">
                         <label for="amount" class="text-sm font-medium block mb-[6px]">Amount</label>
-                        <input id="amount" type="number" class="border border-slate-200 rounded-md w-full"
-                            value="{{ old('amount') }}" placeholder="5" name="amount" required>
+                        <input step=".01" id="amount" type="number"
+                            class="border border-slate-200 rounded-md w-full" value="{{ old('amount') }}" placeholder="5"
+                            name="amount" required>
                         @error('amount')
                             <p class="mt-1 text-red-600">{{ $message }}</p>
                         @enderror

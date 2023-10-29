@@ -6,7 +6,7 @@
             <section class="flex items-center gap-6">
                 <div>
                     <button @click="filter=!filter; search=false" class="flex items-center gap-2">
-                        <x-heroicon-o-adjustments-horizontal class="w-6 h-6" /> Filter
+                        <x-heroicon-o-adjustments-horizontal class="w-6 h-6" /> Sort
                     </button>
                 </div>
                 <div @click="search=!search; filter=false" class="cursor-pointer">
@@ -22,13 +22,9 @@
                             value={{ request()->query('status') ? request()->query('status') : '1' }} hidden>
                         <label for="urgent">
                             <input type="checkbox" name="urgent" id="urgent" @checked(request()->query('urgent'))>
-                            Urgent
+                            By Date
                         </label>
-                        <label for="high-amount">
-                            <input type="checkbox" name="high-amount" id="high-amount" @checked(request()->query('high-amount'))>
-                            High amount
-                        </label>
-                        <button class="px-4 py-1 bg-slate-900 text-white rounded-md text-sm" type="submit">Filter</button>
+                        <button class="px-4 py-1 bg-slate-900 text-white rounded-md text-sm" type="submit">Sort</button>
                     </form>
                 </div>
                 <div x-show="search">

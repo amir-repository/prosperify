@@ -16,7 +16,7 @@
             <div class="text-center">
                 <h1>Stored Amount</h1>
                 <p class="text-2xl font-bold">
-                    {{ $storedReceipt->stored_amount }}.<span
+                    {{ $storedReceipt->stored_amount }} <span
                         class="text-lg">{{ $storedReceipt->rescueAssignment->food->unit->name }}</span>
                 </p>
             </div>

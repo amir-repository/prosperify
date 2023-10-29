@@ -132,11 +132,11 @@
                                                     </div>
                                                     <div>
                                                         <h3 class="text-2xl font-bold">
-                                                            {{ $food->amount }}.<span
+                                                            {{ $food->amount }} <span
                                                                 class="text-base">{{ $food->unit->name }}</span>
                                                         </h3>
                                                         <p class="text-slate-500">{{ $food->name }}</p>
-                                                        <p class="text-xs text-slate-500">Exp.
+                                                        <p class="text-xs text-slate-500">Exp. {{ $food->expired_date }}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -285,7 +285,8 @@
 
                                                     <div>
                                                         <input class="p-2 border mt-2 rounded-md w-full border-slate-400"
-                                                            type="number" name="food-{{ $food->id }}-amount"
+                                                            type="number" step=".01"
+                                                            name="food-{{ $food->id }}-amount"
                                                             value="{{ $food->amount }}" max="{{ $food->amount }}" required>
                                                     </div>
 
@@ -296,9 +297,13 @@
                                                         <p class="text-sm font-medium mb-1">
 
                                                             @if ($foodAssigned)
-                                                                Donor Signature
+                                                                <span class="font-bold">Donor:</span>
+                                                                {{ $rescue->donor_name }}
+                                                                Signature
                                                             @elseif($foodTaken)
-                                                                Admin Signature
+                                                                <span class="font-bold">Admin:</span>
+                                                                {{ $food->foodAssignments->last()->assigner->name }}
+                                                                Signature
                                                             @endif
 
                                                         </p>

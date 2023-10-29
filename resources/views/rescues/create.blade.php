@@ -4,7 +4,21 @@
     <main class="px-6">
         <form onsubmit="return confirm('Are you sure');" action="{{ route('rescues.store') }}" method="post">
             @csrf
-            <h1 class="text-lg font-bold">Food Rescue</h1>
+            <h1 class="text-lg font-bold mt-4">Create Food Rescue</h1>
+
+            <section class="p-4 bg-yellow-200 rounded-xl mt-2">
+                <h2 class="font-bold">Notes</h2>
+                <ul>
+                    <li>+ Minimum pickup date is +3 days from now.</li>
+                </ul>
+            </section>
+
+            @if ($errors->any())
+                <section>
+                    <h4>{{ $errors->first() }}</h4>
+                </section>
+            @endif
+
             <section class="mt-4">
                 <div class="mb-4">
                     <label for="title" class="text-sm font-medium block mb-[6px]">Title</label>

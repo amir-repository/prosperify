@@ -20,6 +20,14 @@ class FoodRescueLog extends Model
         );
     }
 
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
+        );
+    }
+
     public function food()
     {
         return $this->belongsTo(Food::class);

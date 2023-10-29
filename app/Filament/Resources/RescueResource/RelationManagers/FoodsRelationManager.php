@@ -51,6 +51,7 @@ class FoodsRelationManager extends RelationManager
                 ImageColumn::make('photo')->square(),
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('amount')->searchable()->sortable(),
+                TextColumn::make('unit.name'),
                 TextColumn::make('foodRescueStatus.name')->label('Rescue Status'),
                 TextColumn::make('category.name'),
                 TextColumn::make('subCategory.name')->label('Sub Category'),

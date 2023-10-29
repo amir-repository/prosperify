@@ -2,13 +2,8 @@
 
 @section('main')
     <main class="flex flex-col p-6 gap-4">
-        <div x-data="{ filter: false, search: true }">
+        <div x-data="{ search: true }">
             <section class="flex items-center gap-6">
-                <div>
-                    <button @click="filter=!filter; search=false" class="flex items-center gap-2">
-                        <x-heroicon-o-adjustments-horizontal class="w-6 h-6" /> Filter
-                    </button>
-                </div>
                 <div @click="search=!search; filter=false" class="cursor-pointer">
                     <p class="flex gap-2">
                         <x-heroicon-o-magnifying-glass class="w-6 h-6" /> Search
@@ -16,21 +11,6 @@
                 </div>
             </section>
             <section>
-                <div x-show="filter">
-                    <form class="flex items-center gap-11 my-4" action="{{ route('rescues.index') }}" method="get">
-                        <input type="text" name="status"
-                            value={{ request()->query('status') ? request()->query('status') : '1' }} hidden>
-                        <label for="urgent">
-                            <input type="checkbox" name="urgent" id="urgent" @checked(request()->query('urgent'))>
-                            Urgent
-                        </label>
-                        <label for="high-amount">
-                            <input type="checkbox" name="high-amount" id="high-amount" @checked(request()->query('high-amount'))>
-                            High amount
-                        </label>
-                        <button class="px-4 py-1 bg-slate-900 text-white rounded-md text-sm" type="submit">Filter</button>
-                    </form>
-                </div>
                 <div x-show="search">
                     <form action="" method="get" class="flex items-center gap-2 mt-4">
                         <input type="text" name="status" value="{{ request()->query('status') }}" hidden>

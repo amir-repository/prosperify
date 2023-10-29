@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Rescue;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Redirect;
 
 class StoreRescueRequest extends FormRequest
 {
@@ -42,7 +43,6 @@ class StoreRescueRequest extends FormRequest
             $conflictDonation = $reqRescueDate->between($dbRescueDate, $dbEndRescueDate);
 
             if ($conflictDonation) {
-                // return 
                 dd($conflictDonation, "Conflicting with $rescue->title, start: $dbRescueDate, finish: $dbEndRescueDate. Try another date time");
             }
         }

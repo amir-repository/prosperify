@@ -53,18 +53,19 @@ class RescueController extends Controller
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
-
-            return view('rescues.index', ['rescues' => $filtered]);
+            return view('rescues.index', ['rescues' => $filtered->sortBy('priority_rescue_date')]);
         } else if ($manager) {
             $rescues = Rescue::all();
             $filtered = $this->filterRescueByStatus($rescues, [Rescue::SUBMITTED]);
+            $filtered = $filtered->sortBy('priority_rescue_date');
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
+            if ($request->query('urgent')) {
+                $filtered = $this->filterPriority(request()->query('urgent'), $filtered);
+            }
 
             return view('manager.rescues.index', ['rescues' => $filtered]);
         } else if ($volunteer) {
@@ -72,11 +73,15 @@ class RescueController extends Controller
 
             $filtered = $this->filterRescueByStatus($rescues, [Rescue::ASSIGNED, Rescue::INCOMPLETED]);
 
+            $filtered = $filtered->sortBy('priority_rescue_date');
+
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            $filtered = $this->filterPriority(request()->query('urgent'), request()->query('high-amount'), $filtered);
+            if ($request->query('urgent')) {
+                $filtered = $this->filterPriority(request()->query('urgent'), $filtered);
+            }
 
             $rescues = collect([]);
 
@@ -286,18 +291,6 @@ class RescueController extends Controller
                 $food->save();
                 $foodRescueLog = FoodRescueLog::Create($user, $rescue, $food, $vault);
 
-                // assign tanggal prioritas berdasarkan makanan paling cepat expirednya
-                if ($rescue->rescue_status_id === Rescue::SUBMITTED) {
-                    $foodExpiredDate = Carbon::parse($food->expired_date);
-                    if ($rescue->priority_rescue_date === null) {
-                        $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
-                        $rescue->save();
-                    } else if ($foodExpiredDate->lt($rescue->priority_rescue_date)) {
-                        $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
-                        $rescue->save();
-                    }
-                }
-
                 // assignment dan schedule disini
                 if ($rescue->rescue_status_id === Rescue::ASSIGNED) {
                     $vaultID = $this->getVaultID(request(), $food->id);
@@ -320,7 +313,7 @@ class RescueController extends Controller
             $food->food_rescue_status_id = Food::TAKEN;
             $food->photo = $photo;
             // jika size nya lebih kecil dari seharusnya simpan ke rescue diff logs
-            $amount = (int)$this->getAmount($request, $food->id);
+            $amount = (float)$this->getAmount($request, $food->id);
 
             if ($amount !== $food->amount) {
                 $diffAmount = $food->amount - $amount;
@@ -344,7 +337,7 @@ class RescueController extends Controller
             $food->vault_id = $vault->id;
 
             // jika size nya lebih kecil dari seharusnya simpan ke rescue diff logs
-            $amount = (int)$this->getAmount($request, $food->id);
+            $amount = (float)$this->getAmount($request, $food->id);
 
             if ($amount !== $food->amount) {
                 $diffAmount = $food->amount - $amount;
@@ -465,18 +458,11 @@ class RescueController extends Controller
         return $filtered;
     }
 
-    private function filterPriority($urgent, $highAmount, $collections)
+    private function filterPriority($urgent, $collections)
     {
         $filtered = $collections;
-        if ($urgent === 'on' && $highAmount === 'on') {
-            $filtered = $collections->sortBy([
-                ['rescue_date', 'asc'],
-                ['score', 'desc']
-            ]);
-        } else if ($urgent === 'on') {
+        if ($urgent === 'on') {
             $filtered = $collections->sortBy('rescue_date');
-        } else if ($highAmount === 'on') {
-            $filtered = $collections->sortByDesc('score');
         } else {
             return $collections;
         }
