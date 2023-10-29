@@ -2,7 +2,7 @@
 
 @section('main')
     <main class="px-6">
-        <h1 class="text-lg font-bold">Add a new food</h1>
+        <h1 class="text-lg font-bold mt-4">Add a new food</h1>
         <form onsubmit="return confirm('Are you sure');" action="{{ route('donations.foods.store', compact('donation')) }}"
             method="post">
             @csrf
@@ -13,7 +13,7 @@
                         <select class="border border-slate-200 rounded-md w-full" name="food_id" id="food_id">
                             @foreach ($foods as $food)
                                 <option value="{{ $food->id }}">{{ $food->name }} -
-                                    {{ $food->amount }}.{{ $food->unit->name }}
+                                    {{ $food->amount }} {{ $food->unit->name }} - EXP. {{ $food->expired_date }}
                                 </option>
                             @endforeach
                         </select>

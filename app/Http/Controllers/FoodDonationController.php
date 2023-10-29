@@ -37,7 +37,7 @@ class FoodDonationController extends Controller
             ->where('amount', '>', 0)
             ->where('food_rescue_status_id', Food::STORED)
             ->orWhere('food_rescue_status_id', Food::ADJUSTED_AFTER_STORED)
-            ->get();
+            ->get()->sortBy('expired_date');
 
         return view('donation.food.create', compact('foods', 'donation'));
     }
