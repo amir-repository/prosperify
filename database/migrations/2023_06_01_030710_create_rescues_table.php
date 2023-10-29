@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('description');
             $table->dateTime('rescue_date');
+            $table->dateTime('priority_rescue_date')->nullable();
             $table->integer('score')->nullable();
             $table->integer('food_rescue_plan')->default(0);
             $table->integer('food_rescue_result')->default(0);

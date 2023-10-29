@@ -286,6 +286,18 @@ class RescueController extends Controller
                 $food->save();
                 $foodRescueLog = FoodRescueLog::Create($user, $rescue, $food, $vault);
 
+                // assign tanggal prioritas berdasarkan makanan paling cepat expirednya
+                if ($rescue->rescue_status_id === Rescue::SUBMITTED) {
+                    $foodExpiredDate = Carbon::parse($food->expired_date);
+                    if ($rescue->priority_rescue_date === null) {
+                        $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
+                        $rescue->save();
+                    } else if ($foodExpiredDate->lt($rescue->priority_rescue_date)) {
+                        $rescue->priority_rescue_date = Carbon::parse($food->expired_date);
+                        $rescue->save();
+                    }
+                }
+
                 // assignment dan schedule disini
                 if ($rescue->rescue_status_id === Rescue::ASSIGNED) {
                     $vaultID = $this->getVaultID(request(), $food->id);
