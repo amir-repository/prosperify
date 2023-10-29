@@ -34,11 +34,11 @@ class FoodsRelationManager extends RelationManager
                 TextInput::make('name')->required(),
                 DateTimePicker::make('expired_date')->required(),
                 TextInput::make('detail')->required()->columnSpan(2),
-                TextInput::make('amount')->numeric()->required(),
-                Select::make('unit_id')->relationship(name: 'unit', titleAttribute: 'name')->preload(),
+                TextInput::make('amount')->numeric()->inputMode('decimal')->required(),
+                Select::make('unit_id')->relationship(name: 'unit', titleAttribute: 'name')->preload()->required(),
                 Select::make('sub_category_id')->relationship(name: 'subCategory', titleAttribute: 'name')->label('Group of')->required()->preload()->searchable(),
                 Select::make('food_rescue_status_id')->relationship('foodRescueStatus', 'name')->required()->preload()->searchable()->default(10),
-                Select::make('vault_id')->relationship('vault', 'name')->preload()->columnSpan(2),
+                Select::make('vault_id')->relationship('vault', 'name')->preload()->columnSpan(2)->required(),
             ]);
     }
 
