@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Donation;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -31,7 +32,8 @@ class StoreDonationRequest extends FormRequest
         foreach ($donations as $donation) {
             $dbDonationDate = Carbon::parse($donation->donation_date);
             // rescue time is 4 hour
-            $dbEndDonationDate = Carbon::parse($donation->donation_date)->addHours(4);
+            $donationDuration = Setting::first()->donation_duration;
+            $dbEndDonationDate = Carbon::parse($donation->donation_date)->addMinutes($donationDuration);
             $reqDonationDate = Carbon::parse($this->donation_date);
 
             $conflictDonation = $reqDonationDate->between($dbDonationDate, $dbEndDonationDate);

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Rescue;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Redirect;
@@ -37,7 +38,8 @@ class StoreRescueRequest extends FormRequest
         foreach ($rescues as $rescue) {
             $dbRescueDate = Carbon::parse($rescue->rescue_date);
             // rescue time is 4 hour
-            $dbEndRescueDate = Carbon::parse($rescue->rescue_date)->addHours(4);
+            $rescueDuration = Setting::first()->rescue_duration;
+            $dbEndRescueDate = Carbon::parse($rescue->rescue_date)->addMinutes($rescueDuration);
             $reqRescueDate = Carbon::parse($this->rescue_date);
 
             $conflictDonation = $reqRescueDate->between($dbRescueDate, $dbEndRescueDate);
