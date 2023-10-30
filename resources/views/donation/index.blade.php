@@ -2,15 +2,31 @@
 
 @section('main')
     <main class="flex flex-col p-6 gap-4">
-        <div x-data="{ search: true }">
+        <div x-data="{ filter: false, search: true }">
             <section class="flex items-center gap-6">
-                <div @click="search=!search" class="cursor-pointer">
+                <div>
+                    <button @click="filter=!filter; search=false" class="flex items-center gap-2">
+                        <x-heroicon-o-adjustments-horizontal class="w-6 h-6" /> Sort
+                    </button>
+                </div>
+                <div @click="search=!search; filter=false" class="cursor-pointer">
                     <p class="flex gap-2">
                         <x-heroicon-o-magnifying-glass class="w-6 h-6" /> Search
                     </p>
                 </div>
             </section>
             <section>
+                <div x-show="filter">
+                    <form class="flex items-center gap-11 my-4" action="{{ route('donations.index') }}" method="get">
+                        <input type="text" name="status"
+                            value={{ request()->query('status') ? request()->query('status') : '1' }} hidden>
+                        <label for="urgent">
+                            <input type="checkbox" name="urgent" id="urgent" @checked(request()->query('urgent'))>
+                            By Date
+                        </label>
+                        <button class="px-4 py-1 bg-slate-900 text-white rounded-md text-sm" type="submit">Sort</button>
+                    </form>
+                </div>
                 <div x-show="search">
                     <form action="" method="get" class="flex items-center gap-2 mt-4">
                         <input type="text" name="status" value="{{ request()->query('status') }}" hidden>

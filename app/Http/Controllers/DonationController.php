@@ -38,19 +38,29 @@ class DonationController extends Controller
         if ($admin) {
             $donation = Donation::all();
             $filtered = $this->filterDonationByStatus($donation, [Donation::PLANNED]);
+            $filtered = $filtered->sortBy('priority_donation_date');
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
             }
 
-            return view('donation.index', ['donations' => $filtered->sortBy('donation_date')]);
+            if ($request->query('urgent')) {
+                $filtered = $this->filterPriority(request()->query('urgent'), $filtered);
+            }
+
+            return view('donation.index', ['donations' => $filtered]);
         } else if ($volunteer) {
 
             $donations = Donation::all();
             $filtered = $this->filterDonationByStatus($donations, [Donation::ASSIGNED]);
+            $filtered = $filtered->sortBy('priority_donation_date');
 
             if ($request->query('q')) {
                 $filtered = $this->filterSearch($filtered, $request->query('q'));
+            }
+
+            if ($request->query('urgent')) {
+                $filtered = $this->filterPriority(request()->query('urgent'), $filtered);
             }
 
             $donations = collect([]);
@@ -67,7 +77,7 @@ class DonationController extends Controller
                 }
             }
 
-            return view('donation.index', ['donations' => $donations->sortBy('donation_date')]);
+            return view('donation.index', ['donations' => $donations]);
         }
     }
 
@@ -382,5 +392,16 @@ class DonationController extends Controller
         Storage::disk('public')->put($imageName, $decoded_image);
 
         return $imageName;
+    }
+
+    private function filterPriority($urgent, $collections)
+    {
+        $filtered = $collections;
+        if ($urgent === 'on') {
+            $filtered = $collections->sortBy('donation_date');
+        } else {
+            return $collections;
+        }
+        return $filtered;
     }
 }

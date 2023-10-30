@@ -73,6 +73,16 @@ class FoodDonationController extends Controller
                 $food = Food::find($donationFood->food_id);
                 $food->amount = $food->amount - $donationFood->amount;
                 $food->save();
+
+                // update donation priority
+                $foodExpiredDate = Carbon::parse($food->expired_date);
+                if ($donation->priority_donation_date === null) {
+                    $donation->priority_donation_date = Carbon::parse($food->expired_date);
+                    $donation->save();
+                } else if ($foodExpiredDate->lt($donation->priority_donation_date)) {
+                    $donation->priority_donation_date = Carbon::parse($food->expired_date);
+                    $donation->save();
+                }
             }
 
             FoodDonationLog::Create($donationFood, $user, $food->photo);

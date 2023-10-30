@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('donation_status_id')->constrained()->cascadeOnDelete();
             $table->foreignId('recipient_id')->constrained()->cascadeOnDelete();
+            $table->dateTime('priority_donation_date')->nullable();
             $table->timestamps();
         });
     }

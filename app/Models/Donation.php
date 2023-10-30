@@ -11,7 +11,7 @@ class Donation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'donation_date', 'user_id', 'donation_status_id', 'recipient_id'];
+    protected $fillable = ['title', 'description', 'donation_date', 'user_id', 'donation_status_id', 'recipient_id', 'priority_donation_date'];
 
     public const PLANNED = 1;
     public const ASSIGNED = 2;
