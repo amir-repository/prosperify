@@ -49,7 +49,7 @@ class FoodDonationTakenReceiptResource extends Resource
                 TextColumn::make('donationAssignment.donationFood.food.name')->searchable(),
                 TextColumn::make('taken_amount')->label("Taken Amount"),
                 TextColumn::make('donationAssignment.donationFood.food.unit.name'),
-                ImageColumn::make('admin_signature')->label('Recipient Signature'),
+                ImageColumn::make('admin_signature')->label('Admin Signature'),
                 TextColumn::make('donationAssignment.created_at')->dateTime()->label('Signed At')->sortable(),
             ])
             ->filters([
