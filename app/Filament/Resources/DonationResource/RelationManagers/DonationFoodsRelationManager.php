@@ -7,6 +7,7 @@ use App\Models\DonationFood;
 use App\Models\Food;
 use App\Models\FoodDonationGivenReceipt;
 use App\Models\FoodDonationLog;
+use App\Models\FoodRescueLog;
 use Carbon\Carbon;
 use Faker\Provider\ar_EG\Text;
 use Filament\Forms;

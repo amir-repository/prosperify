@@ -66,7 +66,7 @@ class FoodResource extends Resource
                 TextColumn::make('subCategory.name')->label('Sub Category'),
                 TextColumn::make('stored_at')->date()->label('Stored At'),
                 TextColumn::make('vault.name'),
-                TextColumn::make('expired_date')->date()
+                TextColumn::make('expired_date')->date()->sortable()
             ])
             ->filters([
                 Filter::make('Is Stored')
