@@ -25,8 +25,8 @@ class SettingResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('rescue_duration')->numeric(),
-                TextInput::make('donation_duration')->numeric(),
+                TextInput::make('rescue_duration')->numeric()->label('Rescue Duration (Minutes)'),
+                TextInput::make('donation_duration')->numeric()->label('Donation Duration (Minutes)'),
             ]);
     }
 
@@ -34,8 +34,8 @@ class SettingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('rescue_duration'),
-                TextColumn::make('donation_duration')
+                TextColumn::make('rescue_duration')->label('Rescue Duration (Minutes)'),
+                TextColumn::make('donation_duration')->label('Donation Duration (Minutes)')
             ])
             ->filters([
                 //

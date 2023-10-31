@@ -42,7 +42,7 @@ class DonationScheduleResource extends Resource
                 TextColumn::make('donationFood.food.name')->searchable(),
                 TextColumn::make('donationFood.amount')->label("Amount"),
                 TextColumn::make('donationFood.food.unit.name'),
-                TextColumn::make('donation_date')->dateTime()->label("Schedule"),
+                TextColumn::make('donation_date')->dateTime()->label("Schedule")->sortable(),
                 TextColumn::make('donationFood.donation.recipient.name')->searchable(),
                 TextColumn::make('donationFood.foodDonationStatus.name')->label("status")->searchable(),
             ])

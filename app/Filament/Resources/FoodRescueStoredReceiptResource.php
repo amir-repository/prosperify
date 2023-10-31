@@ -47,7 +47,7 @@ class FoodRescueStoredReceiptResource extends Resource
                 TextColumn::make('stored_amount')->label("Stored Amount"),
                 TextColumn::make('rescueAssignment.food.unit.name'),
                 ImageColumn::make('admin_signature'),
-                TextColumn::make('created_at')->label('Signed At')->dateTime(),
+                TextColumn::make('created_at')->label('Signed At')->dateTime()->sortable(),
             ])
             ->filters([
                 Filter::make('Today Rescue')

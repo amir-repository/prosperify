@@ -47,7 +47,7 @@ class DonationResource extends Resource
                 TextColumn::make('recipient.name')->label('Recipient')->searchable(),
                 TextColumn::make('recipient.nik')->label('NIK')->searchable(),
                 TextColumn::make('recipient.address')->label('Donation Address'),
-                TextColumn::make('donation_date')->dateTime()->label('Donation Date'),
+                TextColumn::make('donation_date')->dateTime()->label('Donation Date')->sortable(),
                 TextColumn::make('donationStatus.name')->label('Status'),
             ])
             ->filters([])

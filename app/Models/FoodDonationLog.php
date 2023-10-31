@@ -12,7 +12,7 @@ class FoodDonationLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['actor_id', 'actor_name', 'food_donation_status_id', 'food_donation_status_name', 'amount', 'unit_id', 'unit_name', 'photo', 'donation_food_id', 'donation_id', 'food_id'];
+    protected $fillable = ['actor_id', 'actor_name', 'food_donation_status_id', 'food_donation_status_name', 'amount', 'unit_id', 'unit_name', 'photo', 'donation_food_id', 'donation_id', 'food_id', 'stored_food_amount'];
 
     protected function createdAt(): Attribute
     {
@@ -29,9 +29,22 @@ class FoodDonationLog extends Model
         );
     }
 
+    protected function storedFoodAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (float $value) => ($value / 1000),
+            set: fn (float $value) => (int)($value * 1000)
+        );
+    }
+
     public function foodDonationLogNote()
     {
         return $this->hasOne(FoodDonationLogNote::class);
+    }
+
+    public function donationFood()
+    {
+        return $this->belongsTo(DonationFood::class);
     }
 
     public static function Create($donationFood, $user, $photo)
@@ -48,6 +61,7 @@ class FoodDonationLog extends Model
         $foodDonationLog->unit_id = $donationFood->food->unit_id;
         $foodDonationLog->unit_name = $donationFood->food->unit->name;
         $foodDonationLog->photo = $photo;
+        $foodDonationLog->stored_food_amount = $donationFood->food->amount;
         $foodDonationLog->save();
 
         return $foodDonationLog;

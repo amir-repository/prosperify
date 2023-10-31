@@ -33,6 +33,11 @@ class FoodRescueLog extends Model
         return $this->belongsTo(Food::class);
     }
 
+    public function rescue()
+    {
+        return $this->belongsTo(Rescue::class);
+    }
+
     public function foodRescueLogNote()
     {
         return $this->hasOne(FoodRescueLogNote::class);

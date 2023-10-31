@@ -42,7 +42,7 @@ class RescueScheduleResource extends Resource
                 TextColumn::make('food.name')->searchable(),
                 TextColumn::make('food.amount'),
                 TextColumn::make('food.unit.name'),
-                TextColumn::make('rescue_date')->dateTime()->label("Schedule"),
+                TextColumn::make('rescue_date')->dateTime()->label("Schedule")->sortable(),
                 TextColumn::make('food.rescue.donor_name')->label('Donor')->searchable(),
                 TextColumn::make('food.foodRescueStatus.name')->label('Status')->searchable(),
 

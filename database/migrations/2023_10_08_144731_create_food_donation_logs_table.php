@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('donation_food_id')->constrained(
                 table: 'donation_food',
             )->cascadeOnDelete();
+            $table->integer('stored_food_amount');
             $table->foreignId('donation_id');
             $table->foreignId('food_id');
             $table->timestamps();
