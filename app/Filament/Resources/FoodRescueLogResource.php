@@ -5,12 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FoodRescueLogResource\Pages;
 use App\Filament\Resources\FoodRescueLogResource\RelationManagers;
 use App\Models\FoodRescueLog;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -47,7 +49,14 @@ class FoodRescueLogResource extends Resource
                 TextColumn::make('created_at')->dateTime()->sortable()
             ])
             ->filters([
-                //
+                Filter::make('Today Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereDate('created_at', Carbon::today()))->toggle(),
+                Filter::make('Yesterday Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereDate('created_at', Carbon::today()->subDays(1)))->toggle(),
+                Filter::make('Past-7 days Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(7), Carbon::now()]))->toggle(),
+                Filter::make('Past-30 days Rescue')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()]))->toggle(),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),

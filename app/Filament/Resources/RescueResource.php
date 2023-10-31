@@ -59,7 +59,7 @@ class RescueResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('created_at')->label('Report Time')->dateTime()->searchable(),
+                TextColumn::make('created_at')->label('Report Time')->dateTime()->sortable(),
                 TextColumn::make('title')->searchable(),
                 TextColumn::make('donor_name')->searchable(),
                 TextColumn::make('pickup_address')->searchable(),

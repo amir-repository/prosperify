@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FoodDonationLogResource\Pages;
 use App\Filament\Resources\FoodDonationLogResource\RelationManagers;
 use App\Models\FoodDonationLog;
+use Carbon\Carbon;
 use Faker\Provider\ar_EG\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -12,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -51,7 +53,14 @@ class FoodDonationLogResource extends Resource
                 TextColumn::make('created_at')->dateTime()->sortable()
             ])
             ->filters([
-                //
+                Filter::make('Today Donation')
+                    ->query(fn (Builder $query): Builder => $query->whereDate('created_at', Carbon::today()))->toggle(),
+                Filter::make('Yesterday Donation')
+                    ->query(fn (Builder $query): Builder => $query->whereDate('created_at', Carbon::today()->subDays(1)))->toggle(),
+                Filter::make('Past-7 days Donation')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(7), Carbon::now()]))->toggle(),
+                Filter::make('Past-30 days Donation')
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()]))->toggle(),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
