@@ -7,6 +7,7 @@ use App\Models\DonationFood;
 use App\Models\Food;
 use App\Models\FoodDonationGivenReceipt;
 use App\Models\FoodDonationLog;
+use App\Models\FoodDonationTakenReceipt;
 use App\Models\FoodRescueLog;
 use Carbon\Carbon;
 use Faker\Provider\ar_EG\Text;
@@ -40,8 +41,10 @@ class DonationFoodsRelationManager extends RelationManager
                         ->get()->sortBy('expired_date')->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount " . $x->unit->name . ") - $x->expired_date"])
                 )->searchable()->required(),
                 TextInput::make('amount')->numeric()->inputMode('decimal')->required(),
-                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required(),
-                FileUpload::make('donation-recipient-signature')->image()->disk('public')->directory('donation-recipient-signature')->required(),
+                FileUpload::make('photo')->image()->disk('public')->directory('donation-documentations')->required()->columnSpan(2),
+                FileUpload::make('donation-recipient-signature')->image()->disk('public')->directory('donation-recipient-signature')->required()->label('Recipient signature'),
+                FileUpload::make('donation-admin-signature')->image()->disk('public')->directory('donation-admin-signature')->required()->label('Admin signature'),
+
             ]);
     }
 
@@ -72,7 +75,9 @@ class DonationFoodsRelationManager extends RelationManager
                 })->after(function (DonationFood $donationFood) {
                     $user = auth()->user();
                     $foodDonationLogPhoto = reset($this->mountedTableActionsData[0]['photo']);
+                    $receiptTakenSignature = reset($this->mountedTableActionsData[0]['donation-admin-signature']);
                     $receiptGivenSignature = reset($this->mountedTableActionsData[0]['donation-recipient-signature']);
+
 
                     try {
                         DB::beginTransaction();
@@ -87,6 +92,9 @@ class DonationFoodsRelationManager extends RelationManager
 
                         // create donation food log
                         FoodDonationLog::Create($donationFood, $user, $foodDonationLogPhoto);
+
+                        // create donation taken receipt
+                        FoodDonationTakenReceipt::Create($donationFood, $receiptTakenSignature);
 
                         // create donation given receipt
                         $foodDonationGivenReceipt = new FoodDonationGivenReceipt();
