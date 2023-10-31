@@ -4,7 +4,10 @@ namespace App\Filament\Resources\RescueResource\RelationManagers;
 
 use App\Models\Food;
 use App\Models\FoodRescueLog;
+use App\Models\FoodRescueStoredReceipt;
+use App\Models\FoodRescueTakenReceipt;
 use App\Models\Rescue;
+use App\Models\RescueAssignment;
 use App\Models\SubCategory;
 use App\Models\Vault;
 use Carbon\Carbon;
@@ -39,6 +42,8 @@ class FoodsRelationManager extends RelationManager
                 Select::make('sub_category_id')->relationship(name: 'subCategory', titleAttribute: 'name')->label('Group of')->required()->preload()->searchable(),
                 Select::make('food_rescue_status_id')->relationship('foodRescueStatus', 'name')->required()->preload()->searchable()->default(10),
                 Select::make('vault_id')->relationship('vault', 'name')->preload()->columnSpan(2)->required(),
+                FileUpload::make('rescue-donor-signature')->image()->disk('public')->directory('rescue-donor-signature')->required()->label('Donor signature'),
+                FileUpload::make('rescue-admin-signature')->image()->disk('public')->directory('rescue-admin-signature')->required()->label('Admin signature'),
             ]);
     }
 
@@ -70,11 +75,29 @@ class FoodsRelationManager extends RelationManager
 
                     return $data;
                 })->after(function (Food $food) {
+                    $receiptTakenSignature = reset($this->mountedTableActionsData[0]['rescue-donor-signature']);
+                    $receiptStoredSignature = reset($this->mountedTableActionsData[0]['rescue-admin-signature']);
+
                     $user = auth()->user();
                     $rescue = Rescue::find($food->rescue_id);
                     $vault = Vault::find($food->vault_id);
                     // we need to save the food log
                     FoodRescueLog::Create($user, $rescue, $food, $vault);
+
+                    // create rescue Assignment
+                    $rescueAssignment = new RescueAssignment();
+                    $rescueAssignment->food_id = $food->id;
+                    $rescueAssignment->rescue_id = $rescue->id;
+                    $rescueAssignment->volunteer_id = $user->id;
+                    $rescueAssignment->vault_id = $vault->id;
+                    $rescueAssignment->assigner_id = $user->id;
+                    $rescueAssignment->save();
+
+                    // create taken receipt
+                    FoodRescueTakenReceipt::Create($food, $rescueAssignment, $receiptTakenSignature);
+
+                    // create receipt
+                    FoodRescueStoredReceipt::Create($food, $rescueAssignment, $receiptStoredSignature);
                 })
             ])
             ->actions([
