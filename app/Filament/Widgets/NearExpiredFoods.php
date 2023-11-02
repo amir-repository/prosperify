@@ -15,7 +15,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class NearExpiredFoods extends BaseWidget
 {
-    protected array|string|int $columnSpan = 'full';
+    protected array|string|int $columnSpan = 'half';
 
     public function table(Table $table): Table
     {
