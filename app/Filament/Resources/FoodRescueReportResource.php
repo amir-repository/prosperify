@@ -52,7 +52,7 @@ class FoodRescueReportResource extends Resource
                 TextColumn::make('food.name')->searchable(),
                 TextColumn::make('food_rescue_status_name')->label('Rescue Status')->searchable(),
                 TextColumn::make('amount')->summarize(
-                    Sum::make()->query(fn (QueryBuilder $query) => $query->where('food_rescue_status_id', 10))
+                    Sum::make()->query(fn (QueryBuilder $query) => $query->where(['food_rescue_status_id' => 10]))->label('Total'),
                 ),
                 TextColumn::make('unit_name'),
                 TextColumn::make('actor_name'),
@@ -95,7 +95,7 @@ class FoodRescueReportResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])->defaultGroup('unit_name');
     }
 
     public static function getRelations(): array
