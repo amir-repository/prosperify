@@ -8,6 +8,7 @@ use App\Filament\Resources\FoodResource\RelationManagers\FoodRescueLogsRelationM
 use App\Models\Food;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -88,6 +89,22 @@ class FoodResource extends Resource
                 SelectFilter::make('Rescue Status')
                     ->relationship('foodRescueStatus', 'name')->searchable()
                     ->preload(),
+                Filter::make('expired_at')
+                    ->form([
+                        DatePicker::make('expired_from'),
+                        DatePicker::make('expired_until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['expired_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('expired_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['expired_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('expired_date', '<=', $date),
+                            );
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -7,6 +7,7 @@ use App\Filament\Resources\DonationResource\RelationManagers;
 use App\Filament\Resources\DonationResource\RelationManagers\DonationFoodsRelationManager;
 use App\Models\Donation;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -14,6 +15,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -50,7 +53,26 @@ class DonationResource extends Resource
                 TextColumn::make('donation_date')->dateTime()->label('Donation Date')->sortable(),
                 TextColumn::make('donationStatus.name')->label('Status'),
             ])
-            ->filters([])
+            ->filters([
+                SelectFilter::make('Donation Status')
+                    ->relationship('donationStatus', 'name')->preload(),
+                Filter::make('donated_at')
+                    ->form([
+                        DatePicker::make('donated_from'),
+                        DatePicker::make('donated_until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['donated_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('donation_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['donated_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('donation_date', '<=', $date),
+                            );
+                    })
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

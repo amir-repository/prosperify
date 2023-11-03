@@ -68,26 +68,22 @@ class RescueResource extends Resource
                 TextColumn::make('rescueStatus.name'),
             ])
             ->filters([
-                Filter::make('Rescue this weeks')
-                    ->query(fn (Builder $query): Builder => $query->whereBetween('rescue_date', [Carbon::now(), Carbon::now()->addDays(6)]))->toggle(),
-                Filter::make('Rescue this months')
-                    ->query(fn (Builder $query): Builder => $query->whereBetween('rescue_date', [Carbon::now(), Carbon::now()->addDays(29)]))->toggle(),
                 SelectFilter::make('Rescue Status')
                     ->relationship('rescueStatus', 'name')->preload(),
-                Filter::make('created_at')
+                Filter::make('rescue_at')
                     ->form([
-                        DatePicker::make('created_from'),
-                        DatePicker::make('created_until'),
+                        DatePicker::make('rescue_from'),
+                        DatePicker::make('rescue_until'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                $data['rescue_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('rescue_date', '>=', $date),
                             )
                             ->when(
-                                $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                $data['rescue_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('rescue_date', '<=', $date),
                             );
                     })
             ])

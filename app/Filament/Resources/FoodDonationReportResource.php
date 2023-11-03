@@ -2,32 +2,37 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\DonationFoodDiffResource\Pages;
-use App\Filament\Resources\DonationFoodDiffResource\RelationManagers;
-use App\Models\DonationFoodDiff;
+use App\Filament\Resources\FoodDonationReportResource\Pages;
+use App\Filament\Resources\FoodDonationReportResource\RelationManagers;
+use App\Models\FoodDonationLog;
+use App\Models\FoodDonationReport;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class DonationFoodDiffResource extends Resource
+class FoodDonationReportResource extends Resource
 {
-    protected static ?string $model = DonationFoodDiff::class;
+    protected static ?string $model = FoodDonationLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationGroup = 'Donation Management';
 
-    protected static ?string $navigationLabel = 'Diff';
+    protected static ?string $navigationLabel = 'Donation Report';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -41,15 +46,17 @@ class DonationFoodDiffResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('donationFood.donation.recipient.name')->searchable(),
                 TextColumn::make('donationFood.donation.title')->searchable(),
                 TextColumn::make('donationFood.food.name')->searchable(),
-                TextColumn::make('amount'),
-                TextColumn::make('donationFood.food.unit.name'),
-                TextColumn::make('onFoodDonationStatus.name')->label('When food is'),
-                TextColumn::make('created_at')->dateTime()->label('Date')->sortable(),
-                TextColumn::make('actor_name')->label('Actor'),
-                TextColumn::make('foodDonationStatus.name')->label('Status'),
+                TextColumn::make('food_donation_status_name')->label('Donation Status')->searchable(),
+                TextColumn::make('stored_food_amount')->label('Stored Amount'),
+                TextColumn::make('amount')->label('Donation Amount')->summarize(
+                    Sum::make()->query(fn (QueryBuilder $query) => $query->where(['food_donation_status_id' => 7]))->label('Total'),
+                ),
+                TextColumn::make('unit_name')->label('Unit'),
+                TextColumn::make('actor_name'),
+                ImageColumn::make('photo')->square(),
+                TextColumn::make('created_at')->dateTime()->sortable()
             ])
             ->filters([
                 Filter::make('Today Donation')
@@ -59,7 +66,10 @@ class DonationFoodDiffResource extends Resource
                 Filter::make('Past-7 days Donation')
                     ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(7), Carbon::now()]))->toggle(),
                 Filter::make('Past-30 days Donation')
-                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()]))->toggle(),
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()]))->toggle()->default(),
+                SelectFilter::make('Donation Status')
+                    ->relationship('foodDonationStatus', 'name')->searchable()
+                    ->preload()->default(7),
                 Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from'),
@@ -82,9 +92,9 @@ class DonationFoodDiffResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])->defaultGroup('unit_name');
     }
 
     public static function getRelations(): array
@@ -97,9 +107,9 @@ class DonationFoodDiffResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDonationFoodDiffs::route('/'),
-            'create' => Pages\CreateDonationFoodDiff::route('/create'),
-            'edit' => Pages\EditDonationFoodDiff::route('/{record}/edit'),
+            'index' => Pages\ListFoodDonationReports::route('/'),
+            'create' => Pages\CreateFoodDonationReport::route('/create'),
+            'edit' => Pages\EditFoodDonationReport::route('/{record}/edit'),
         ];
     }
 

@@ -47,6 +47,11 @@ class FoodDonationLog extends Model
         return $this->belongsTo(DonationFood::class);
     }
 
+    public function foodDonationStatus()
+    {
+        return $this->belongsTo(FoodDonationStatus::class);
+    }
+
     public static function Create($donationFood, $user, $photo)
     {
         $foodDonationLog = new FoodDonationLog();
