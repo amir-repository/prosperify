@@ -44,6 +44,7 @@ class FoodDonationLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('donationFood.donation.title')->searchable(),
+                TextColumn::make('donationFood.donation.recipient.address')->searchable()->label('Donation Address'),
                 TextColumn::make('donationFood.food.name')->searchable(),
                 TextColumn::make('food_donation_status_name')->label('Donation Status')->searchable(),
                 TextColumn::make('stored_food_amount')->label('Stored Amount'),

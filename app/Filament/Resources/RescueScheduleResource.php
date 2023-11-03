@@ -40,6 +40,7 @@ class RescueScheduleResource extends Resource
             ->columns([
                 TextColumn::make('user.name')->label('Volunteer')->searchable(),
                 TextColumn::make('food.rescue.title')->searchable(),
+                TextColumn::make('food.rescue.pickup_address')->searchable()->label('Pickup Address'),
                 TextColumn::make('food.name')->searchable(),
                 TextColumn::make('food.amount'),
                 TextColumn::make('food.unit.name'),

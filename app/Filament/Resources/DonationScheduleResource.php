@@ -40,6 +40,7 @@ class DonationScheduleResource extends Resource
             ->columns([
                 TextColumn::make('user.name')->label("Volunteer")->searchable(),
                 TextColumn::make('donationFood.donation.title')->searchable(),
+                TextColumn::make('donationFood.donation.recipient.address')->searchable()->label('Donation Address'),
                 TextColumn::make('donationFood.food.name')->searchable(),
                 TextColumn::make('donationFood.amount')->label("Amount"),
                 TextColumn::make('donationFood.food.unit.name'),

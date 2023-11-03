@@ -41,6 +41,7 @@ class FoodRescueLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('rescue.title')->searchable(),
+                TextColumn::make('rescue.pickup_address')->searchable()->label('Pickup Address'),
                 TextColumn::make('food.name')->searchable(),
                 TextColumn::make('food_rescue_status_name')->label('Rescue Status')->searchable(),
                 TextColumn::make('amount'),
