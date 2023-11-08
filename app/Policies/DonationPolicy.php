@@ -29,7 +29,7 @@ class DonationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole('admin|volunteer');
+        return $user->hasAnyRole('admin');
     }
 
     /**
@@ -37,7 +37,7 @@ class DonationPolicy
      */
     public function update(User $user, Donation $donation): bool
     {
-        return $user->hasAnyRole('admin|volunteer');
+        return $user->hasAnyRole('admin');
     }
 
     /**

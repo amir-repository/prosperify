@@ -37,6 +37,11 @@ class FoodDonationLog extends Model
         );
     }
 
+    public function food()
+    {
+        return $this->belongsTo(Food::class);
+    }
+
     public function foodDonationLogNote()
     {
         return $this->hasOne(FoodDonationLogNote::class);

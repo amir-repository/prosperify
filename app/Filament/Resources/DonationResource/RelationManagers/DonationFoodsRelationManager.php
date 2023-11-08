@@ -36,8 +36,7 @@ class DonationFoodsRelationManager extends RelationManager
                     Food::with('unit')
                         ->where('expired_date', '>=', Carbon::now())
                         ->where('amount', '>', 0)
-                        ->where('food_rescue_status_id', Food::STORED)
-                        ->orWhere('food_rescue_status_id', Food::ADJUSTED_AFTER_STORED)
+                        ->whereIn('food_rescue_status_id', [Food::STORED, Food::ADJUSTED_AFTER_STORED])
                         ->get()->sortBy('expired_date')->mapWithKeys(fn ($x) => [$x->id => "$x->name ($x->amount " . $x->unit->name . ") - $x->expired_date"])
                 )->searchable()->required(),
                 TextInput::make('amount')->numeric()->inputMode('decimal')->required(),

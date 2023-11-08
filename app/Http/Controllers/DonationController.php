@@ -18,6 +18,7 @@ use App\Models\FoodRescueTakenReceipt;
 use App\Models\Recipient;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -86,6 +87,12 @@ class DonationController extends Controller
      */
     public function create()
     {
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        if (!$user->hasRole('admin')) {
+            abort(403);
+        }
+
         $recipients = Recipient::where('recipient_status_id', Recipient::ACCEPTED)->get();
         return view('donation.create', compact('recipients'));
     }

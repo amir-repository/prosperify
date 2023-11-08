@@ -15,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -45,6 +46,7 @@ class FoodDonationLogResource extends Resource
             ->columns([
                 TextColumn::make('donationFood.donation.title')->searchable(),
                 TextColumn::make('donationFood.donation.recipient.address')->searchable()->label('Donation Address'),
+                TextColumn::make('donationFood.food.id')->label('Food ID')->searchable(),
                 TextColumn::make('donationFood.food.name')->searchable(),
                 TextColumn::make('food_donation_status_name')->label('Donation Status')->searchable(),
                 TextColumn::make('stored_food_amount')->label('Stored Amount'),
@@ -63,6 +65,12 @@ class FoodDonationLogResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(7), Carbon::now()]))->toggle(),
                 Filter::make('Past-30 days Donation')
                     ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()]))->toggle(),
+                SelectFilter::make('Donation Status')
+                    ->relationship('foodDonationStatus', 'name')->searchable()
+                    ->preload()->default(7),
+                SelectFilter::make('Food-ID')
+                    ->relationship('food', 'id')->searchable()
+                    ->preload(),
                 Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from'),
