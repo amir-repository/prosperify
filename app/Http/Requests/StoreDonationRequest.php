@@ -26,22 +26,22 @@ class StoreDonationRequest extends FormRequest
      */
     public function rules(): array
     {
-        // validate if there's an active donation
-        $donations = Donation::where('donation_status_id', Donation::PLANNED)->orWhere('donation_status_id', Donation::ASSIGNED)->orWhere('donation_status_id', Donation::INCOMPLETED)->get();
+        // // validate if there's an active donation
+        // $donations = Donation::where('donation_status_id', Donation::PLANNED)->orWhere('donation_status_id', Donation::ASSIGNED)->orWhere('donation_status_id', Donation::INCOMPLETED)->get();
 
-        foreach ($donations as $donation) {
-            $dbDonationDate = Carbon::parse($donation->donation_date);
-            // rescue time is 4 hour
-            $donationDuration = Setting::first()->donation_duration;
-            $dbEndDonationDate = Carbon::parse($donation->donation_date)->addMinutes($donationDuration);
-            $reqDonationDate = Carbon::parse($this->donation_date);
+        // foreach ($donations as $donation) {
+        //     $dbDonationDate = Carbon::parse($donation->donation_date);
+        //     // rescue time is 4 hour
+        //     $donationDuration = Setting::first()->donation_duration;
+        //     $dbEndDonationDate = Carbon::parse($donation->donation_date)->addMinutes($donationDuration);
+        //     $reqDonationDate = Carbon::parse($this->donation_date);
 
-            $conflictDonation = $reqDonationDate->between($dbDonationDate, $dbEndDonationDate);
+        //     $conflictDonation = $reqDonationDate->between($dbDonationDate, $dbEndDonationDate);
 
-            if ($conflictDonation) {
-                dd($conflictDonation, "Conflicting with $donation->title, start: $dbDonationDate, finish: $dbEndDonationDate");
-            }
-        }
+        //     if ($conflictDonation) {
+        //         dd($conflictDonation, "Conflicting with $donation->title, start: $dbDonationDate, finish: $dbEndDonationDate");
+        //     }
+        // }
 
 
         return [

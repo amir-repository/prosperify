@@ -2,9 +2,16 @@
 
 @section('main')
     <main class="px-6">
+
         <form onsubmit="return confirm('Are you sure');" action="{{ route('rescues.store') }}" method="post">
             @csrf
             <h1 class="text-lg font-bold mt-4">Create Food Rescue</h1>
+
+            @if (session('conflict'))
+                <div class="p-4 bg-red-200 rounded-xl mt-2">
+                    {{ session('conflict') }}
+                </div>
+            @endif
 
             <section class="p-4 bg-yellow-200 rounded-xl mt-2">
                 <h2 class="font-bold">Notes</h2>

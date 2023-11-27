@@ -16,6 +16,7 @@ use App\Models\FoodDonationLog;
 use App\Models\FoodDonationTakenReceipt;
 use App\Models\FoodRescueTakenReceipt;
 use App\Models\Recipient;
+use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\Response;
@@ -102,6 +103,24 @@ class DonationController extends Controller
      */
     public function store(StoreDonationRequest $request)
     {
+
+        // validate if there's an active donation
+        $donations = Donation::where('donation_status_id', Donation::PLANNED)->orWhere('donation_status_id', Donation::ASSIGNED)->orWhere('donation_status_id', Donation::INCOMPLETED)->get();
+
+        foreach ($donations as $donation) {
+            $dbDonationDate = Carbon::parse($donation->donation_date);
+            // rescue time is 4 hour
+            $donationDuration = Setting::first()->donation_duration;
+            $dbEndDonationDate = Carbon::parse($donation->donation_date)->addMinutes($donationDuration);
+            $reqDonationDate = Carbon::parse($request->donation_date);
+
+            $conflictDonation = $reqDonationDate->between($dbDonationDate, $dbEndDonationDate);
+
+            if ($conflictDonation) {
+                return redirect(route('donations.create'))->with('conflict', "Conflicting with $donation->title, start: $dbDonationDate, finish: $dbEndDonationDate. Try another date and time");
+            }
+        }
+
         $validated = $request->validated();
         $user = auth()->user();
 
