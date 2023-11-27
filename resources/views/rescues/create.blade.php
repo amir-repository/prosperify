@@ -16,7 +16,7 @@
             <section class="p-4 bg-yellow-200 rounded-xl mt-2">
                 <h2 class="font-bold">Notes</h2>
                 <ul>
-                    <li>+ Minimum pickup date is +3 days from now.</li>
+                    <li>+ Minimum pickup date is >={{ $prep }} days from now.</li>
                 </ul>
             </section>
 

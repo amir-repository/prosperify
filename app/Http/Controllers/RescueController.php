@@ -118,8 +118,10 @@ class RescueController extends Controller
             abort(403);
         }
 
+        $prep = Setting::first()->rescue_preptime;
+
         $user = auth()->user();
-        return view('rescues.create', ['user' => $user]);
+        return view('rescues.create', ['user' => $user, 'prep' => $prep]);
     }
 
     /**

@@ -16,6 +16,7 @@ class SettingSeeder extends Seeder
         DB::table('settings')->insert([
             'rescue_duration' => 60 * 4,
             'donation_duration' => 60 * 4,
+            'rescue_preptime' => 3,
         ]);
     }
 }

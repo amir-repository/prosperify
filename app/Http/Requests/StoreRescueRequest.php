@@ -28,11 +28,12 @@ class StoreRescueRequest extends FormRequest
      */
     public function rules(): array
     {
+        $prep = Setting::first()->rescue_preptime;
         return [
             'title' => 'required|max:100',
             'description' => 'required|max:255',
             'pickup_address' => 'required|max:255',
-            'rescue_date' => 'required|after:' . $this->allowedDays(3),
+            'rescue_date' => 'required|after:' . $this->allowedDays($prep),
             'donor_name' => 'required|max:100',
             'phone' => 'required|max:15',
             'email' => 'required',

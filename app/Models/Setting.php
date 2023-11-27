@@ -9,5 +9,5 @@ class Setting extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['rescue_duration', 'donation_duration'];
+    protected $fillable = ['rescue_duration', 'donation_duration', 'rescue_preptime'];
 }

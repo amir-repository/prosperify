@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('rescue_duration');
             $table->integer('donation_duration');
+            $table->integer('rescue_preptime');
             $table->timestamps();
         });
     }
