@@ -6,6 +6,7 @@ use App\Filament\Resources\DonationResource\Pages;
 use App\Filament\Resources\DonationResource\RelationManagers;
 use App\Filament\Resources\DonationResource\RelationManagers\DonationFoodsRelationManager;
 use App\Models\Donation;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -36,7 +37,12 @@ class DonationResource extends Resource
                 TextInput::make('title')->required(),
                 TextInput::make('description')->required(),
                 DateTimePicker::make('donation_date')->required(),
-                Select::make('user_id')->relationship(name: 'user', titleAttribute: 'name')->searchable()->preload()->label('Actor')->required(),
+
+                Select::make('user_id')
+                    ->label('Actor')
+                    ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => User::role('admin')->get()->pluck('name', 'id')->toArray())->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name),
+
                 Select::make('donation_status_id')->relationship(name: 'donationStatus', titleAttribute: 'name')->searchable()->preload()->default(4)->required(),
                 Select::make('recipient_id')->relationship(name: 'recipient', titleAttribute: 'name')->searchable()->preload()->required()
             ]);

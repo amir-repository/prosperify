@@ -52,8 +52,8 @@ class RescueResource extends Resource
                 Select::make('rescue_status_id')->relationship(name: 'rescueStatus', titleAttribute: 'name')->preload(),
 
                 Select::make('user_id')
+                    ->label('Donor')
                     ->searchable()
-                    ->preload()
                     ->getSearchResultsUsing(fn (string $search): array => User::role('donor')->get()->pluck('name', 'id')->toArray())->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name),
 
                 TextInput::make('donor_name')->required(),
