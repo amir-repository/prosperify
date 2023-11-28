@@ -206,11 +206,11 @@
                                     <div class="mt-5">
                                         <p class="text-sm font-medium mb-1">
 
-                                            @if ($donation->donation_status_id === 2)
+                                            @if ($foodAssigned)
                                                 <span class="font-bold">Admin:</span>
                                                 {{ $donationFood->donationAssignments->last()->assigner->name }}
                                                 Signature
-                                            @elseif($donation->donation_status_id === 3)
+                                            @elseif($foodTaken)
                                                 <span class="font-bold">Recipient:</span> {{ $donation->recipient->name }}
                                                 Signature
                                             @endif
