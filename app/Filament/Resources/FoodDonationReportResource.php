@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -52,7 +53,7 @@ class FoodDonationReportResource extends Resource
                 TextColumn::make('food_donation_status_name')->label('Donation Status')->searchable(),
                 TextColumn::make('stored_food_amount')->label('Stored Amount'),
                 TextColumn::make('amount')->label('Donation Amount')->summarize(
-                    Sum::make()->query(fn (QueryBuilder $query) => $query->where(['food_donation_status_id' => 7]))->label('Total'),
+                    Summarizer::make()->using(fn (QueryBuilder $query) => $query->where(['food_donation_status_id' => 7])->sum('amount') / 1000)->label('Total')
                 ),
                 TextColumn::make('unit_name')->label('Unit'),
                 TextColumn::make('actor_name'),

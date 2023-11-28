@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Summarizers\Average;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -53,7 +54,8 @@ class FoodRescueReportResource extends Resource
                 TextColumn::make('food.name')->searchable(),
                 TextColumn::make('food_rescue_status_name')->label('Rescue Status')->searchable(),
                 TextColumn::make('amount')->summarize(
-                    Sum::make()->query(fn (QueryBuilder $query) => $query->where(['food_rescue_status_id' => 10]))->label('Total'),
+                    Summarizer::make()
+                        ->using(fn (QueryBuilder $query) => $query->where(['food_rescue_status_id' => 10])->sum('amount') / 1000)
                 ),
                 TextColumn::make('unit_name'),
                 TextColumn::make('actor_name'),
