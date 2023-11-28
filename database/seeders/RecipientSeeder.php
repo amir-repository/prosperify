@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Recipient;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,9 @@ class RecipientSeeder extends Seeder
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 2
+            'recipient_status_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
 
         DB::table('recipients')->insert([
@@ -31,7 +34,9 @@ class RecipientSeeder extends Seeder
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 2
+            'recipient_status_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
 
         DB::table('recipients')->insert([
@@ -41,7 +46,9 @@ class RecipientSeeder extends Seeder
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 2
+            'recipient_status_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
 
         DB::table('recipients')->insert([
@@ -51,7 +58,9 @@ class RecipientSeeder extends Seeder
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 2
+            'recipient_status_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
 
         DB::table('recipients')->insert([
@@ -61,7 +70,9 @@ class RecipientSeeder extends Seeder
             'phone' => fake()->phoneNumber(),
             'family_members' => rand(1, 5),
             'photo' => fake()->name(),
-            'recipient_status_id' => 2
+            'recipient_status_id' => 2,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
     }
 }
